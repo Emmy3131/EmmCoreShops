@@ -10,7 +10,6 @@ const MainLayout = () => {
   const [moreActive, setMoreActive] = useState(false);
   const closeSidebar = () => {
     setOpenSidebar(false);
-    setMoreActive(false);
   }
 
   return (
@@ -36,7 +35,7 @@ const MainLayout = () => {
 
       {/* CONTENT */}
       <main className="flex-1 overflow-y-auto pt-24 pb-16">
-        <Outlet />
+        <Outlet context={{ setOpenSidebar }} />
       </main>
 
       {/* FOOTER */}

@@ -150,7 +150,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         </div>
 
         {/* SOCIAL MEDIA */}
-        <div className="px-4 pb-20 border-t">
+        <div className="px-4 pb-32 border-t">
           <h3 className="font-semibold text-gray-700 mb-4">
             CONNECT US ON SOCIAL MEDIA
           </h3>

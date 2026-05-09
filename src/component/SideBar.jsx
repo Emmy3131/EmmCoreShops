@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
       {/* SIDEBAR */}
       <div
         className={`
-          fixed top-[60px] left-0 h-full w-full
+          fixed top-[55px] left-0 h-full w-full
           bg-white shadow-lg
           transform transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         `}
       >
         {/* LOGIN / SIGNUP */}
-        <div className="flex gap-3 px-4 pb-4">
+        <div className="flex gap-3 px-4 pb-4 pt-7">
           <button className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
             Login
           </button>
@@ -150,7 +150,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         </div>
 
         {/* SOCIAL MEDIA */}
-        <div className="px-4 pb-10 border-t">
+        <div className="px-4 pb-20 border-t">
           <h3 className="font-semibold text-gray-700 mb-4">
             CONNECT US ON SOCIAL MEDIA
           </h3>

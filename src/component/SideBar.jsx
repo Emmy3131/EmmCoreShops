@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
       {/* SIDEBAR */}
       <div
         className={`
-          fixed top-[55px] left-0 h-full w-full
+          fixed top-[53px] left-0 h-full w-full
           bg-white shadow-lg
           transform transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}

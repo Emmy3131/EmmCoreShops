@@ -31,7 +31,7 @@ const MobileHeader = () => {
 
         {/* LOGO */}
         <h1 className="text-[#ED017F] font-bold text-xl">
-          KongaClone
+          EmmCoreShops
         </h1>
 
         {/* RIGHT ICONS */}

@@ -27,7 +27,7 @@ const MobileHeader = () => {
       {/* TOP BAR */}
       <div
         className={`
-    flex items-center justify-between px-4 py-3 bg-white shadow-md w-full z-50
+    flex items-center justify-between px-4 py-3 bg-white w-full z-50
     ${openSidebar ? "fixed top-0 left-0" : "relative"}
   `}
       >

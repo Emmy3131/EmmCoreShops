@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   FaBars,
   FaShoppingCart,
@@ -6,67 +5,73 @@ import {
   FaSearch,
   FaTimes,
 } from "react-icons/fa";
-import Sidebar from "../SideBar";
 
-const MobileHeader = () => {
-  const [openSidebar, setOpenSidebar] = useState(false);
-
+const MobileHeader = ({ openSidebar, setOpenSidebar }) => {
   return (
-    <header className="w-full">
-      {/* SIDEBAR */}
-      <Sidebar
-        isOpen={openSidebar}
-        closeSidebar={() => setOpenSidebar(false)}
-      />
+    <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
 
-      {/* PROMO BAR */}
-      <div className="bg-gray-100 text-center text-xs py-2">
-        Explore the Samsung Store
-      </div>
+      {/* ✅ ONLY TOP BAR WHEN SIDEBAR IS OPEN */}
+      {openSidebar ? (
+        <div className="flex items-center justify-between px-4 py-3">
 
-      {/* TOP BAR */}
-      <div
-        className={`
-    flex items-center justify-between px-4 py-3 bg-white w-full z-50
-    ${openSidebar ? "fixed top-0 left-0" : "relative"}
-  `}
-      >
-        {/* HAMBURGER / CLOSE */}
-        {openSidebar ? (
+          {/* CLOSE BUTTON */}
           <FaTimes
             size={22}
             className="cursor-pointer"
             onClick={() => setOpenSidebar(false)}
           />
-        ) : (
-          <FaBars
-            size={22}
-            className="cursor-pointer"
-            onClick={() => setOpenSidebar(true)}
-          />
-        )}
 
-        {/* LOGO */}
-        <h1 className="text-[#ED017F] font-bold text-xl">EmmCoreShops</h1>
+          {/* LOGO */}
+          <h1 className="text-[#ED017F] font-bold text-xl">
+            EmmCoreShops
+          </h1>
 
-        {/* RIGHT ICONS */}
-        <div className="flex gap-4">
-          <FaStore size={20} />
-          <FaShoppingCart size={20} />
+          {/* RIGHT ICONS */}
+          <div className="flex gap-4">
+            <FaStore size={20} />
+            <FaShoppingCart size={20} />
+          </div>
         </div>
-      </div>
+      ) : (
+        /* ✅ FULL HEADER WHEN CLOSED */
+        <>
+          {/* PROMO BAR */}
+          <div className="bg-gray-100 text-center text-xs py-2">
+            Explore the Samsung Store
+          </div>
 
-      {/* SEARCH */}
-      <div className="px-3 pb-3 bg-white">
-        <div className="flex items-center bg-gray-100 rounded-md px-3">
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="w-full py-3 bg-transparent outline-none text-sm"
-          />
-          <FaSearch />
-        </div>
-      </div>
+          {/* TOP BAR */}
+          <div className="flex items-center justify-between px-4 py-3">
+
+            <FaBars
+              size={22}
+              className="cursor-pointer"
+              onClick={() => setOpenSidebar(true)}
+            />
+
+            <h1 className="text-[#ED017F] font-bold text-xl">
+              EmmCoreShops
+            </h1>
+
+            <div className="flex gap-4">
+              <FaStore size={20} />
+              <FaShoppingCart size={20} />
+            </div>
+          </div>
+
+          {/* SEARCH */}
+          <div className="px-3 pb-3">
+            <div className="flex items-center bg-gray-100 rounded-md px-3">
+              <input
+                type="text"
+                placeholder="Search for products..."
+                className="w-full py-3 bg-transparent outline-none text-sm"
+              />
+              <FaSearch />
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 };

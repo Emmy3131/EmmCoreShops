@@ -6,38 +6,46 @@ import Sidebar from "../component/SideBar";
 import { useState } from "react";
 
 const MainLayout = () => {
-
   const [openSidebar, setOpenSidebar] = useState(false);
+  const [moreActive, setMoreActive] = useState(false);
+  const closeSidebar = () => {
+    setOpenSidebar(false);
+    setMoreActive(false);
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
 
-      {/* DESKTOP HEADER */}
-      <div className="hidden md:block">
+      {/* HEADER */}
+      <div className="md:hidden fixed top-0 left-0 w-full z-50">
+        <MobileHeader
+          openSidebar={openSidebar}
+          setOpenSidebar={setOpenSidebar}
+        />
+      </div>
+
+      <div className="hidden md:block fixed top-0 left-0 w-full z-50">
         <DesktopHeader />
       </div>
 
-      {/* MOBILE HEADER */}
-      <div className="md:hidden">
-        <MobileHeader openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
-      </div>
-
-      {/* GLOBAL SIDEBAR */}
+      {/* SIDEBAR */}
       <Sidebar
         isOpen={openSidebar}
-        closeSidebar={() => setOpenSidebar(false)}
+        closeSidebar={closeSidebar}
       />
 
-      {/* PAGE CONTENT */}
-      <main className="flex-1 pb-16 md:pb-0">
+      {/* CONTENT */}
+      <main className="flex-1 overflow-y-auto pt-24 pb-16">
         <Outlet />
       </main>
 
-      {/* MOBILE FOOTER */}
-      <div className="md:hidden fixed bottom-0 w-full">
-        <MobileFooter />
+      {/* FOOTER */}
+      <div className="md:hidden fixed bottom-0 w-full z-50">
+        <MobileFooter setOpenSidebar={setOpenSidebar}
+        setMoreActive={setMoreActive}
+        closeSidebar={closeSidebar}
+        moreActive={moreActive} />
       </div>
-
     </div>
   );
 };

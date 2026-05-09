@@ -1,11 +1,9 @@
 import {
-  FaTimes,
   FaStar,
   FaStore,
   FaMapMarkerAlt,
   FaTag,
   FaChevronRight,
-  FaShoppingCart,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
@@ -21,37 +19,14 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
       {/* SIDEBAR */}
       <div
-        className={`fixed top-0 left-0 h-full w-full bg-white z-50
-        transform transition-transform duration-300 overflow-y-auto
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`
+          fixed top-[60px] left-0 h-full w-full
+          bg-white shadow-lg
+          transform transition-transform duration-300
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          z-50 overflow-y-auto
+        `}
       >
-        {/* CLOSE BUTTON */}
-        {/* SIDEBAR HEADER */}
-        <div className="flex items-center justify-between px-4 py-4 border-b">
-          {/* CLOSE ICON */}
-          <FaTimes
-            size={20}
-            className="cursor-pointer"
-            onClick={closeSidebar}
-          />
-
-          {/* RIGHT ICONS */}
-          <div className="flex items-center gap-5">
-            {/* STORE ICON (optional) */}
-            <span className="text-xl">🏬</span>
-
-            {/* CART ICON */}
-            <div className="relative cursor-pointer">
-              <FaShoppingCart size={22} />
-
-              {/* CART COUNT BADGE */}
-              <span className="absolute -top-2 -right-2 bg-[#ED017F] text-white text-xs px-1 rounded-full">
-                0
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* LOGIN / SIGNUP */}
         <div className="flex gap-3 px-4 pb-4">
           <button className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
@@ -94,7 +69,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             <FaStore className="text-gray-600 mt-1" />
             <div>
               <p className="font-semibold">Physical Stores</p>
-              <span className="text-gray-400 text-xs">Stores around you</span>
+              <span className="text-gray-400 text-xs">
+                Stores around you
+              </span>
             </div>
           </div>
         </div>
@@ -129,7 +106,6 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         <div className="px-4 py-6 border-t">
           <h3 className="font-semibold text-gray-700 mb-4">Contact Us</h3>
 
-          {/* EMAIL SUPPORT */}
           <div className="flex gap-3 mb-4">
             <div className="bg-gray-200 p-3 rounded-full">📧</div>
             <div>
@@ -140,13 +116,11 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             </div>
           </div>
 
-          {/* PHONE SUPPORT */}
           <div className="mb-4">
             <p className="text-xs text-gray-500 font-semibold">PHONE SUPPORT</p>
             <p className="text-sm">07080635700, 02018883435</p>
           </div>
 
-          {/* WHATSAPP */}
           <div className="flex gap-3 mb-6">
             <div className="bg-gray-200 p-3 rounded-full">💬</div>
             <div>
@@ -158,7 +132,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
         {/* NEWSLETTER */}
         <div className="px-4 py-6 border-t">
-          <h3 className="font-semibold text-gray-700 mb-4">GET LATEST DEALS</h3>
+          <h3 className="font-semibold text-gray-700 mb-4">
+            GET LATEST DEALS
+          </h3>
 
           <div className="flex border rounded overflow-hidden">
             <input
@@ -197,8 +173,6 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             </div>
           </div>
         </div>
-
-        {/* FLOATING CHAT BUTTON */}
       </div>
     </>
   );

@@ -14,6 +14,7 @@ import Menu from "./pages/public/Menu";
 
 /* AUTH */
 import Login from "./pages/Auth/Login";
+import Signup from "./pages/Auth/Register";
 
 /* USER */
 import Dashboard from "./pages/User/Dashboard";
@@ -40,6 +41,7 @@ const AppRouter = () => {
         {/* AUTH */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Route>
 
         {/* USER */}

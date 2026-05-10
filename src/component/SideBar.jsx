@@ -5,6 +5,7 @@ import {
   FaTag,
   FaChevronRight,
 } from "react-icons/fa";
+import { Link} from "react-router-dom"
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
   return (
@@ -28,18 +29,18 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         `}
       >
         {/* LOGIN / SIGNUP */}
-        <div className="flex gap-3 px-4 pb-4 pt-7">
-          <button className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
+        <div className="flex gap-3 text-center px-4 pb-4 pt-7">
+          <Link to="/login" className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
             Login
-          </button>
+          </Link>
 
-          <button className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
+          <Link to="/signup" className="flex-1 text-center border border-[#ED017F] text-[#ED017F] py-2 rounded">
             Signup
-          </button>
+          </Link>
         </div>
 
         {/* QUICK ACTIONS */}
-        <div className="grid grid-cols-2 gap-4 px-4 py-4 border-t border-b text-sm">
+        <div className="grid grid-cols-2 gap-4 px-4 py-4 border-t border-b text-sm md:hidden">
           <div className="flex gap-3">
             <FaMapMarkerAlt className="text-orange-500 mt-1" />
             <div>
@@ -58,7 +59,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           <div className="flex gap-3">
             <FaTag className="text-gray-600 mt-1" />
             <div>
-              <p className="font-semibold">Sell on Konga</p>
+              <p className="font-semibold">Sell on EmmCoreShops</p>
               <span className="text-gray-400 text-xs">
                 Join other merchants
               </span>
@@ -85,11 +86,9 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             "Computers and Accessories",
             "Phones and Tablets",
             "Electronics",
-            "Konga Fashion",
+            "Fashions",
             "Home and Kitchen",
             "Baby, Kids and Toys",
-            "Beauty, Health & Personal Care",
-            "Drinks & Groceries",
             "Other Categories",
           ].map((item, index) => (
             <li
@@ -112,7 +111,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
               <p className="text-xs text-gray-500 font-semibold">
                 EMAIL SUPPORT
               </p>
-              <p className="text-sm">help@konga.com</p>
+              <p className="text-sm">help@emmcOREshops.com</p>
             </div>
           </div>
 

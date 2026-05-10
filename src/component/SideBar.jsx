@@ -5,9 +5,14 @@ import {
   FaTag,
   FaChevronRight,
 } from "react-icons/fa";
-import { Link} from "react-router-dom"
+import { Link } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
+import MenuLink from "./MenuLink";
+import MenuItem from "./MenuItem";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
+  const { user, logout } = useAuth();
+
   return (
     <>
       {/* OVERLAY */}
@@ -29,54 +34,92 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
         `}
       >
         {/* LOGIN / SIGNUP */}
-        <div className="flex gap-3 text-center px-4 pb-4 pt-7">
-          <Link to="/login" className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded">
-            Login
-          </Link>
+        {/* ================= USER SECTION ================= */}
 
-          <Link to="/signup" className="flex-1 text-center border border-[#ED017F] text-[#ED017F] py-2 rounded">
-            Signup
-          </Link>
+        <div className="px-4 pt-7 pb-4 border-b">
+          {!user ? (
+            /* ================= GUEST VIEW ================= */
+            <>
+              {/* LOGIN BUTTONS */}
+              <div className="flex gap-3 text-center mb-5">
+                <Link
+                  to="/login"
+                  className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  to="/signup"
+                  className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded"
+                >
+                  Signup
+                </Link>
+              </div>
+
+              {/* GUEST ACTIONS */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <MenuItem title="Track Orders" />
+                <MenuItem title="Pending Items" />
+                <MenuItem title="Sell on EmmCore" />
+                <MenuItem title="Physical Stores" />
+              </div>
+            </>
+          ) : (
+            /* ================= LOGGED USER ================= */
+            <>
+              {/* USER INFO */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-[#ED017F] text-white rounded-full flex items-center justify-center font-bold">
+                  {user.firstName?.charAt(0)}
+                </div>
+
+                <div>
+                  <p className="font-semibold">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+              </div>
+
+              {/* USER MENU */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <MenuLink title="My Orders" to="/orders" icon={<FaStar />} />
+                <MenuLink
+                  title="Track Orders"
+                  to="/track"
+                  icon={<FaMapMarkerAlt />}
+                />
+                <MenuLink
+                  title="Pending Items"
+                  to="/pending"
+                  icon={<FaChevronRight />}
+                />
+                <MenuLink title="My Wallet" to="/wallet" icon={<FaStore />} />
+                <MenuLink
+                  title="Sell on EmmCore"
+                  to="/sell"
+                  icon={<FaStore />}
+                />
+                <MenuLink
+                  title="My Saved Items"
+                  to="/saved"
+                  icon={<FaStar />}
+                />
+                <MenuLink
+                  title="My Address"
+                  to="/address"
+                  icon={<FaMapMarkerAlt />}
+                />
+                <MenuLink
+                  title="Physical Stores"
+                  to="/stores"
+                  icon={<FaStore />}
+                />
+              </div>
+            </>
+          )}
         </div>
-
-        {/* QUICK ACTIONS */}
-        <div className="grid grid-cols-2 gap-4 px-4 py-4 border-t border-b text-sm md:hidden">
-          <div className="flex gap-3">
-            <FaMapMarkerAlt className="text-orange-500 mt-1" />
-            <div>
-              <p className="font-semibold">Track Orders</p>
-              <span className="text-gray-400 text-xs">Order status</span>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <FaStar className="text-gray-600 mt-1" />
-            <div>
-              <p className="font-semibold">Pending Items</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <FaTag className="text-gray-600 mt-1" />
-            <div>
-              <p className="font-semibold">Sell on EmmCoreShops</p>
-              <span className="text-gray-400 text-xs">
-                Join other merchants
-              </span>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <FaStore className="text-gray-600 mt-1" />
-            <div>
-              <p className="font-semibold">Physical Stores</p>
-              <span className="text-gray-400 text-xs">
-                Stores around you
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* CATEGORY TITLE */}
         <h3 className="px-4 py-3 font-bold text-gray-700">Categories</h3>
 
@@ -93,13 +136,26 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           ].map((item, index) => (
             <li
               key={index}
-              className="flex justify-between items-center px-4 py-4 border-t"
+              className="flex justify-between items-center px-4 py-4 border-b"
             >
               {item}
               <FaChevronRight size={12} />
             </li>
           ))}
         </ul>
+
+        <div className="">
+          <button
+            onClick={logout}
+            className="block text-left px-3 py-2 rounded hover:bg-red-50 text-red-500"
+          >
+            Logout
+          </button>
+
+          <button className="block text-left px-3 py-2 rounded hover:bg-red-50 text-red-600">
+            Delete Account
+          </button>
+        </div>
 
         {/* CONTACT US */}
         <div className="px-4 py-6 border-t">
@@ -131,9 +187,7 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
         {/* NEWSLETTER */}
         <div className="px-4 py-6 border-t">
-          <h3 className="font-semibold text-gray-700 mb-4">
-            GET LATEST DEALS
-          </h3>
+          <h3 className="font-semibold text-gray-700 mb-4">GET LATEST DEALS</h3>
 
           <div className="flex border rounded overflow-hidden">
             <input

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { FaGoogle, FaApple } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-3">
@@ -87,6 +89,11 @@ const Login = () => {
             {/* LOGIN BUTTON */}
             <button
               className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition"
+              onClick={(e) => {
+                e.preventDefault();
+                // Simulate login logic
+                login({ name: "John Doe", email: "john@example.com" }, "sample-token");
+              }}
             >
               Login
             </button>

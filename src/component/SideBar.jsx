@@ -68,60 +68,89 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           ) : (
             /* ================= LOGGED USER ================= */
             <>
-              {/* USER INFO */}
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 bg-[#ED017F] text-white rounded-full flex items-center justify-center font-bold">
-                  {user.firstName?.charAt(0)}
+              <>
+                {/* ================= USER PROFILE ================= */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-[#ED017F] text-white rounded flex items-center justify-center font-bold">
+                    {user.firstName?.charAt(0)}
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-sm">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="font-semibold">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
-                </div>
-              </div>
+                {/* ACCOUNT SETTINGS TITLE */}
+                <p className="text-xs font-bold text-[#ED017F] mb-4">
+                  ACCOUNT SETTINGS
+                </p>
 
-              {/* USER MENU */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <MenuLink title="My Orders" to="/orders" icon={<FaStar />} />
-                <MenuLink
-                  title="Track Orders"
-                  to="/track"
-                  icon={<FaMapMarkerAlt />}
-                />
-                <MenuLink
-                  title="Pending Items"
-                  to="/pending"
-                  icon={<FaChevronRight />}
-                />
-                <MenuLink title="My Wallet" to="/wallet" icon={<FaStore />} />
-                <MenuLink
-                  title="Sell on EmmCore"
-                  to="/sell"
-                  icon={<FaStore />}
-                />
-                <MenuLink
-                  title="My Saved Items"
-                  to="/saved"
-                  icon={<FaStar />}
-                />
-                <MenuLink
-                  title="My Address"
-                  to="/address"
-                  icon={<FaMapMarkerAlt />}
-                />
-                <MenuLink
-                  title="Physical Stores"
-                  to="/stores"
-                  icon={<FaStore />}
-                />
-              </div>
+                {/* USER MENU GRID */}
+                <div className="grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
+                  <MenuLink
+                    icon={<FaStore />}
+                    title="My Orders"
+                    desc="0 Items Ordered"
+                    to="/orders"
+                  />
+
+                  <MenuLink
+                    icon={<FaMapMarkerAlt />}
+                    title="Track Orders"
+                    desc="View order status"
+                    to="/track"
+                  />
+
+                  <MenuLink
+                    icon={<FaStar />}
+                    title="Pending Items"
+                    to="/pending"
+                  />
+
+                  <MenuLink
+                    icon={<FaTag />}
+                    title="My Wallet"
+                    desc="Bal: ₦0"
+                    to="/wallet"
+                  />
+
+                  <MenuLink
+                    icon={<FaStore />}
+                    title="Sell on EmmCore"
+                    desc="Join other merchants"
+                    to="/sell"
+                  />
+
+                  <MenuLink
+                    icon={<FaStar />}
+                    title="My Saved Items"
+                    desc="View liked items"
+                    to="/saved"
+                  />
+
+                  <MenuLink
+                    icon={<FaStore />}
+                    title="Physical Stores"
+                    desc="Stores around you"
+                    to="/stores"
+                  />
+
+                  <MenuLink
+                    icon={<FaMapMarkerAlt />}
+                    title="My Addresses"
+                    desc="View saved addresses"
+                    to="/address"
+                  />
+                </div>
+              </>
             </>
           )}
         </div>
         {/* CATEGORY TITLE */}
-        <h3 className="px-4 py-3 font-bold text-gray-700">Categories</h3>
+        <h3 className="px-4 py-3 font-bold text-gray-700 bordr">Categories</h3>
 
         {/* CATEGORY LIST */}
         <ul className="text-gray-700">
@@ -144,18 +173,20 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
           ))}
         </ul>
 
-        <div className="">
-          <button
-            onClick={logout}
-            className="block text-left px-3 py-2 rounded hover:bg-red-50 text-red-500"
-          >
-            Logout
-          </button>
+        {user && (
+          <div className="px-4 py-4 border-t">
+            <button
+              onClick={logout}
+              className="block w-full text-left py-2 text-red-500 hover:bg-red-50 rounded"
+            >
+              Logout
+            </button>
 
-          <button className="block text-left px-3 py-2 rounded hover:bg-red-50 text-red-600">
-            Delete Account
-          </button>
-        </div>
+            <button className="block w-full text-left py-2 text-red-600 hover:bg-red-50 rounded">
+              Delete Account
+            </button>
+          </div>
+        )}
 
         {/* CONTACT US */}
         <div className="px-4 py-6 border-t">

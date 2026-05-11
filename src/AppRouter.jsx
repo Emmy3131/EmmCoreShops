@@ -17,7 +17,8 @@ import Login from "./pages/Auth/Login";
 import Signup from "./pages/Auth/Register";
 
 /* USER */
-import Dashboard from "./pages/User/Dashboard";
+import MyOrder from "./pages/User/MyOrder";
+import MyWallet from "./pages/User/MyWallet";
 
 /* VENDOR */
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
@@ -46,7 +47,8 @@ const AppRouter = () => {
 
         {/* USER */}
         <Route element={<UserLayout />}>
-          <Route path="/user/dashboard" element={<Dashboard />} />
+          <Route path="/user/orders" element={<MyOrder />} />
+          <Route path="/user/wallet" element={<MyWallet />} />
         </Route>
 
         {/* VENDOR */}

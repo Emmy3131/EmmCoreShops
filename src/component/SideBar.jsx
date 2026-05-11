@@ -94,27 +94,27 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
                     icon={<FaStore />}
                     title="My Orders"
                     desc="0 Items Ordered"
-                    to="/orders"
+                    to="user/orders"
                   />
 
                   <MenuLink
                     icon={<FaMapMarkerAlt />}
                     title="Track Orders"
                     desc="View order status"
-                    to="/track"
+                    to="user/track"
                   />
 
                   <MenuLink
                     icon={<FaStar />}
                     title="Pending Items"
-                    to="/pending"
+                    to="user/pending"
                   />
 
                   <MenuLink
                     icon={<FaTag />}
                     title="My Wallet"
                     desc="Bal: ₦0"
-                    to="/wallet"
+                    to="user/wallet"
                   />
 
                   <MenuLink

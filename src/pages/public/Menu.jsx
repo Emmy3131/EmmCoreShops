@@ -1,16 +1,16 @@
-import { useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+// import { useEffect } from "react";
+// import { useOutletContext } from "react-router-dom";
 
-const Menu = () => {
-  const { setOpenSidebar } = useOutletContext();
+// const Menu = () => {
+//   const { setOpenSidebar } = useOutletContext();
 
-  useEffect(() => {
-    setOpenSidebar(true);
+//   useEffect(() => {
+//     setOpenSidebar(true);
 
-    return () => setOpenSidebar(false);
-  }, [setOpenSidebar]);
+//     return () => setOpenSidebar(false);
+//   }, [setOpenSidebar]);
 
-  return null;
-};
+//   return null;
+// };
 
-export default Menu;
+// export default Menu;

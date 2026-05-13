@@ -1,39 +1,96 @@
 import { useState } from "react";
 import { FaGoogle, FaApple } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-3">
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-      {/* LOGIN CARD */}
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+
+  /* ================= INPUT HANDLER ================= */
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  /* ================= SUBMIT ================= */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      setLoading(true);
+
+      const res = await api.post("/users/login", formData);
+
+      console.log("LOGIN RESPONSE:", res.data);
+
+      /* ✅ Adjust based on backend */
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        login(res.data.token);
+        navigate("/");
+      } else {
+        setError("Login failed");
+      }
+
+    } catch (err) {
+      console.error("Login error:", err);
+
+      setError(
+        err.response?.data?.message ||
+        "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-3">
+
       <div className="bg-white w-full max-w-md rounded-lg shadow-md">
 
-        {/* TITLE */}
         <h2 className="text-center text-2xl font-semibold py-5 border-b">
           Login
         </h2>
 
         <div className="p-6">
 
-          {/* SOCIAL LOGIN */}
+          {/* ERROR */}
+          {error && (
+            <p className="bg-red-100 text-red-600 p-2 mb-4 text-sm rounded">
+              {error}
+            </p>
+          )}
+
+          {/* SOCIAL */}
           <div className="flex gap-3 mb-6">
-            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-50">
+            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2">
               <FaGoogle className="text-red-500" />
-              Login with Google
+              Google
             </button>
 
-            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-50">
+            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2">
               <FaApple />
-              Login with Apple
+              Apple
             </button>
           </div>
 
-          {/* OR */}
           <div className="flex items-center gap-3 mb-6">
             <hr className="flex-1" />
             <span className="text-sm text-gray-400">OR</span>
@@ -41,17 +98,19 @@ const Login = () => {
           </div>
 
           {/* FORM */}
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
 
             {/* EMAIL */}
             <div>
-              <label className="text-sm">
-                Email Address or Phone Number
-              </label>
+              <label className="text-sm">Email</label>
+
               <input
                 type="text"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="example@email.com"
-                className="w-full border rounded-md px-3 py-3 mt-1 outline-none focus:ring-2 focus:ring-[#ED017F]"
+                className="w-full border rounded-md px-3 py-3 mt-1"
               />
             </div>
 
@@ -59,10 +118,7 @@ const Login = () => {
             <div>
               <div className="flex justify-between text-sm">
                 <label>Password</label>
-                <button
-                  type="button"
-                  className="text-[#ED017F]"
-                >
+                <button type="button" className="text-[#ED017F]">
                   Forgot Password?
                 </button>
               </div>
@@ -70,15 +126,16 @@ const Login = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   placeholder="********"
-                  className="w-full border rounded-md px-3 py-3 mt-1 outline-none focus:ring-2 focus:ring-[#ED017F]"
+                  className="w-full border rounded-md px-3 py-3 mt-1"
                 />
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-4 text-sm text-gray-500"
                 >
                   {showPassword ? "Hide" : "Show"}
@@ -86,17 +143,15 @@ const Login = () => {
               </div>
             </div>
 
-            {/* LOGIN BUTTON */}
+            {/* BUTTON */}
             <button
-              className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition"
-              onClick={(e) => {
-                e.preventDefault();
-                // Simulate login logic
-                login({ name: "John Doe", email: "john@example.com" }, "sample-token");
-              }}
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-3 rounded-md font-semibold"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
+
           </form>
         </div>
 
@@ -106,8 +161,11 @@ const Login = () => {
             Don't have an Account?
           </p>
 
-          <Link to="/signup" className="border  block bg-[#ED017F] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#790743] hover:text-white transition">
-            Create an Account
+          <Link
+            to="/signup"
+            className="block bg-[#ED017F] text-white py-2 rounded-md font-semibold"
+          >
+            Create Account
           </Link>
         </div>
 

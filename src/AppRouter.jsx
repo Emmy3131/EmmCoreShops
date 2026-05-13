@@ -21,6 +21,7 @@ import MyOrder from "./pages/User/MyOrder";
 import MyWallet from "./pages/User/MyWallet";
 import MySavedItems from "./pages/User/MySavedItems";
 import SellOnEmmCoreShopes from "./component/SellOnEmmcore/SellOnEmmCoreShopes";
+import Settings from "./pages/User/Settings";
 
 /* VENDOR */
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
@@ -48,6 +49,7 @@ const AppRouter = () => {
             <Route path="/user/wallet" element={<MyWallet />} />
             <Route path="/saved" element={<MySavedItems />} />
             <Route path="/sell" element={<SellOnEmmCoreShopes />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
 
           {/* ================= VENDOR AREA ================= */}

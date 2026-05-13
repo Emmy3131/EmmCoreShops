@@ -5,13 +5,18 @@ import {
   FaTag,
   FaChevronRight,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import MenuLink from "./MenuLink";
 import MenuItem from "./MenuItem";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSettings = () => {
+    navigate("/settings");
+  };
 
   return (
     <>
@@ -74,23 +79,29 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
             <>
               <>
                 {/* ================= USER PROFILE ================= */}
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-start gap-3 mb-3">
                   <div className="w-12 h-12 bg-[#ED017F] text-white rounded flex items-center justify-center font-bold">
                     {user.firstName?.charAt(0)}
                   </div>
 
-                  <div>
+                  <div className="flex flex-col">
                     <p className="font-semibold text-sm">
                       {user.firstName} {user.lastName}
                     </p>
+
                     <p className="text-xs text-gray-500">{user.email}</p>
+
+                    {/* ACCOUNT SETTINGS */}
+                    <button onClick={handleSettings}  className="text-xs text-[#ED017F] font-medium">
+                        Account Settings
+                    </button>
                   </div>
                 </div>
 
                 {/* ACCOUNT SETTINGS TITLE */}
-                <p className="text-xs font-bold text-[#ED017F] mb-4">
+                {/* <Link to="/settings" className="text-xs font-bold text-[#ED017F] mb-4">
                   ACCOUNT SETTINGS
-                </p>
+                </Link> */}
 
                 {/* USER MENU GRID */}
                 <div className="grid grid-cols-2 gap-y-5 gap-x-4 text-sm">

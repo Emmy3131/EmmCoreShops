@@ -101,18 +101,18 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
                     to="user/orders"
                   />
 
-                  <MenuLink
+                  {/* <MenuLink
                     icon={<FaMapMarkerAlt />}
                     title="Track Orders"
                     desc="View order status"
                     to="user/track"
-                  />
+                  /> */}
 
-                  <MenuLink
+                  {/* <MenuLink
                     icon={<FaStar />}
                     title="Pending Items"
                     to="user/pending"
-                  />
+                  /> */}
 
                   <MenuLink
                     icon={<FaTag />}
@@ -135,19 +135,19 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
                     to="/saved"
                   />
 
-                  <MenuLink
+                  {/* <MenuLink
                     icon={<FaStore />}
                     title="Physical Stores"
                     desc="Stores around you"
                     to="/stores"
-                  />
+                  /> */}
 
-                  <MenuLink
+                  {/* <MenuLink
                     icon={<FaMapMarkerAlt />}
                     title="My Addresses"
                     desc="View saved addresses"
                     to="/address"
-                  />
+                  /> */}
                 </div>
               </>
             </>

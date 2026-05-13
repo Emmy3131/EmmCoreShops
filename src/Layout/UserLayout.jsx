@@ -2,10 +2,10 @@ import { Outlet } from "react-router-dom";
 
 const UserLayout = () => {
   return (
-    <div className="max-w-7xl mx-auto px-3 md:px-6">
+    <div className="max-w-7xl mx-auto md:px-6 pt-10">
 
       {/* USER PAGE WRAPPER */}
-      <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+      <div className="bg-white md:p-6">
         <Outlet />
       </div>
 

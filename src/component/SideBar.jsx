@@ -9,6 +9,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import MenuLink from "./MenuLink";
 import MenuItem from "./MenuItem";
+import api from "../library/api";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
   const { user, logout } = useAuth();
@@ -16,6 +17,28 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
   const handleSettings = () => {
     navigate("/settings");
+  };
+
+  const handleLogout = async () => {
+    try {
+      // optional backend logout (safe even if it fails)
+      const res = await api.post("/users/logout");
+
+      // clear frontend auth state
+      if (res.status === 200) {
+        logout();
+        closeSidebar?.();
+        navigate("/login");
+      }
+      // redirect user
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      // still force logout on frontend
+      logout();
+      closeSidebar?.();
+      navigate("/login");
+    }
   };
 
   return (
@@ -92,8 +115,11 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
                     <p className="text-xs text-gray-500">{user.email}</p>
 
                     {/* ACCOUNT SETTINGS */}
-                    <button onClick={handleSettings}  className="text-xs text-[#ED017F] font-medium">
-                        Account Settings
+                    <button
+                      onClick={handleSettings}
+                      className="text-xs text-[#ED017F] font-medium"
+                    >
+                      Account Settings
                     </button>
                   </div>
                 </div>

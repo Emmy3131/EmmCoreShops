@@ -14,7 +14,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
 
   /* ================= INPUT HANDLER ================= */
@@ -23,54 +23,65 @@ const Login = () => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await api.post("/users/login", formData);
+    const res = await api.post("/users/login", formData);
 
-      console.log("LOGIN RESPONSE:", res.data);
+    console.log("Login Response:", res.data);
 
-      /* ✅ Adjust based on backend */
-      if (res.data?.token) {
-        localStorage.setItem("token", res.data.token);
-        login(res.data.token);
-        navigate("/");
-      } else {
-        setError("Login failed");
-      }
+    const token = res.data.token;
+    const user = res.data.data; // ✅ FIXED
 
-    } catch (err) {
-      console.error("Login error:", err);
-
-      setError(
-        err.response?.data?.message ||
-        "Invalid email or password"
-      );
-    } finally {
-      setLoading(false);
+    if (!token || !user) {
+      setError("Login failed");
+      return;
     }
-  };
+
+    // ✅ Save to Context + localStorage
+    login(user, token);
+
+    /* ================= REDIRECT ================= */
+
+    if (user.role === "admin") {
+      navigate("/admin/dashboard");
+    } 
+    else if (user.role === "vendor") {
+      navigate("/vendor/dashboard");
+    } 
+    else {
+      navigate("/");
+    }
+
+  } catch (err) {
+    console.error(err);
+
+    setError(
+      err.response?.data?.message ||
+      "Invalid email or password"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-3">
-
       <div className="bg-white w-full max-w-md rounded-lg shadow-md">
-
         <h2 className="text-center text-2xl font-semibold py-5 border-b">
           Login
         </h2>
 
         <div className="p-6">
-
           {/* ERROR */}
           {error && (
             <p className="bg-red-100 text-red-600 p-2 mb-4 text-sm rounded">
@@ -99,7 +110,6 @@ const Login = () => {
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* EMAIL */}
             <div>
               <label className="text-sm">Email</label>
@@ -151,15 +161,12 @@ const Login = () => {
             >
               {loading ? "Logging in..." : "Login"}
             </button>
-
           </form>
         </div>
 
         {/* FOOTER */}
         <div className="bg-gray-50 text-center p-6 rounded-b-lg">
-          <p className="text-sm text-gray-500 mb-3">
-            Don't have an Account?
-          </p>
+          <p className="text-sm text-gray-500 mb-3">Don't have an Account?</p>
 
           <Link
             to="/signup"
@@ -168,7 +175,6 @@ const Login = () => {
             Create Account
           </Link>
         </div>
-
       </div>
     </div>
   );

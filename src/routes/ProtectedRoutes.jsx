@@ -1,15 +1,17 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 
-const ProtectedRoute = () => {
+const ProtectedRoute = ({ role }) => {
   const { user } = useAuth();
 
-  // ❌ Not logged in
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // ✅ Logged in
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
 };
 

@@ -28,6 +28,15 @@ import VendorDashboard from "./pages/Vendor/VendorDashboard";
 
 /* ADMIN */
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import Users from "./pages/Admin/Users";
+import Orders from "./pages/Admin/Orders";
+import Products from "./pages/Admin/Products";
+import Category from "./pages/Admin/Category";
+import Reviews from "./pages/Admin/Reviews";
+import Payments from "./pages/Admin/Payments";
+import Report from "./pages/Admin/Report";
+import Profile from "./pages/Admin/Profile";
+import Vendors from "./pages/Admin/Vendors";
 
 const AppRouter = () => {
   return (
@@ -52,8 +61,9 @@ const AppRouter = () => {
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>
+        </Route>
 
-          {/* ================= VENDOR AREA ================= */}
+        {/* ================= VENDOR AREA ================= */}
           <Route element={<ProtectedRoute />}>
             <Route element={<VendorLayout />}>
               <Route path="/vendor/dashboard" element={<VendorDashboard />} />
@@ -64,10 +74,17 @@ const AppRouter = () => {
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<Users />} />
+              <Route path="/admin/orders" element={<Orders />} />
+              <Route path="/admin/products" element={<Products />} />
+              <Route path="/admin/category" element={<Category />} />
+              <Route path="/admin/reviews" element={<Reviews />} />
+              <Route path="/admin/payments" element={<Payments />} />
+              <Route path="/admin/report" element={<Report />} />
+              <Route path="/admin/vendors" element={<Vendors />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
           </Route>
-
-        </Route>
 
         {/* ================= AUTH ================= */}
         <Route element={<AuthLayout />}>

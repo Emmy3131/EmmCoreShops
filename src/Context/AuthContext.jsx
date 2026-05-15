@@ -11,8 +11,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      if (storedUser && storedUser !== "undefined") {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Invalid user in localStorage");
+      localStorage.removeItem("user");
     }
   }, []);
 
@@ -20,6 +25,8 @@ export const AuthProvider = ({ children }) => {
       LOGIN
   =========================*/
   const login = (userData, token) => {
+    if (!userData) return;
+
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
 

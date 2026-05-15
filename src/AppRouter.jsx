@@ -30,13 +30,18 @@ import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
 import Orders from "./pages/Admin/Orders";
-import Products from "./pages/Admin/Products";
-import Category from "./pages/Admin/Category";
+import Products from "./pages/Admin/products/Products";
+import AddProduct from "./pages/Admin/products/AddProducts";
+import EditProduct from "./pages/Admin/products/EditProduct";
+import Category from "./pages/Admin/category/Category";
+import AddCategory from "./pages/Admin/category/AddCategory";
+import EditCategory from "./pages/Admin/category/EditCategory";
 import Reviews from "./pages/Admin/Reviews";
 import Payments from "./pages/Admin/Payments";
 import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
+
 
 const AppRouter = () => {
   return (
@@ -78,11 +83,15 @@ const AppRouter = () => {
               <Route path="/admin/orders" element={<Orders />} />
               <Route path="/admin/products" element={<Products />} />
               <Route path="/admin/category" element={<Category />} />
+              <Route path="/admin/category/add" element={<AddCategory />} />
+              <Route path="/admin/category/edit/:id" element={<EditCategory />} />
               <Route path="/admin/reviews" element={<Reviews />} />
               <Route path="/admin/payments" element={<Payments />} />
               <Route path="/admin/report" element={<Report />} />
               <Route path="/admin/vendors" element={<Vendors />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/admin/products/add" element={<AddProduct />} />
+              <Route path="/admin/products/edit/:id" element={<EditProduct />} />
             </Route>
           </Route>
 

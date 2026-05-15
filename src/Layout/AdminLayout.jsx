@@ -8,18 +8,17 @@ import UserInfo from "../component/UserInfo";
 const AdminLayout = () => {
   const [openSidebar, setOpenSidebar] = useState(false);
   const { user, logout } = useAuth();
-
   const location = useLocation();
 
   /* ================= AUTO CLOSE SIDEBAR ================= */
   useEffect(() => {
     setOpenSidebar(false);
-  }, [location.pathname]); // runs whenever route changes
+  }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* HEADER */}
-      <header className="bg-gray-200 p-4 flex justify-between">
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* ================= HEADER ================= */}
+      <header className="h-16 bg-gray-200 flex items-center justify-between px-4 shadow z-30">
         <button
           onClick={() => setOpenSidebar(true)}
           className="md:hidden text-xl"
@@ -27,15 +26,20 @@ const AdminLayout = () => {
           <FaBars />
         </button>
 
-        <h1 className="text-[#ED017F] font-bold text-xl">EmmCoreShops</h1>
+        <h1 className="text-[#ED017F] font-bold text-xl">
+          EmmCoreShops
+        </h1>
 
         <div>
-          <h2>Welcome,</h2>
-          <span className="text-[#ED017F]">{user?.firstName}</span>
+          <h2 className="text-sm">Welcome,</h2>
+          <span className="text-[#ED017F] font-semibold">
+            {user?.firstName}
+          </span>
         </div>
       </header>
 
-      <div className="flex flex-1 relative">
+      {/* ================= BODY ================= */}
+      <div className="flex flex-1 overflow-hidden">
         {/* OVERLAY */}
         {openSidebar && (
           <div
@@ -44,16 +48,17 @@ const AdminLayout = () => {
           />
         )}
 
-        {/* SIDEBAR */}
+        {/* ================= SIDEBAR ================= */}
         <aside
           className={`
-    fixed md:static top-0 left-0 h-full
-    bg-white w-64 z-50
-    transform transition-transform duration-300
-    flex flex-col
-    ${openSidebar ? "translate-x-0" : "-translate-x-full"}
-    md:translate-x-0
-  `}
+          fixed md:relative top-0 h-screen md:top-0 left-0
+          h-[calc(100vh-4rem)] md:h-full
+          bg-white w-64 z-50
+          flex flex-col
+          transform transition-transform duration-300
+          ${openSidebar ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0
+        `}
         >
           {/* MOBILE CLOSE */}
           <div className="flex justify-between items-center p-4 border-b md:hidden">
@@ -64,28 +69,26 @@ const AdminLayout = () => {
             </button>
           </div>
 
-          {/* MENU AREA */}
+          {/* MENU */}
           <div className="flex-1 overflow-y-auto p-4">
             <AdminMenu />
           </div>
 
-          {/* USER + LOGOUT AREA */}
+          {/* USER AREA */}
           <div className="border-t p-4 space-y-4 bg-gray-50">
             <UserInfo />
 
             <button
               onClick={logout}
-              className="w-full flex items-center justify-center gap-2
-      bg-red-500 hover:bg-red-600 text-white
-      py-2 rounded-lg transition"
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg"
             >
               Logout
             </button>
           </div>
         </aside>
 
-        {/* MAIN */}
-        <main className="flex-1 p-4">
+        {/* ================= MAIN CONTENT ================= */}
+        <main className="flex-1 overflow-y-auto bg-gray-100 p-6">
           <Outlet />
         </main>
       </div>

@@ -1,33 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import api from "../../../library/api";
 
 const Categories = () => {
   const navigate = useNavigate();
 
-  const [categories] = useState([
-    {
-      id: 1,
-      name: "Electronics",
-      description: "Phones, laptops and gadgets",
-      image:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475",
-    },
-    {
-      id: 2,
-      name: "Fashion",
-      description: "Clothing and accessories",
-      image:
-        "https://images.unsplash.com/photo-1521334884684-d80222895322",
-    },
-    {
-      id: 3,
-      name: "Home & Kitchen",
-      description: "Home appliances and utensils",
-      image:
-        "https://images.unsplash.com/photo-1484154218962-a197022b5858",
-    },
-  ]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories");
+        setCategories(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this category?")) return;
+
+    try {
+      await api.delete(`/categories/${id}`);
+      setCategories(categories.filter((cat) => cat._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -52,7 +55,7 @@ const Categories = () => {
 
         {categories.map((cat) => (
           <div
-            key={cat.id}
+            key={cat._id}
             className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden"
           >
 
@@ -78,14 +81,14 @@ const Categories = () => {
               <div className="flex justify-between pt-3">
 
                 <Link
-                  to={`/admin/category/edit/${cat.id}`}
+                  to={`/admin/category/edit/${cat._id}`}
                   className="flex items-center gap-1 text-blue-600 text-sm"
                 >
                   <FaEdit />
                   Edit
                 </Link>
 
-                <button className="flex items-center gap-1 text-red-500 text-sm">
+                <button onClick={() => handleDelete(cat._id)} className="flex items-center gap-1 text-red-500 text-sm">
                   <FaTrash />
                   Delete
                 </button>

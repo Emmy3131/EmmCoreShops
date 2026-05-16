@@ -4,46 +4,68 @@ import {
   FaStore,
   FaMoneyBillWave,
 } from "react-icons/fa";
+import api from "../../library/api";
+import { useAuth } from "../../Context/AuthContext";
+import { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalRevenue: 0,
+  });
+
+  const handleStats = async () => {
+    try {
+      const res = await api.get("/stats/dashboard-stats");
+
+      console.log("Dashboard Stats:", res.data);
+
+      setStats(res.data.stats); // ✅ FIXED
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    }
+  };
+
+  useEffect(() => {
+    handleStats();
+  }, []);
+
   return (
     <div className=" space-y-6">
-
       {/* ================= HEADER ================= */}
       <div className="p-4">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-gray-500">
-          Welcome back, Admin 👋
-        </p>
       </div>
 
       {/* ================= STATS ================= */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-
         <StatCard
           title="Total Users"
-          value="1,240"
+          value={stats.totalUsers}
           icon={<FaUsers />}
           color="bg-blue-500"
         />
 
         <StatCard
           title="Orders"
-          value="560"
+          value={stats.totalOrders}
           icon={<FaShoppingCart />}
           color="bg-green-500"
         />
 
         <StatCard
-          title="Vendors"
-          value="85"
+          title="Products"
+          value={stats.totalProducts}
           icon={<FaStore />}
           color="bg-purple-500"
         />
 
         <StatCard
           title="Revenue"
-          value="$12,450"
+          value={stats.totalRevenue}
           icon={<FaMoneyBillWave />}
           color="bg-pink-500"
         />
@@ -51,12 +73,9 @@ const AdminDashboard = () => {
 
       {/* ================= ANALYTICS ================= */}
       <div className="grid lg:grid-cols-3 gap-6">
-
         {/* SALES CHART PLACEHOLDER */}
         <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow">
-          <h2 className="font-semibold mb-4">
-            Sales Overview
-          </h2>
+          <h2 className="font-semibold mb-4">Sales Overview</h2>
 
           <div className="h-64 flex items-center justify-center text-gray-400">
             Chart goes here (Recharts / Chart.js)
@@ -65,9 +84,7 @@ const AdminDashboard = () => {
 
         {/* QUICK ACTIONS */}
         <div className="bg-white p-5 rounded-xl shadow">
-          <h2 className="font-semibold mb-4">
-            Quick Actions
-          </h2>
+          <h2 className="font-semibold mb-4">Quick Actions</h2>
 
           <div className="space-y-3">
             <button className="w-full bg-[#ED017F] text-white py-2 rounded">
@@ -87,9 +104,7 @@ const AdminDashboard = () => {
 
       {/* ================= RECENT TABLE ================= */}
       <div className="bg-white p-5 rounded-xl shadow">
-        <h2 className="font-semibold mb-4">
-          Recent Orders
-        </h2>
+        <h2 className="font-semibold mb-4">Recent Orders</h2>
 
         <table className="w-full text-sm">
           <thead>
@@ -125,31 +140,23 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 };
 
 export default AdminDashboard;
 
-
 /* ================= STAT CARD ================= */
 
 const StatCard = ({ title, value, icon, color }) => {
   return (
     <div className="bg-white p-5 rounded-xl shadow flex items-center justify-between">
-
       <div>
         <p className="text-gray-500 text-sm">{title}</p>
         <h3 className="text-xl font-bold">{value}</h3>
       </div>
 
-      <div
-        className={`${color} text-white p-3 rounded-lg text-xl`}
-      >
-        {icon}
-      </div>
-
+      <div className={`${color} text-white p-3 rounded-lg text-xl`}>{icon}</div>
     </div>
   );
 };

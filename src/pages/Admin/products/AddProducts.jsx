@@ -1,23 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../../library/api";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaUpload } from "react-icons/fa";
 
 const AddProduct = () => {
   const navigate = useNavigate();
 
-  const [preview, setPreview] = useState(null);
-
+  /* ================= STATE ================= */
   const [product, setProduct] = useState({
+    image: "",
     name: "",
-    price: "",
-    stock: "",
-    category: "",
-    rating: "",
     description: "",
-    image: null,
+    price: "",
+    category: "",
+    stock: "",
   });
 
-  /* ================= INPUT CHANGE ================= */
+  const [categories, setCategories] = useState([]);
+  const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  /* ================= HANDLE INPUT ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -25,216 +27,182 @@ const AddProduct = () => {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "image") {
+      setPreview(value);
+    }
   };
 
-  /* ================= IMAGE UPLOAD ================= */
-  const handleImage = (e) => {
-    const file = e.target.files[0];
+  /* ================= FETCH CATEGORIES ================= */
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
 
-    if (!file) return;
-
-    setProduct((prev) => ({
-      ...prev,
-      image: file,
-    }));
-
-    setPreview(URL.createObjectURL(file));
+      // backend structure: { status, results, data: [] }
+      setCategories(res.data.data || []);
+    } catch (err) {
+      console.error("Category fetch error:", err);
+    }
   };
 
-  /* ================= SUBMIT ================= */
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  /* ================= SUBMIT PRODUCT ================= */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
+    try {
+      setLoading(true);
 
-    Object.keys(product).forEach((key) => {
-      formData.append(key, product[key]);
-    });
+      const res = await api.post("/products", product);
 
-    console.log("PRODUCT:", product);
+      if (res.data.status === "success") {
+        alert("Product created successfully ✅");
 
-    // 👉 API POST HERE
-    // await api.post("/products", formData)
+        // reset form
+        setProduct({
+          image: "",
+          name: "",
+          description: "",
+          price: "",
+          category: "",
+          stock: "",
+        });
 
-    navigate("/admin/products");
+        setPreview("");
+        navigate("/admin/products");
+      }
+    } catch (err) {
+      console.error("Create product error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Failed to create product");
+    } finally {
+      setLoading(false);
+    }
   };
 
+ 
+  /* ================= UI ================= */
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-6">
+        Add New Product
+      </h1>
 
-      {/* ================= HEADER ================= */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-black"
-        >
-          <FaArrowLeft />
-          Back
-        </button>
+      <div className="bg-white shadow-lg rounded-2xl p-6">
+        <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-5">
 
-        <h1 className="text-2xl font-bold">
-          Add New Product
-        </h1>
-      </div>
-
-      {/* ================= FORM ================= */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow p-6 space-y-6 max-w-4xl"
-      >
-
-        {/* PRODUCT NAME */}
-        <div>
-          <label className="block mb-1 font-medium">
-            Product Name
-          </label>
-          <input
-            name="name"
-            value={product.name}
-            onChange={handleChange}
-            required
-            className="w-full border rounded-lg p-3"
-            placeholder="Nike Air Force"
-          />
-        </div>
-
-        {/* GRID */}
-        <div className="grid md:grid-cols-2 gap-4">
-
+          {/* NAME */}
           <div>
-            <label className="block mb-1 font-medium">
-              Price
-            </label>
+            <label className="font-medium">Product Name</label>
             <input
-              name="price"
+              type="text"
+              name="name"
+              value={product.name}
+              onChange={handleChange}
+              required
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
+
+          {/* PRICE */}
+          <div>
+            <label className="font-medium">Price</label>
+            <input
               type="number"
+              name="price"
               value={product.price}
               onChange={handleChange}
               required
-              className="w-full border rounded-lg p-3"
-              placeholder="₦50000"
+              className="border p-3 w-full rounded-lg"
             />
           </div>
 
+          {/* CATEGORY DROPDOWN */}
           <div>
-            <label className="block mb-1 font-medium">
-              Stock
-            </label>
-            <input
-              name="stock"
-              type="number"
-              value={product.stock}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg p-3"
-              placeholder="50"
-            />
-          </div>
-
-        </div>
-
-        {/* CATEGORY + RATING */}
-        <div className="grid md:grid-cols-2 gap-4">
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Category
-            </label>
-            <input
+            <label className="font-medium">Category</label>
+            <select
               name="category"
               value={product.category}
               onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              placeholder="Shoes"
-            />
+              required
+              className="border p-3 w-full rounded-lg"
+            >
+              <option value="">Select Category</option>
+
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
 
+          {/* STOCK */}
           <div>
-            <label className="block mb-1 font-medium">
-              Rating (0 - 5)
-            </label>
+            <label className="font-medium">Stock</label>
             <input
-              name="rating"
               type="number"
-              step="0.1"
-              min="0"
-              max="5"
-              value={product.rating}
+              name="stock"
+              value={product.stock}
               onChange={handleChange}
-              className="w-full border rounded-lg p-3"
-              placeholder="4.5"
+              required
+              className="border p-3 w-full rounded-lg"
             />
           </div>
 
-        </div>
-
-        {/* IMAGE UPLOAD */}
-        <div>
-          <label className="block mb-2 font-medium">
-            Product Image
-          </label>
-
-          <label className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
-
-            <FaUpload className="text-2xl mb-2 text-gray-500" />
-
-            <span className="text-sm text-gray-500">
-              Click to upload image
-            </span>
-
+          {/* IMAGE */}
+          <div className="md:col-span-2">
+            <label className="font-medium">Image URL</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              hidden
+              type="text"
+              name="image"
+              value={product.image}
+              onChange={handleChange}
+              required
+              className="border p-3 w-full rounded-lg"
+              placeholder="Paste image URL"
             />
-          </label>
+          </div>
 
+          {/* IMAGE PREVIEW */}
           {preview && (
-            <img
-              src={preview}
-              alt="preview"
-              className="mt-4 h-40 rounded-lg object-cover"
-            />
+            <div className="md:col-span-2">
+              <p className="font-medium mb-2">Image Preview</p>
+              <img
+                src={preview}
+                alt="preview"
+                className="w-40 h-40 object-cover rounded-lg border"
+              />
+            </div>
           )}
-        </div>
 
-        {/* DESCRIPTION */}
-        <div>
-          <label className="block mb-1 font-medium">
-            Description
-          </label>
-          <textarea
-            name="description"
-            rows="4"
-            value={product.description}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-            placeholder="Product details..."
-          />
-        </div>
+          {/* DESCRIPTION */}
+          <div className="md:col-span-2">
+            <label className="font-medium">Description</label>
+            <textarea
+              name="description"
+              value={product.description}
+              onChange={handleChange}
+              required
+              rows="4"
+              className="border p-3 w-full rounded-lg"
+            />
+          </div>
 
-        {/* BUTTONS */}
-        <div className="flex gap-3 pt-4">
+          {/* SUBMIT */}
+          <div className="md:col-span-2 flex justify-end">
+            <button
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+            >
+              {loading ? "Creating..." : "Create Product"}
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/products")}
-            className="px-6 py-3 border rounded-lg"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
-          >
-            Save Product
-          </button>
-
-        </div>
-
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

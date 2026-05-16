@@ -1,194 +1,255 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FaArrowLeft, FaUpload } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../../library/api";
+import { FaArrowLeft } from "react-icons/fa";
 
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  /* ================= STATE ================= */
+
   const [product, setProduct] = useState({
     name: "",
     price: "",
-    stock: "",
     category: "",
+    stock: "",
+    image: "",
     description: "",
-    rating: "",
-    image: null,
-    preview: "",
   });
 
+  const [categories, setCategories] = useState([]);
+  const [preview, setPreview] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+
   /* ================= FETCH PRODUCT ================= */
+
+  const fetchProduct = async () => {
+    try {
+      const res = await api.get(`/products/${id}`);
+
+      const data = res.data.data;
+
+      setProduct({
+        name: data.name || "",
+        price: data.price || "",
+        stock: data.stock || "",
+        image: data.image || "",
+        description: data.description || "",
+        category: data.category?._id || "",
+      });
+
+      setPreview(data.image);
+    } catch (err) {
+      console.error("Fetch product error:", err);
+    }
+  };
+
+  /* ================= FETCH CATEGORIES ================= */
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+      setCategories(res.data.data || []);
+    } catch (err) {
+      console.error("Fetch categories error:", err);
+    }
+  };
+
+  /* ================= INITIAL LOAD ================= */
+
   useEffect(() => {
-    // 🔥 Replace with API call
-    const fetchedProduct = {
-      name: "Sample Product",
-      price: "20000",
-      stock: "5",
-      category: "Electronics",
-      description: "Demo product",
-      rating: "4.5",
-      image:
-        "https://via.placeholder.com/300x200.png?text=Product+Image",
+    const init = async () => {
+      await Promise.all([fetchProduct(), fetchCategories()]);
+      setPageLoading(false);
     };
 
-    setProduct({
-      ...fetchedProduct,
-      preview: fetchedProduct.image,
-    });
+    init();
   }, [id]);
 
   /* ================= HANDLE INPUT ================= */
+
   const handleChange = (e) => {
-    setProduct({
-      ...product,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setProduct((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "image") {
+      setPreview(value);
+    }
   };
 
-  /* ================= IMAGE UPLOAD ================= */
-  const handleImage = (e) => {
-    const file = e.target.files[0];
+  /* ================= UPDATE PRODUCT ================= */
 
-    setProduct({
-      ...product,
-      image: file,
-      preview: URL.createObjectURL(file),
-    });
-  };
-
-  /* ================= SUBMIT ================= */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Updated Product:", product);
+    try {
+      setLoading(true);
 
-    // PUT/PATCH API HERE
+      // ✅ CLEAN PAYLOAD FOR BACKEND
+      const payload = {
+        name: product.name.trim(),
+        price: Number(product.price),
+        stock: Number(product.stock),
+        category: product.category,
+        image: product.image,
+        description: product.description,
+      };
 
-    navigate("/admin/products");
+      const res = await api.patch(`/products/${id}`, payload);
+
+      if (res.data.status === "success") {
+        alert("Product updated successfully ✅");
+        navigate("/admin/products");
+      }
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      alert(err.response?.data?.message || "Update failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  /* ================= LOADING ================= */
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading product...
+      </div>
+    );
+  }
+
   /* ================= UI ================= */
+
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-6xl mx-auto p-4 md:p-6">
 
       {/* HEADER */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Edit Product</h1>
+
         <button
           onClick={() => navigate(-1)}
-          className="bg-white p-3 rounded-full shadow hover:bg-gray-100"
+          className="flex items-center gap-2 bg-gray-200 px-4 py-2 rounded-lg"
         >
-          <FaArrowLeft />
+          <FaArrowLeft /> Back
         </button>
-
-        <h1 className="text-2xl font-bold">
-          Edit Product
-        </h1>
       </div>
 
       {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-lg grid md:grid-cols-2 gap-6"
+        className="bg-white shadow-lg rounded-xl p-6 grid md:grid-cols-2 gap-5"
       >
-        {/* LEFT SIDE */}
-        <div className="space-y-4">
-
+        {/* NAME */}
+        <div>
+          <label className="font-medium">Product Name</label>
           <input
             name="name"
             value={product.name}
             onChange={handleChange}
-            placeholder="Product Name"
+            required
             className="border p-3 w-full rounded-lg"
           />
+        </div>
 
+        {/* PRICE */}
+        <div>
+          <label className="font-medium">Price</label>
           <input
+            type="number"
             name="price"
             value={product.price}
             onChange={handleChange}
-            placeholder="Price"
+            required
             className="border p-3 w-full rounded-lg"
           />
+        </div>
 
+        {/* CATEGORY */}
+        <div>
+          <label className="font-medium">Category</label>
+
+          <select
+            name="category"
+            value={product.category || ""}
+            onChange={handleChange}
+            required
+            className="border p-3 w-full rounded-lg"
+          >
+            <option value="">Select Category</option>
+
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* STOCK */}
+        <div>
+          <label className="font-medium">Stock</label>
           <input
+            type="number"
             name="stock"
             value={product.stock}
             onChange={handleChange}
-            placeholder="Stock Quantity"
+            required
             className="border p-3 w-full rounded-lg"
           />
+        </div>
 
+        {/* IMAGE URL */}
+        <div className="md:col-span-2">
+          <label className="font-medium">Image URL</label>
           <input
-            name="category"
-            value={product.category}
+            name="image"
+            value={product.image}
             onChange={handleChange}
-            placeholder="Category"
             className="border p-3 w-full rounded-lg"
           />
+        </div>
 
-          <input
-            name="rating"
-            type="number"
-            step="0.1"
-            min="0"
-            max="5"
-            value={product.rating}
-            onChange={handleChange}
-            placeholder="Rating (0 - 5)"
-            className="border p-3 w-full rounded-lg"
-          />
+        {/* IMAGE PREVIEW */}
+        {preview && (
+          <div className="md:col-span-2">
+            <p className="font-medium mb-2">Preview</p>
+            <img
+              src={preview}
+              alt="preview"
+              className="w-40 h-40 object-cover rounded-lg border"
+            />
+          </div>
+        )}
 
+        {/* DESCRIPTION */}
+        <div className="md:col-span-2">
+          <label className="font-medium">Description</label>
           <textarea
+            rows="4"
             name="description"
             value={product.description}
             onChange={handleChange}
-            placeholder="Product Description"
-            rows={5}
             className="border p-3 w-full rounded-lg"
           />
         </div>
 
-        {/* RIGHT SIDE (IMAGE) */}
-        <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6">
-
-          {product.preview ? (
-            <img
-              src={product.preview}
-              alt="Preview"
-              className="w-full h-64 object-cover rounded-lg mb-4"
-            />
-          ) : (
-            <div className="text-gray-400 text-center mb-4">
-              No Image Selected
-            </div>
-          )}
-
-          <label className="cursor-pointer bg-gray-100 px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-200">
-            <FaUpload />
-            Change Image
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImage}
-            />
-          </label>
-        </div>
-
-        {/* BUTTONS */}
-        <div className="md:col-span-2 flex gap-4 justify-end mt-4">
+        {/* BUTTON */}
+        <div className="md:col-span-2 flex justify-end">
           <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-6 py-3 rounded-lg bg-gray-200 hover:bg-gray-300"
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
           >
-            Cancel
-          </button>
-
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-            Update Product
+            {loading ? "Updating..." : "Update Product"}
           </button>
         </div>
-
       </form>
     </div>
   );

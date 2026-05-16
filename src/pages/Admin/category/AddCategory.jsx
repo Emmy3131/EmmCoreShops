@@ -1,109 +1,137 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { PlusCircle } from "lucide-react";
+import api from "../../../library/api";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaUpload } from "react-icons/fa";
 
 const AddCategory = () => {
   const navigate = useNavigate();
 
-  const [category, setCategory] = useState({
+  /* ================= STATE ================= */
+  const [form, setForm] = useState({
     name: "",
     description: "",
-    image: null,
+    image: "",
   });
 
-  const [preview, setPreview] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  /* ================= FETCH CATEGORIES ================= */
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+      console.log("Fetch categories response:", res.data);
+      setCategories(res.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  /* ================= HANDLE INPUT ================= */
 
   const handleChange = (e) => {
-    setCategory({
-      ...category,
+    setForm({
+      ...form,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
+  /* ================= SUBMIT ================= */
 
-    setCategory({ ...category, image: file });
-    setPreview(URL.createObjectURL(file));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(category);
+    try {
+      setLoading(true);
 
-    // API POST HERE
+      const res = await api.post("/categories", form);
 
-    navigate("/admin/categories");
+      if (res.data.status === "success") {
+        alert("Category added successfully");
+
+        setForm({
+          name: "",
+          description: "",
+          image: "",
+        });
+        navigate("/admin/category");
+        fetchCategories(); // refresh dropdown
+      }
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      alert("Failed to add category");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  /* ================= UI ================= */
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-
-      {/* HEADER */}
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)}>
-          <FaArrowLeft />
-        </button>
-
-        <h1 className="text-2xl font-bold">
-          Add Category
-        </h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="flex items-center gap-2 mb-6">
+        <PlusCircle className="text-blue-600" />
+        <h2 className="text-2xl font-bold text-white">Add Category</h2>
       </div>
 
-      {/* FORM */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow space-y-5 max-w-2xl"
-      >
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* NAME */}
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Category Name"
+            className="w-full border p-3 rounded-lg"
+          />
 
-        <input
-          name="name"
-          placeholder="Category Name"
-          onChange={handleChange}
-          className="w-full border p-3 rounded-lg"
-        />
+          {/* DESCRIPTION */}
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Description"
+            className="w-full border p-3 rounded-lg"
+          />
 
-        <textarea
-          name="description"
-          placeholder="Description"
-          onChange={handleChange}
-          className="w-full border p-3 rounded-lg"
-        />
+          {/* IMAGE URL */}
+          <input
+            name="image"
+            value={form.image}
+            onChange={handleChange}
+            placeholder="Image URL"
+            className="w-full border p-3 rounded-lg"
+          />
 
-        {/* IMAGE */}
-        <div>
-          <label className="block mb-2 font-medium">
-            Category Image
-          </label>
+          <button
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg"
+          >
+            {loading ? "Adding..." : "Add Category"}
+          </button>
+        </form>
+      </div>
 
-          <label className="border-dashed border-2 p-6 flex flex-col items-center rounded-lg cursor-pointer">
-            <FaUpload />
-            <p className="text-sm text-gray-500">
-              Upload Image
-            </p>
+      {/* ================= CATEGORY DROPDOWN ================= */}
 
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImage}
-            />
-          </label>
+      <div className="mt-8 bg-white p-6 rounded-2xl shadow">
+        <h3 className="font-semibold mb-4">Existing Categories</h3>
 
-          {preview && (
-            <img
-              src={preview}
-              className="mt-3 h-40 object-cover rounded-lg"
-            />
-          )}
-        </div>
+        <select className="w-full border p-3 rounded-lg">
+          <option>Select Category</option>
 
-        <button className="bg-green-600 text-white px-6 py-3 rounded-lg w-full">
-          Save Category
-        </button>
-
-      </form>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };

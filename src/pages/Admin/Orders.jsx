@@ -8,6 +8,7 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get("/orders");
+      console.log("orders:", res);
       setOrders(res.data.data || []);
     } catch (err) {
       console.error("Fetch orders error:", err);
@@ -34,8 +35,8 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="p-4 md:p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Orders</h1>
+    <div className="md:p-6">
+      <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
 
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow">

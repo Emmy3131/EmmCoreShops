@@ -1,54 +1,129 @@
-const Cart = () => {
-  // sample cart data (replace with state or context later)
-  const cartItems = [
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      price: 25000,
-      qty: 1,
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      price: 45000,
-      qty: 2,
-    },
-  ];
+import api from "../../library/api";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext";
 
-  const total = cartItems.reduce(
-    (acc, item) => acc + item.price * item.qty,
-    0
-  );
+
+const Cart = () => {
+  const [cartItems, setCartItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handlecheckout = () => {
+    navigate("/checkout");
+  }
+
+  /* ================= AUTH GUARD ================= */
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  /* ================= FETCH CART ================= */
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+
+      const res = await api.get("/cart");
+      const data = res.data.data;
+
+      const items = data?.items || [];
+
+      setCartItems(items);
+
+      // safe total calculation
+      const sum = items.reduce((acc, item) => {
+        return acc + (item.price || 0) * (item.quantity || 1);
+      }, 0);
+
+      setTotal(sum);
+    } catch (err) {
+      console.error("Cart fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= LOAD CART ================= */
+  useEffect(() => {
+    if (user) {
+      fetchCart();
+    }
+  }, [user]);
+
+  /* ================= REMOVE ITEM ================= */
+  const handleRemove = async (id) => {
+    try {
+      await api.delete(`/cart/${id}`);
+      fetchCart(); // refresh cart
+    } catch (err) {
+      console.error("Remove error:", err);
+    }
+  };
+
+  /* ================= LOADING ================= */
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading cart...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-10 pt-14">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">Shopping Cart</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">
+        Shopping Cart
+      </h1>
 
       <div className="flex flex-col lg:flex-row gap-6">
+
         {/* CART ITEMS */}
         <div className="flex-1 space-y-4">
-          {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row sm:items-center justify-between"
-            >
-              <div>
-                <h2 className="font-semibold text-lg">{item.name}</h2>
-                <p className="text-gray-500 text-sm">
-                  Qty: {item.qty}
-                </p>
-              </div>
+          {cartItems.length === 0 ? (
+            <p className="text-gray-500">Your cart is empty 🛒</p>
+          ) : (
+            cartItems.map((item) => (
+              <div
+                key={item._id}
+                className="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row sm:items-center justify-between"
+              >
+                <div>
+                  <h2 className="font-semibold text-lg">
+                    {item.name}
+                  </h2>
 
-              <div className="mt-2 sm:mt-0 font-bold text-green-600">
-                ₦{item.price.toLocaleString()}
+                  <p className="text-gray-500 text-sm">
+                    Qty: {item.quantity || 1}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 mt-2 sm:mt-0">
+                  <div className="font-bold text-green-600">
+                    ₦{(item.price || 0).toLocaleString()}
+                  </div>
+
+                  <button
+                    onClick={() => handleRemove(item._id)}
+                    className="text-red-500 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* SUMMARY */}
         <div className="w-full lg:w-1/3 bg-white p-5 rounded-lg shadow h-fit">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Order Summary
+          </h2>
 
           <div className="flex justify-between mb-2 text-gray-600">
             <span>Subtotal</span>
@@ -67,7 +142,7 @@ const Cart = () => {
             <span>₦{total.toLocaleString()}</span>
           </div>
 
-          <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition">
+          <button onClick={handlecheckout} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition">
             Proceed to Checkout
           </button>
         </div>

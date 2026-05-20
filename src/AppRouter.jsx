@@ -22,6 +22,8 @@ import MyWallet from "./pages/User/MyWallet";
 import MySavedItems from "./pages/User/MySavedItems";
 import SellOnEmmCoreShopes from "./component/SellOnEmmcore/SellOnEmmCoreShopes";
 import Settings from "./pages/User/Settings";
+import Checkout from "./pages/User/CheckOut";
+import PaymentSuccess from "./pages/User/PaymentSuccess";
 
 /* VENDOR */
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
@@ -53,7 +55,9 @@ const AppRouter = () => {
 
           {/* PUBLIC */}
           <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/cart" element={<Cart />} />
+          </Route>
           <Route path="/deals" element={<Deals />} />
 
           {/* ================= USER AREA ================= */}
@@ -64,6 +68,8 @@ const AppRouter = () => {
               <Route path="/saved" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/checkout" element={<Checkout />} />
+             <Route path="/payment-success" element={<PaymentSuccess />} />
             </Route>
           </Route>
         </Route>

@@ -10,18 +10,23 @@ export const AuthProvider = ({ children }) => {
       RESTORE SESSION
   =========================*/
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
 
-    if (token) {
-      try {
+      if (token && storedUser && storedUser !== "undefined") {
         setUser({
+          ...JSON.parse(storedUser),
           token,
         });
-      } catch (err) {
-        console.log("Invalid token");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+      } else {
+        setUser(null);
       }
+    } catch (err) {
+      console.log("Auth restore error:", err);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
     }
 
     setLoading(false);

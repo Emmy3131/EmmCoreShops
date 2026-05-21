@@ -6,35 +6,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* =========================
-      RESTORE SESSION
-  =========================*/
+  /* ================= RESTORE SESSION ================= */
   useEffect(() => {
     try {
-      const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
-      if (token && storedUser && storedUser !== "undefined") {
+      if (storedUser && token) {
+        const parsedUser = JSON.parse(storedUser);
+
         setUser({
-          ...JSON.parse(storedUser),
+          ...parsedUser,
           token,
         });
-      } else {
-        setUser(null);
       }
     } catch (err) {
-      console.log("Auth restore error:", err);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setUser(null);
-    }
+      console.log("Session restore failed");
 
-    setLoading(false);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  /* =========================
-      LOGIN
-  =========================*/
+  /* ================= LOGIN ================= */
   const login = (userData, token) => {
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
@@ -45,17 +41,23 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  /* =========================
-      LOGOUT
-  =========================*/
+  /* ================= LOGOUT ================= */
   const logout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,13 +1,26 @@
 import axios from "axios";
 
-const token = localStorage.getItem("token");
+const api = axios.create({
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    "https://emm-core-global-networks-updated.vercel.app/api/v1",
 
-export default axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "https://emm-core-global-networks-updated.vercel.app/api/v1",
-    headers: {
-        Authorization: token?`Bearer ${token}`:"",
-        "Content-Type": "application/json",
-    },
-    withCredentials: true,
-    withXSRFToken: true,
-})
+  withCredentials: true,
+
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+/* ================= TOKEN INTERCEPTOR ================= */
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+export default api;

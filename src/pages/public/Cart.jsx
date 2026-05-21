@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 
-
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -12,16 +11,10 @@ const Cart = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handlecheckout = () => {
+  /* ================= CHECKOUT ================= */
+  const handleCheckout = () => {
     navigate("/checkout");
-  }
-
-  /* ================= AUTH GUARD ================= */
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+  };
 
   /* ================= FETCH CART ================= */
   const fetchCart = async () => {
@@ -50,16 +43,14 @@ const Cart = () => {
 
   /* ================= LOAD CART ================= */
   useEffect(() => {
-    if (user) {
-      fetchCart();
-    }
-  }, [user]);
+    fetchCart();
+  }, []);
 
   /* ================= REMOVE ITEM ================= */
   const handleRemove = async (id) => {
     try {
       await api.delete(`/cart/${id}`);
-      fetchCart(); // refresh cart
+      fetchCart();
     } catch (err) {
       console.error("Remove error:", err);
     }
@@ -82,10 +73,12 @@ const Cart = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* CART ITEMS */}
+        {/* ================= CART ITEMS ================= */}
         <div className="flex-1 space-y-4">
           {cartItems.length === 0 ? (
-            <p className="text-gray-500">Your cart is empty 🛒</p>
+            <p className="text-gray-500">
+              Your cart is empty 🛒
+            </p>
           ) : (
             cartItems.map((item) => (
               <div
@@ -119,7 +112,7 @@ const Cart = () => {
           )}
         </div>
 
-        {/* SUMMARY */}
+        {/* ================= SUMMARY ================= */}
         <div className="w-full lg:w-1/3 bg-white p-5 rounded-lg shadow h-fit">
           <h2 className="text-xl font-semibold mb-4">
             Order Summary
@@ -142,7 +135,10 @@ const Cart = () => {
             <span>₦{total.toLocaleString()}</span>
           </div>
 
-          <button onClick={handlecheckout} className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition">
+          <button
+            onClick={handleCheckout}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition"
+          >
             Proceed to Checkout
           </button>
         </div>

@@ -40,6 +40,7 @@ const Login = () => {
 
     const token = localStorage.getItem("token", res.data.token); // ✅ FIXED
     const user = res.data; // ✅ FIXED
+    console.log("Decoded user:", user); // Debugging log
 
     if (!token || !user) {
       setError("Login failed");

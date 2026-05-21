@@ -44,20 +44,15 @@ import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
 
-
 const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ================= MAIN WEBSITE ================= */}
         <Route element={<MainLayout />}>
-
           {/* PUBLIC */}
           <Route path="/" element={<Home />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/cart" element={<Cart />} />
-          </Route>
+          <Route path="/cart" element={<Cart />} />
           <Route path="/deals" element={<Deals />} />
 
           {/* ================= USER AREA ================= */}
@@ -69,44 +64,43 @@ const AppRouter = () => {
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/checkout" element={<Checkout />} />
-             <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
             </Route>
           </Route>
         </Route>
 
         {/* ================= VENDOR AREA ================= */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<VendorLayout />}>
-              <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-            </Route>
+        <Route element={<ProtectedRoute />}>
+          <Route element={<VendorLayout />}>
+            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
           </Route>
+        </Route>
 
-          {/* ================= ADMIN AREA ================= */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<Users />} />
-              <Route path="/admin/orders" element={<Orders />} />
-              <Route path="/admin/products" element={<Products />} />
-              <Route path="/admin/category" element={<Category />} />
-              <Route path="/admin/category/add" element={<AddCategory />} />
-              <Route path="/admin/category/edit/:id" element={<EditCategory />} />
-              <Route path="/admin/reviews" element={<Reviews />} />
-              <Route path="/admin/payments" element={<Payments />} />
-              <Route path="/admin/report" element={<Report />} />
-              <Route path="/admin/vendors" element={<Vendors />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin/products/add" element={<AddProduct />} />
-              <Route path="/admin/products/edit/:id" element={<EditProduct />} />
-            </Route>
+        {/* ================= ADMIN AREA ================= */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/orders" element={<Orders />} />
+            <Route path="/admin/products" element={<Products />} />
+            <Route path="/admin/category" element={<Category />} />
+            <Route path="/admin/category/add" element={<AddCategory />} />
+            <Route path="/admin/category/edit/:id" element={<EditCategory />} />
+            <Route path="/admin/reviews" element={<Reviews />} />
+            <Route path="/admin/payments" element={<Payments />} />
+            <Route path="/admin/report" element={<Report />} />
+            <Route path="/admin/vendors" element={<Vendors />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/products/add" element={<AddProduct />} />
+            <Route path="/admin/products/edit/:id" element={<EditProduct />} />
           </Route>
+        </Route>
 
         {/* ================= AUTH ================= */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
-
       </Routes>
     </BrowserRouter>
   );

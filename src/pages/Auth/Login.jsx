@@ -39,7 +39,7 @@ const Login = () => {
     console.log("Login response:", res.data); // Debugging log
 
     const token = res.data.token; // ✅ FIXED
-    const user = res.data.user; // ✅ FIXED
+    const user = res.data.data; // ✅ FIXED
     console.log("Decoded user:", user); // Debugging log
 
     if (!token || !user) {

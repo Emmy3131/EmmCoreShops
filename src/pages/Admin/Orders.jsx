@@ -5,10 +5,12 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const fetchOrders = async () => {
     try {
       const res = await api.get("/orders");
-      console.log("orders:", res);
+
       setOrders(res.data.data || []);
     } catch (err) {
       console.error("Fetch orders error:", err);
@@ -23,7 +25,10 @@ const AdminOrders = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await api.patch(`/orders/${id}/status`, { status });
+      await api.patch(`/orders/${id}/status`, {
+        status,
+      });
+
       fetchOrders();
     } catch (err) {
       console.error("Update error:", err);
@@ -35,8 +40,10 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="md:p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
+    <div className="md:p-6 p-3">
+      <h1 className="text-2xl font-bold mb-4">
+        Admin Orders
+      </h1>
 
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow">
@@ -56,7 +63,9 @@ const AdminOrders = () => {
             {orders.map((order) => (
               <tr key={order._id} className="border-t">
                 <td className="p-3">
-                  {order.user?.email || "Guest"}
+                  {order.user
+                    ? `${order.user.firstName} ${order.user.lastName}`
+                    : "Deleted User"}
                 </td>
 
                 <td className="p-3">
@@ -83,18 +92,35 @@ const AdminOrders = () => {
                     }
                     className="border p-1 rounded"
                   >
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
+                    <option value="processing">
+                      Processing
+                    </option>
+
+                    <option value="shipped">
+                      Shipped
+                    </option>
+
+                    <option value="delivered">
+                      Delivered
+                    </option>
                   </select>
                 </td>
 
                 <td className="p-3">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {new Date(
+                    order.createdAt
+                  ).toLocaleDateString()}
                 </td>
 
                 <td className="p-3">
-                  <button className="text-blue-500">View</button>
+                  <button
+                    onClick={() =>
+                      setSelectedOrder(order)
+                    }
+                    className="text-blue-500"
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
@@ -111,11 +137,15 @@ const AdminOrders = () => {
           >
             <div className="flex justify-between mb-2">
               <span className="font-semibold">
-                {order.user?.email || "Guest"}
+                {order.user
+                  ? `${order.user.firstName} ${order.user.lastName}`
+                  : "Deleted User"}
               </span>
 
               <span className="text-sm text-gray-500">
-                {new Date(order.createdAt).toLocaleDateString()}
+                {new Date(
+                  order.createdAt
+                ).toLocaleDateString()}
               </span>
             </div>
 
@@ -137,26 +167,159 @@ const AdminOrders = () => {
               </span>
             </div>
 
-            <div className="mb-2">
+            <div className="mb-3">
               <select
                 value={order.status}
                 onChange={(e) =>
                   updateStatus(order._id, e.target.value)
                 }
-                className="border p-1 rounded w-full"
+                className="border p-2 rounded w-full"
               >
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
+                <option value="processing">
+                  Processing
+                </option>
+
+                <option value="shipped">
+                  Shipped
+                </option>
+
+                <option value="delivered">
+                  Delivered
+                </option>
               </select>
             </div>
 
-            <button className="text-blue-500 text-sm">
+            <button
+              onClick={() =>
+                setSelectedOrder(order)
+              }
+              className="text-blue-500 text-sm"
+            >
               View Details
             </button>
           </div>
         ))}
       </div>
+
+      {/* ================= MODAL ================= */}
+      {selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-2xl rounded-lg p-6 overflow-y-auto max-h-[90vh]">
+
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                Order Details
+              </h2>
+
+              <button
+                onClick={() =>
+                  setSelectedOrder(null)
+                }
+                className="text-red-500 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* CUSTOMER */}
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">
+                Customer Info
+              </h3>
+
+              <p>
+                Name:{" "}
+                {selectedOrder.user
+                  ? `${selectedOrder.user.firstName} ${selectedOrder.user.lastName}`
+                  : "Deleted User"}
+              </p>
+
+              <p>
+                Email:{" "}
+                {selectedOrder.user?.email}
+              </p>
+            </div>
+
+            {/* SHIPPING */}
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">
+                Shipping Address
+              </h3>
+
+              <p>
+                {
+                  selectedOrder.shippingAddress
+                    ?.fullName
+                }
+              </p>
+
+              <p>
+                {
+                  selectedOrder.shippingAddress
+                    ?.phone
+                }
+              </p>
+
+              <p>
+                {
+                  selectedOrder.shippingAddress
+                    ?.address
+                }
+              </p>
+
+              <p>
+                {
+                  selectedOrder.shippingAddress
+                    ?.city
+                }
+                ,{" "}
+                {
+                  selectedOrder.shippingAddress
+                    ?.state
+                }
+              </p>
+            </div>
+
+            {/* ITEMS */}
+            <div>
+              <h3 className="font-semibold mb-3">
+                Ordered Items
+              </h3>
+
+              <div className="space-y-3">
+                {selectedOrder.orderItems?.map(
+                  (item, index) => (
+                    <div
+                      key={index}
+                      className="border rounded p-3"
+                    >
+                      <p className="font-medium">
+                        {item.name}
+                      </p>
+
+                      <p>
+                        Quantity: {item.quantity}
+                      </p>
+
+                      <p>
+                        Price: ₦
+                        {item.price?.toLocaleString()}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* TOTAL */}
+            <div className="mt-5 text-right font-bold text-lg">
+              Total: ₦
+              {selectedOrder.totalPrice?.toLocaleString()}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -39,7 +39,7 @@ const Login = () => {
     console.log("Login response:", res.data); // Debugging log
 
     const token = localStorage.getItem("token", res.data.token); // ✅ FIXED
-    const user = res.data.data; // ✅ FIXED
+    const user = res.data; // ✅ FIXED
 
     if (!token || !user) {
       setError("Login failed");

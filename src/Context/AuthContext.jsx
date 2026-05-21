@@ -1,36 +1,47 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import jwtDecode from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   /* =========================
-      CHECK LOCAL STORAGE
+      RESTORE SESSION
   =========================*/
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    try {
-      if (storedUser && storedUser !== "undefined") {
-        setUser(JSON.parse(storedUser));
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+
+        setUser({
+          id: decoded.id,
+          token,
+        });
+      } catch (err) {
+        console.log("Invalid token");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
-    } catch (error) {
-      console.error("Invalid user in localStorage");
-      localStorage.removeItem("user");
     }
+
+    setLoading(false);
   }, []);
 
   /* =========================
       LOGIN
   =========================*/
   const login = (userData, token) => {
-    if (!userData) return;
-
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", token);
 
-    setUser(userData);
+    setUser({
+      ...userData,
+      token,
+    });
   };
 
   /* =========================
@@ -43,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

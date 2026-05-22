@@ -1,32 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaSearch, FaUserSlash, FaEye, FaTrash } from "react-icons/fa";
+import api from "../../library/api";
 
 const User = () => {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
 
-  const users = [
-    {
-      id: 1,
-      name: "Emmanuel Nnaemeka",
-      email: "emmanuel@mail.com",
-      role: "User",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      email: "john@mail.com",
-      role: "Vendor",
-      status: "Suspended",
-    },
-    {
-      id: 3,
-      name: "Sarah James",
-      email: "sarah@mail.com",
-      role: "Admin",
-      status: "Active",
-    },
-  ];
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/users");
+      if(res.data.status === "success") {
+        alert("Users fetched successfully");
+        setUsers(res.data.data || []);
+      } else {
+        alert("Failed to fetch users");
+      }
+    }
+    catch (err) {
+      console.error("Fetch users error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())

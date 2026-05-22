@@ -17,11 +17,15 @@ const MyOrder = () => {
     cancelled: [],
   });
 
+  const tabs = [
+    { key: "ongoing", label: "Ongoing", icon: <FaBox /> },
+    { key: "delivered", label: "Delivered", icon: <FaCheckCircle /> },
+    { key: "cancelled", label: "Cancelled", icon: <FaTimesCircle /> },
+  ];
+
   /* ================= AUTH GUARD ================= */
   useEffect(() => {
-    if (authLoading) return;
-
-    if (!user) {
+    if (!authLoading && !user) {
       navigate("/login");
     }
   }, [user, authLoading, navigate]);
@@ -33,29 +37,24 @@ const MyOrder = () => {
 
       const res = await api.get("/orders/my-orders");
 
-      console.log("ORDERS RESPONSE:", res.data);
-
-      if (res.data.status !== "success") return;
-
       const data = res.data?.data || [];
 
       setOrders({
         ongoing: data.filter(
-          (order) =>
-            order.status === "processing" ||
-            order.status === "shipped"
+          (o) => o.orderStatus === "pending"
         ),
 
         delivered: data.filter(
-          (order) => order.status === "delivered"
+          (o) => o.isDelivered === true
         ),
 
         cancelled: data.filter(
-          (order) => order.status === "cancelled"
+          (o) => o.orderStatus === "cancelled"
         ),
       });
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+
+    } catch (err) {
+      console.error("Fetch orders error:", err);
     } finally {
       setLoading(false);
     }
@@ -74,18 +73,10 @@ const MyOrder = () => {
     );
   }
 
-  /* ================= TABS ================= */
-  const tabs = [
-    { key: "ongoing", label: "Ongoing", icon: <FaBox /> },
-    { key: "delivered", label: "Delivered", icon: <FaCheckCircle /> },
-    { key: "cancelled", label: "Cancelled", icon: <FaTimesCircle /> },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
 
-      {/* HEADER */}
-      <div className="bg-white shadow-sm p-4">
+      <div className="bg-white p-4 shadow">
         <h1 className="text-xl font-semibold">My Orders</h1>
       </div>
 
@@ -95,106 +86,51 @@ const MyOrder = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-3 flex flex-col items-center text-sm ${
+            className={`flex-1 py-3 text-sm ${
               activeTab === tab.key
-                ? "text-[#ED017F] border-b-2 border-[#ED017F]"
+                ? "text-pink-600 border-b-2 border-pink-600"
                 : "text-gray-500"
             }`}
           >
             {tab.icon}
-            <span className="mt-1">{tab.label}</span>
-
-            <span className="bg-gray-200 text-xs px-2 py-0.5 rounded-full mt-1">
+            <div>{tab.label}</div>
+            <div className="text-xs">
               {orders[tab.key].length}
-            </span>
+            </div>
           </button>
         ))}
       </div>
 
-      {/* ORDER LIST */}
+      {/* ORDERS */}
       <div className="p-4 space-y-4">
         {orders[activeTab].length === 0 ? (
-          <div className="text-center text-gray-400 mt-10">
-            No orders available
-          </div>
+          <p className="text-center text-gray-400">
+            No orders found
+          </p>
         ) : (
           orders[activeTab].map((order) => (
-            <div
-              key={order._id}
-              className="bg-white rounded-xl shadow-sm p-4"
-            >
-              {/* TOP */}
-              <div className="flex justify-between">
-                <div>
-                  <h2 className="font-semibold">
-                    Order #{order._id?.slice(-6)}
-                  </h2>
+            <div key={order._id} className="bg-white p-4 rounded shadow">
 
-                  <p className="text-sm text-gray-500 mt-1">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
+              <h2 className="font-semibold">
+                Order #{order._id.slice(-6)}
+              </h2>
+
+              <p className="text-sm text-gray-500">
+                {new Date(order.createdAt).toLocaleString()}
+              </p>
+
+              {order.orderItems.map((item, i) => (
+                <div key={i} className="flex justify-between text-sm mt-2">
+                  <span>{item.name} x {item.quantity}</span>
+                  <span>₦{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
+              ))}
 
-                <span
-                  className={`text-xs px-3 py-1 rounded-full ${
-                    order.status === "processing"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : order.status === "shipped"
-                      ? "bg-blue-100 text-blue-700"
-                      : order.status === "delivered"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </div>
-
-              {/* ITEMS */}
-              <div className="mt-4 space-y-2">
-                {(order.orderItems || []).map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between text-sm"
-                  >
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-gray-500">
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
-
-                    <p className="font-semibold text-[#ED017F]">
-                      ₦{(item.price * item.quantity).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* TOTAL */}
-              <div className="border-t mt-4 pt-3 flex justify-between font-bold">
+              <div className="border-t mt-3 pt-2 font-bold flex justify-between">
                 <span>Total</span>
-                <span>
-                  ₦{order.totalPrice?.toLocaleString()}
-                </span>
+                <span>₦{order.totalPrice.toLocaleString()}</span>
               </div>
 
-              {/* PAYMENT */}
-              <div className="mt-3 flex justify-between">
-                <span className="text-sm text-gray-500">
-                  Payment:
-                </span>
-
-                <span
-                  className={`text-sm font-medium ${
-                    order.paymentStatus === "paid"
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {order.paymentStatus || "pending"}
-                </span>
-              </div>
             </div>
           ))
         )}

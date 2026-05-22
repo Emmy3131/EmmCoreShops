@@ -224,7 +224,7 @@ const CheckOut = () => {
             >
               {loading
                 ? "Redirecting..."
-                : "Pay with Paystack"}
+                : "Proceed to Payment"}
             </button>
           </div>
         </div>

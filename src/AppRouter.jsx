@@ -44,7 +44,7 @@ import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
 
-import AuthProvider from "./Context/AuthContext";
+import {AuthProvider} from "./Context/AuthContext";
 
 const AppRouter = () => {
   return (

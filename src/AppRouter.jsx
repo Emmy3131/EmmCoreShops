@@ -63,9 +63,7 @@ const AppRouter = () => {
               <Route path="/saved" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />
               <Route path="/settings" element={<Settings />} />
-              <Route elememnt={<ProtectedRoute />}>
-                <Route path="/checkout" element={<Checkout />} />
-              </Route>
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
             </Route>
           </Route>

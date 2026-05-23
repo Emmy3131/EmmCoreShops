@@ -44,6 +44,8 @@ import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
 
+import AuthProvider from "./Context/AuthContext";
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -56,15 +58,17 @@ const AppRouter = () => {
           <Route path="/deals" element={<Deals />} />
 
           {/* ================= USER AREA ================= */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<UserLayout />}>
-              <Route path="/user/orders" element={<MyOrder />} />
-              <Route path="/user/wallet" element={<MyWallet />} />
-              <Route path="/saved" element={<MySavedItems />} />
-              <Route path="/sell" element={<SellOnEmmCoreShopes />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route element={<AuthProvider role="user" />}>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<UserLayout />}>
+                <Route path="/user/orders" element={<MyOrder />} />
+                <Route path="/user/wallet" element={<MyWallet />} />
+                <Route path="/saved" element={<MySavedItems />} />
+                <Route path="/sell" element={<SellOnEmmCoreShopes />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+              </Route>
             </Route>
           </Route>
         </Route>

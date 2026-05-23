@@ -48,17 +48,18 @@ import AuthProvider from "./Context/AuthContext";
 
 const AppRouter = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ================= MAIN WEBSITE ================= */}
-        <Route element={<MainLayout />}>
-          {/* PUBLIC */}
-          <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/deals" element={<Deals />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* ================= MAIN WEBSITE ================= */}
+          <Route element={<MainLayout />}>
+            {/* PUBLIC */}
+            <Route path="/" element={<Home />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/deals" element={<Deals />} />
 
-          {/* ================= USER AREA ================= */}
-          <Route element={<AuthProvider role="user" />}>
+            {/* ================= USER AREA ================= */}
+
             <Route element={<ProtectedRoute />}>
               <Route element={<UserLayout />}>
                 <Route path="/user/orders" element={<MyOrder />} />
@@ -71,42 +72,48 @@ const AppRouter = () => {
               </Route>
             </Route>
           </Route>
-        </Route>
 
-        {/* ================= VENDOR AREA ================= */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<VendorLayout />}>
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          {/* ================= VENDOR AREA ================= */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<VendorLayout />}>
+              <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* ================= ADMIN AREA ================= */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<AdminLayout />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<Users />} />
-            <Route path="/admin/orders" element={<Orders />} />
-            <Route path="/admin/products" element={<Products />} />
-            <Route path="/admin/category" element={<Category />} />
-            <Route path="/admin/category/add" element={<AddCategory />} />
-            <Route path="/admin/category/edit/:id" element={<EditCategory />} />
-            <Route path="/admin/reviews" element={<Reviews />} />
-            <Route path="/admin/payments" element={<Payments />} />
-            <Route path="/admin/report" element={<Report />} />
-            <Route path="/admin/vendors" element={<Vendors />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin/products/add" element={<AddProduct />} />
-            <Route path="/admin/products/edit/:id" element={<EditProduct />} />
+          {/* ================= ADMIN AREA ================= */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<Users />} />
+              <Route path="/admin/orders" element={<Orders />} />
+              <Route path="/admin/products" element={<Products />} />
+              <Route path="/admin/category" element={<Category />} />
+              <Route path="/admin/category/add" element={<AddCategory />} />
+              <Route
+                path="/admin/category/edit/:id"
+                element={<EditCategory />}
+              />
+              <Route path="/admin/reviews" element={<Reviews />} />
+              <Route path="/admin/payments" element={<Payments />} />
+              <Route path="/admin/report" element={<Report />} />
+              <Route path="/admin/vendors" element={<Vendors />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin/products/add" element={<AddProduct />} />
+              <Route
+                path="/admin/products/edit/:id"
+                element={<EditProduct />}
+              />
+            </Route>
           </Route>
-        </Route>
 
-        {/* ================= AUTH ================= */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* ================= AUTH ================= */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 

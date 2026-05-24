@@ -22,6 +22,7 @@ const Cart = () => {
       setLoading(true);
 
       const res = await api.get("/cart");
+      console.log("Cart response:", res.data); // Debugging log
       const data = res.data.data;
 
       const items = data?.items || [];
@@ -47,14 +48,26 @@ const Cart = () => {
   }, []);
 
   /* ================= REMOVE ITEM ================= */
-  const handleRemove = async (id) => {
-    try {
-      await api.delete(`/cart/${id}`);
+const handleRemove = async (id) => {
+  try {
+    const res = await api.delete(`/cart/${id}`);
+
+    if (res.data.status === "success") {
       fetchCart();
-    } catch (err) {
-      console.error("Remove error:", err);
+    } else {
+      console.error(
+        "Failed to remove item:",
+        res.data
+      );
     }
-  };
+
+  } catch (err) {
+    console.error(
+      "Remove cart item error:",
+      err.response?.data || err.message
+    );
+  }
+};
 
   /* ================= LOADING ================= */
   if (loading) {
@@ -101,7 +114,7 @@ const Cart = () => {
                   </div>
 
                   <button
-                    onClick={() => handleRemove(item._id)}
+                    onClick={() => handleRemove(item.product._id)}
                     className="text-red-500 text-sm"
                   >
                     Remove

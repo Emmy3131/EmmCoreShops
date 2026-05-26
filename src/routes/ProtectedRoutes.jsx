@@ -8,7 +8,7 @@ const ProtectedRoute = ({ role }) => {
   if (loading) return null;
 
   // not logged in
-  // if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   // role protection
   if (role && user.role !== role) {

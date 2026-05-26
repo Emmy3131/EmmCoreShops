@@ -18,42 +18,53 @@ const ResetPassword = () => {
 
 
   // ================= RESET PASSWORD =================
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
+ const handleResetPassword = async (e) => {
+  e.preventDefault();
 
-    setError("");
-    setSuccess("");
+  setError("");
+  setSuccess("");
 
-    if (password !== passwordConfirm) {
-      return setError("Passwords do not match");
-    }
+  if (password !== passwordConfirm) {
+    return setError("Passwords do not match");
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await api.patch(`/users/resetPassword/${token}`, {
+    const res = await api.patch(
+      `/users/resetPassword/${token}`,
+      {
         password,
         passwordConfirm,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Password reset failed");
       }
+    );
 
-      setSuccess("Password reset successful ✅ Redirecting...");
-
-      // redirect after success
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (res.data.status !== "success") {
+      throw new Error(
+        res.data.message || "Password reset failed"
+      );
     }
-  };
+
+    setSuccess(
+      "Password reset successful ✅ Redirecting..."
+    );
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000);
+
+  } catch (err) {
+
+    setError(
+      err.response?.data?.message ||
+      err.message ||
+      "Something went wrong"
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ================= UI =================
   return (

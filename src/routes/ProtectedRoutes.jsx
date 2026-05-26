@@ -5,9 +5,9 @@ const ProtectedRoute = ({ role }) => {
   const { user } = useAuth();
   console.log("ProtectedRoute user:", user); // Debugging log
 
-  // if (!user) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (role && user.role !== role) {
     return <Navigate to="/" replace />;

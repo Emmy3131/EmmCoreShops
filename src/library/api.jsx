@@ -18,6 +18,7 @@ api.interceptors.request.use((config) => {
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("Attached token to request:", token); // Debugging log
   }
 
   return config;

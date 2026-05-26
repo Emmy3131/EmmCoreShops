@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
     // ⚡ STEP 2: verify with backend
     try {
-      const res = await api.get("/user/me");
+      const res = await api.get("/users/me");
 
       if (res.data.status === "success") {
         const freshUser = {

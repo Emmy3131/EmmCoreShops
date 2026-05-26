@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import api from "../library/api";
 
 const AuthContext = createContext();
 
@@ -6,28 +7,58 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* ================= RESTORE SESSION ================= */
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const token = localStorage.getItem("token");
+  /* ================= INIT AUTH ================= */
+  const initAuth = async () => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
-      if (storedUser && token) {
-        const parsedUser = JSON.parse(storedUser);
+    // 🚨 If no token, stop immediately
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
 
+    // ⚡ STEP 1: show cached user immediately (prevents flicker)
+    if (storedUser) {
+      try {
         setUser({
-          ...parsedUser,
+          ...JSON.parse(storedUser),
           token,
         });
+      } catch (e) {
+        console.log("Invalid cached user");
+      }
+    }
+
+    // ⚡ STEP 2: verify with backend
+    try {
+      const res = await api.get("/user/me");
+
+      if (res.data.status === "success") {
+        const freshUser = {
+          ...res.data.data.user,
+          token,
+        };
+
+        setUser(freshUser);
+        localStorage.setItem("user", JSON.stringify(freshUser));
+      } else {
+        setUser(null);
       }
     } catch (err) {
-      console.log("Session restore failed");
-
-      localStorage.removeItem("user");
+      console.log("Auth failed:", err);
+      setUser(null);
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
     } finally {
       setLoading(false);
     }
+  };
+
+  /* ================= RUN ON START ================= */
+  useEffect(() => {
+    initAuth();
   }, []);
 
   /* ================= LOGIN ================= */
@@ -45,19 +76,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        logout,
-        loading,
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

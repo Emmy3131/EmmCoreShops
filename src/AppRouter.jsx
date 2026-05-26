@@ -44,11 +44,23 @@ import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
 
-import {AuthProvider} from "./Context/AuthContext";
+import { useAuth } from "./Context/AuthContext";
 
 const AppRouter = () => {
+ 
+   const { loading } = useAuth();
+
+  // 🚨 BLOCK ENTIRE ROUTER UNTIL AUTH IS READY
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading session...
+      </div>
+    );
+  }
+
   return (
-    <AuthProvider>
+   
       <BrowserRouter>
         <Routes>
           {/* ================= MAIN WEBSITE ================= */}
@@ -113,7 +125,7 @@ const AppRouter = () => {
           </Route>
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+   
   );
 };
 

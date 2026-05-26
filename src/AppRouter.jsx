@@ -15,6 +15,8 @@ import Deals from "./pages/public/Deal";
 /* AUTH */
 import Login from "./pages/Auth/Login";
 import Signup from "./pages/Auth/Register";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 /* USER */
 import MyOrder from "./pages/User/MyOrder";
@@ -122,6 +124,8 @@ const AppRouter = () => {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
         </Routes>
       </BrowserRouter>

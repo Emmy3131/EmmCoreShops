@@ -17,6 +17,10 @@ const Login = () => {
     password: "",
   });
 
+  const handleForgotPassword = () => {
+    navigate("/forgot-password");
+  };
+
   /* ================= INPUT HANDLER ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,7 +132,7 @@ const Login = () => {
             <div>
               <div className="flex justify-between text-sm">
                 <label>Password</label>
-                <button type="button" className="text-[#ED017F]">
+                <button  type="button" className="text-[#ED017F]" onClick={handleForgotPassword}>
                   Forgot Password?
                 </button>
               </div>

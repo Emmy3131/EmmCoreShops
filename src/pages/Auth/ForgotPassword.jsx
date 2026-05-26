@@ -18,7 +18,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/users/forgot-password", { email });
+      const res = await api.post("/users/forgotPassword", { email });
 
       const data = await res.json();
 

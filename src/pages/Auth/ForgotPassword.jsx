@@ -8,7 +8,7 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ================= SEND EMAIL =================
+  /* ================= SEND EMAIL ================= */
   const handleForgotPassword = async (e) => {
     e.preventDefault();
 
@@ -18,29 +18,46 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/users/forgotPassword", { email });
+      const res = await api.post(
+        "/users/forgotPassword",
+        { email }
+      );
 
-      const data = res.data;
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to send reset email");
+      if (res.data.status !== "success") {
+        throw new Error(
+          res.data.message ||
+            "Failed to send reset email"
+        );
       }
 
-      setSuccess("✅ Password reset instructions sent to your email");
+      setSuccess(
+        "✅ Password reset instructions sent to your email"
+      );
 
       setEmail("");
+
     } catch (err) {
-      setError(err.message);
+
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Something went wrong"
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= UI =================
+  /* ================= UI ================= */
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Forgot Password</h2>
+
+        <h2 className="text-2xl font-bold text-center mb-4">
+          Forgot Password
+        </h2>
 
         <p className="text-gray-600 text-center mb-6">
           Enter your email to receive password reset instructions.
@@ -58,13 +75,19 @@ const ForgotPassword = () => {
           </p>
         )}
 
-        <form onSubmit={handleForgotPassword} className="space-y-4">
+        <form
+          onSubmit={handleForgotPassword}
+          className="space-y-4"
+        >
+
           <input
             type="email"
             required
             placeholder="Email Address"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
             className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
 
@@ -73,19 +96,25 @@ const ForgotPassword = () => {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Sending..." : "Send Reset Instructions"}
+            {loading
+              ? "Sending..."
+              : "Send Reset Instructions"}
           </button>
+
         </form>
 
         <p className="text-sm text-center mt-6">
           Remember password?{" "}
+
           <Link
             to="/login"
             className="text-blue-600 font-semibold hover:underline"
           >
             Login
           </Link>
+
         </p>
+
       </div>
     </div>
   );

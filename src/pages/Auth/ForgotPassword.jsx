@@ -20,7 +20,7 @@ const ForgotPassword = () => {
 
       const res = await api.post("/users/forgotPassword", { email });
 
-      const data = await res.json();
+      const data = res.data;
 
       if (!res.ok) {
         throw new Error(data.message || "Failed to send reset email");

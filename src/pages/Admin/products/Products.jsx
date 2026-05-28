@@ -36,12 +36,11 @@ const Products = () => {
 
   /* SEARCH */
   const filteredProducts = products.filter((product) =>
-    product.name?.toLowerCase().includes(search.toLowerCase())
+    product.name?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold">Products</h1>
@@ -68,30 +67,42 @@ const Products = () => {
         {filteredProducts.map((product) => (
           <div
             key={product._id}
-            className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
+            className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
           >
-           <div className="h-16 w-full">
-             <img
-              src={product.image}
-              alt={product.name}
-              className="object-cover"
-            />
-           </div>
+            {/* IMAGE SECTION */}
+            <div className="w-full h-64 bg-gray-100 overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+              />
+            </div>
 
-            <div className="p-4 space-y-2">
-              <h2 className="font-semibold text-lg">{product.name}</h2>
+            {/* PRODUCT DETAILS */}
+            <div className="p-5 space-y-3">
+              {/* CATEGORY */}
+              <span className="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                {product.category?.name}
+              </span>
 
-              <p className="text-gray-500 text-sm">
-                Category: {product.category?.name}
-              </p>
+              {/* PRODUCT NAME */}
+              <h2 className="text-lg font-bold text-gray-800 line-clamp-2">
+                {product.name}
+              </h2>
 
-              <p className="font-bold text-green-600">
-                ₦{product.price?.toLocaleString()}
-              </p>
+              {/* PRICE */}
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-extrabold text-green-600">
+                  ₦{product.price?.toLocaleString()}
+                </p>
 
-              <p className="text-sm text-gray-500">
-                Stock: {product.stock}
-              </p>
+                <p className="text-sm text-gray-500">
+                  Stock:
+                  <span className="font-semibold text-gray-700 ml-1">
+                    {product.stock}
+                  </span>
+                </p>
+              </div>
 
               <div className="flex justify-between pt-3">
                 <Link

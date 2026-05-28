@@ -9,7 +9,7 @@ const Hero = () => {
         </h1>
 
         <p className="text-lg mb-6">
-          Best deals on electronics, fashion and more
+          Best deals on Phones, Laptops, Gadgets, and more. Shop now and save big!
         </p>
 
         <button className="bg-white text-pink-600 px-6 py-3 rounded-lg font-bold">

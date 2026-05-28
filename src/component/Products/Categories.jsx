@@ -16,7 +16,7 @@ const categories = [
 
 const Categories = () => {
   return (
-    <div className="bg-white py-3 overflow-x-auto">
+    <div className="bg-white py-3 md:hidden overflow-x-auto">
       <div className="flex gap-6 px-4 min-w-max">
         {categories.map((cat, index) => (
           <div

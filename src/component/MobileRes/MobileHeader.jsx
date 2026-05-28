@@ -5,8 +5,13 @@ import {
   FaSearch,
   FaTimes,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const MobileHeader = ({ openSidebar, setOpenSidebar }) => {
+  const navigate = useNavigate();
+  const handleCart =() => {
+    navigate("/cart");
+  }
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
 
@@ -55,7 +60,7 @@ const MobileHeader = ({ openSidebar, setOpenSidebar }) => {
 
             <div className="flex gap-4">
               <FaStore size={20} />
-              <FaShoppingCart size={20} />
+              <FaShoppingCart size={20} onClick={handleCart} />
             </div>
           </div>
 

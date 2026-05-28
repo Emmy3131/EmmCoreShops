@@ -70,11 +70,13 @@ const Products = () => {
             key={product._id}
             className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
           >
-            <img
+           <div className="h-16 w-full">
+             <img
               src={product.image}
               alt={product.name}
-              className=" w-full object-cover"
+              className="object-cover"
             />
+           </div>
 
             <div className="p-4 space-y-2">
               <h2 className="font-semibold text-lg">{product.name}</h2>

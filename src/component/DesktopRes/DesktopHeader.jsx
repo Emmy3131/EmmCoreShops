@@ -260,7 +260,7 @@ const Header = () => {
           {/* PHONES */}
           <li>
             <Link
-              to="/category/phones-tablets"
+              to="/category/phones&tablets"
               className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
             >
               Phones & Tablets
@@ -280,7 +280,7 @@ const Header = () => {
           {/* ACCESSORIES */}
           <li>
             <Link
-              to="/category/accessories"
+              to="/category/gadgets&access"
               className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
             >
               Gadgets & Accessories

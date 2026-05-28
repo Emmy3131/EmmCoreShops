@@ -47,6 +47,7 @@ import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
 
 import { useAuth } from "./Context/AuthContext";
+import CategoryProducts from "./pages/public/categories/CategoryProduct";
 
 const AppRouter = () => {
  
@@ -71,6 +72,7 @@ const AppRouter = () => {
             <Route path="/" element={<Home />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/deals" element={<Deals />} />
+            <Route path="/category/:slug" element={<CategoryProducts />} />
 
             {/* ================= USER AREA ================= */}
 

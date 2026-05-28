@@ -22,6 +22,7 @@ import { useAuth } from "../../Context/AuthContext";
 const Header = () => {
   const { user, logout } = useAuth();
   const [cartCount, setCartCount] = useState(0);
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
   const handleCart = () => {
@@ -46,7 +47,7 @@ const Header = () => {
       }
     };
 
-   if (user) {
+    if (user) {
       fetchCartCount();
     }
   }, []);
@@ -237,19 +238,54 @@ const Header = () => {
       </div>
 
       {/* CATEGORY NAVIGATION */}
-      <nav className="bg-[#9C004F] text-white px-6 py-2 w-full">
-        <ul className="flex gap-12 text-sm overflow-x-auto justify-base">
-          <li className="flex px-4 justify-center items-center gap-2">
-            All Categories
+      {/* CATEGORY NAVIGATION */}
+      <nav className="bg-[#9C004F] text-white px-6 py-3 w-full shadow-md">
+        <ul className="flex gap-6 text-sm overflow-x-auto whitespace-nowrap">
+          {/* ALL CATEGORIES */}
+          <li className="group relative px-4 py-2 hover:bg-[#ED017F] rounded-lg transition cursor-pointer flex items-center gap-2">
             <FaBars />
+            All Categories
           </li>
-          <li className="px-4">Computers and Accesories</li>
-          <li className="px-4">Phones & Tablets</li>
-          <li className="px-4">Electronics</li>
-          <li className="px-4">Fashion</li>
-          <li className="px-4">Home & Kitchen</li>
-          <li className="px-4">Baby, Kids & Toys</li>
-          <li className="px-4">Beauty, Health and Personal Care</li>
+
+          {/* LAPTOPS */}
+          <li>
+            <Link
+              to="/category/laptops"
+              className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
+            >
+              Laptops
+            </Link>
+          </li>
+
+          {/* PHONES */}
+          <li>
+            <Link
+              to="/category/phones-tablets"
+              className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
+            >
+              Phones & Tablets
+            </Link>
+          </li>
+
+          {/* ELECTRONICS */}
+          <li>
+            <Link
+              to="/category/electronics"
+              className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
+            >
+              Electronics
+            </Link>
+          </li>
+
+          {/* ACCESSORIES */}
+          <li>
+            <Link
+              to="/category/accessories"
+              className="block px-4 py-2 rounded-lg hover:bg-[#ED017F] transition font-medium"
+            >
+              Gadgets & Accessories
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>

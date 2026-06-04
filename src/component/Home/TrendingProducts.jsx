@@ -1,11 +1,32 @@
 import ProductCard from "./ProductsCard";
+import api from "../../library/api";
+import { useState, useEffect } from "react";
 
-const TrendingProducts = ({ products }) => {
+const TrendingProducts = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTrendingProducts = async () => {
+    try {
+      const res = await api.get("/products/isTrending");
+
+      if (res.data.status === "success") {
+        setProducts(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching trending products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrendingProducts();
+  }, []);
+
   return (
     <div className="mx-auto py-10 px-4">
-
       <div className="flex items-center justify-between mb-6">
-
         <h2 className="text-2xl font-bold">
           Trending Products
         </h2>
@@ -13,19 +34,22 @@ const TrendingProducts = ({ products }) => {
         <button className="text-pink-600 font-semibold">
           See All
         </button>
-
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-        {products.map((product) => (
-          <ProductCard
-            key={product._id}
-            product={product}
-          />
-        ))}
-
-      </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : products.length === 0 ? (
+        <p>No trending products found yes is coming from here.</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {products.map((product) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

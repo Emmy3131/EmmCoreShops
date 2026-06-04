@@ -26,6 +26,7 @@ import SellOnEmmCoreShopes from "./component/SellOnEmmcore/SellOnEmmCoreShopes";
 import Settings from "./pages/User/Settings";
 import Checkout from "./pages/User/CheckOut";
 import PaymentSuccess from "./pages/User/PaymentSuccess";
+import SearchProducts from "./pages/public/SearchProducts";
 
 /* VENDOR */
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
@@ -72,8 +73,8 @@ const AppRouter = () => {
             <Route path="/" element={<Home />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/deals" element={<Deals />} />
-            <Route path="/category/:slug" element={<CategoryProducts />} />
-
+            <Route path="/category/:id" element={<CategoryProducts />} />
+            <Route path="/search" element={<SearchProducts />} />
             {/* ================= USER AREA ================= */}
 
             <Route element={<ProtectedRoute />}>

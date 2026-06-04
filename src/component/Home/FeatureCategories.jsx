@@ -1,35 +1,58 @@
-const FeaturedCategories = ({ categories = [] }) => {
-  return (
-    <div className=" mx-auto py-10 px-4">
+import ProductCard from "../Products/ProductCard";
+import api from "../../library/api";
+import { useState, useEffect } from "react";
 
-      <h2 className="text-2xl font-bold mb-6">
+const FeaturedCategories = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get("/products");
+
+        setProducts(res.data.data || []);
+      } catch (err) {
+        console.error("Product fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  return (
+    <div className="px-3 mt-6 pb-24">
+
+      {/* HEADER */}
+      <h2 className="font-semibold text-lg mb-3">
         Featured Categories
       </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {/* LOADING STATE */}
+      {loading ? (
+        <p className="text-gray-500">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="text-gray-500">No products found</p>
+      ) : (
+        <div className="
+          grid
+          grid-cols-2
+          sm:grid-cols-3
+          md:grid-cols-4
+          lg:grid-cols-5
+          gap-3
+        ">
+          {products.map((product) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+            />
+          ))}
+        </div>
+      )}
 
-        {categories.length > 0 ? (
-          categories.map((cat) => (
-            <div
-              key={cat._id}
-              className="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition"
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="w-20 h-20 mx-auto object-cover mb-4"
-              />
-
-              <h3 className="font-semibold">
-                {cat.name}
-              </h3>
-            </div>
-          ))
-        ) : (
-          <p>No categories found</p>
-        )}
-
-      </div>
     </div>
   );
 };

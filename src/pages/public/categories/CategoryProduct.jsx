@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../../library/api";
-import ProductCard from "../../components/ProductCard/ProductCard";
+import api from "../../../library/api";
+import ProductCard from "../../../component/Products/ProductCard";
 
 const CategoryProducts = () => {
-  const { slug } = useParams(); // 👈 gets category from URL
+  // ✅ PUT IT HERE (TOP OF COMPONENT)
+  const { id } = useParams();
+  console.log("Category ID from URL:", id);
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +16,7 @@ const CategoryProducts = () => {
       try {
         setLoading(true);
 
-        const res = await api.get(`/products/category/${slug}`);
+        const res = await api.get(`/products/category/${id}`);
 
         setProducts(res.data.data || []);
       } catch (err) {
@@ -24,12 +27,12 @@ const CategoryProducts = () => {
     };
 
     fetchProducts();
-  }, [slug]);
+  }, [id]);
 
   return (
     <div className="px-6 py-8">
-      <h1 className="text-2xl font-bold capitalize mb-6">
-        {slug.replace("-", " ")}
+      <h1 className="text-2xl font-bold mb-6">
+        Category Products
       </h1>
 
       {loading ? (

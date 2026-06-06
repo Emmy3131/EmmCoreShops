@@ -13,7 +13,8 @@ const AdminMenu = () => {
       <MenuItem to="/admin/payments" title="Payments" icon={<FaLink />} />
       <MenuItem to="/admin/report" title="Report" icon={<FaLink />} />
       <MenuItem to="/admin/vendors" title="Vendors" icon={<FaLink />} />
-      <MenuItem to="profile" title="Settings" icon={<FaLink />} />
+      <MenuItem to="/admin/newsletter" title="Newsletter" icon={<FaLink />} />
+      <MenuItem to="/admin/profile" title="Settings" icon={<FaLink />} />
     </>
   );
 };

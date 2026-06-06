@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import DesktopHeader from "../component/DesktopRes/DesktopHeader";
+import DesktopFooter from "../component/DesktopRes/DesktopFooter";
 import MobileHeader from "../component/MobileRes/MobileHeader";
 import MobileFooter from "../component/MobileRes/MobileFooter";
 import Sidebar from "../component/SideBar";
@@ -17,7 +18,7 @@ const MainLayout = () => {
     setMoreActive(false);
   };
 
-  /* ✅ AUTO CLOSE WHEN ROUTE CHANGES */
+  // Auto close sidebar on route change
   useEffect(() => {
     setOpenSidebar(false);
     setMoreActive(false);
@@ -45,9 +46,16 @@ const MainLayout = () => {
         closeSidebar={closeSidebar}
       />
 
-      {/* PAGE CONTENT */}
-      <main className="flex-1 overflow-y-auto pt-24 pb-16">
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 overflow-y-auto pt-24 pb-20">
+
         <Outlet context={{ setOpenSidebar }} />
+
+        {/* DESKTOP FOOTER (IMPORTANT FIX) */}
+        <div className="hidden md:block mt-10">
+          <DesktopFooter />
+        </div>
+
       </main>
 
       {/* MOBILE FOOTER */}

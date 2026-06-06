@@ -16,16 +16,13 @@ const Newsletter = () => {
       const res = await api.post("/newsletter/subscribe", { email });
 
       if (res.data.status === "success") {
-        alert(res.data.message);
-        console.log(res.data.message);
+        alert(res.data.message || "Subscribed successfully");
         setEmail("");
       } else {
         alert("Subscription failed");
       }
-      
-
-      console.log(res.data.message);
       setEmail("");
+      
     } catch (error) {
       alert(error.response?.data?.message || "Subscription failed");
     } finally {

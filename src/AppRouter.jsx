@@ -46,6 +46,7 @@ import Payments from "./pages/Admin/Payments";
 import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
+import NewsletterSub from "./pages/Admin/NewsletterSub";
 
 import { useAuth } from "./Context/AuthContext";
 import CategoryProducts from "./pages/public/categories/CategoryProduct";
@@ -105,6 +106,7 @@ const AppRouter = () => {
               <Route path="/admin/orders" element={<Orders />} />
               <Route path="/admin/products" element={<Products />} />
               <Route path="/admin/category" element={<Category />} />
+              <Route path="/admin/newsletter" element={<NewsletterSub />} />
               <Route path="/admin/category/add" element={<AddCategory />} />
               <Route
                 path="/admin/category/edit/:id"

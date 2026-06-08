@@ -1,4 +1,4 @@
-import ProductCard from "./ProductsCard";
+import ProductCard from "../Products/ProductCard";
 import api from "../../library/api";
 import { useState, useEffect } from "react";
 

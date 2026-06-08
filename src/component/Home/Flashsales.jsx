@@ -1,4 +1,4 @@
-import ProductCard from "./ProductsCard";
+import ProductCard from "../Products/ProductCard";
 import api from "../../library/api";
 import { useState, useEffect } from "react";
 
@@ -12,6 +12,7 @@ const FlashSales = () => {
 
       if (res.data.status === "success") {
         setProducts(res.data.data || []);
+        console.log("Flash sales data:", res.data.data);
       }
     } catch (error) {
       console.error("Error fetching flash sales:", error);
@@ -39,7 +40,7 @@ const FlashSales = () => {
       {loading ? (
         <p>Loading flash sales...</p>
       ) : products.length === 0 ? (
-        <p>No flash sales available yes is coming from here.</p>
+        <p>No flash sales available yet.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {products.map((product) => (

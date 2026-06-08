@@ -21,31 +21,12 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
     navigate("/settings");
   };
 
-  const handleLogout = async () => {
-    try {
-      // optional backend logout (safe even if it fails)
-      const res = await api.post("/users/logout");
-
-      // clear frontend auth state
-      if (res.status === 200) {
-        logout();
-        closeSidebar?.();
-        navigate("/login");
-      }
-      // redirect user
-    } catch (error) {
-      console.error("Logout error:", error);
-
-      // still force logout on frontend
-      logout();
-      closeSidebar?.();
-      navigate("/login");
-    }
-  };
+ 
 
   const fetchCategories = async () => {
     try {
       const res = await api.get("/categories");
+      console.log("CATEGORIES RESPONSE:", res.data);
 
       if (res.data.status === "success") {
         console.log("Fetched categories:", res.data.data);
@@ -214,12 +195,19 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
         {/* CATEGORY LIST */}
         <ul className="text-gray-700">
-          {(categories || []).map((item, index) => (
+          {(categories || []).map((item) => (
             <li
-              key={item._id || index}
+              key={item._id}
               className="flex justify-between items-center px-4 py-4 border-b"
             >
-              {item.name}
+              <Link
+                to={`/category/${item._id}`}
+                onClick={closeSidebar}
+                className="flex-1"
+              >
+                {item.name}
+              </Link>
+
               <FaChevronRight size={12} />
             </li>
           ))}

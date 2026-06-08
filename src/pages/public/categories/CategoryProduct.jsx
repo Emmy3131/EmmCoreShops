@@ -30,7 +30,7 @@ const CategoryProducts = () => {
   }, [id]);
 
   return (
-    <div className="px-6 py-8">
+    <div className="px-6 py-8 mt-4">
       <h1 className="text-2xl font-bold mb-6">
         Category Products
       </h1>

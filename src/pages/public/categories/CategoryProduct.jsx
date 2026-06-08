@@ -31,7 +31,7 @@ const CategoryProducts = () => {
 
   return (
     <div className="px-6 py-8 mt-4">
-      <h1 className="text-2xl font-bold mb-6">
+      <h1 className="text-2xl font-bold py-4">
         Category Products
       </h1>
 

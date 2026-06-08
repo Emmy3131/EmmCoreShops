@@ -1,8 +1,8 @@
 const Hero = () => {
   return (
-    <div className="w-full bg-pink-600 text-white py-20 px-10">
+    <div className="w-full bg-pink-600 text-white p-10 flex items-center justify-center">
 
-      <div className=" mx-auto">
+      <div className="">
 
         <h1 className="text-5xl font-bold mb-4">
           Welcome to EmmCoreShops

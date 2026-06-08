@@ -10,9 +10,11 @@ import { useAuth } from "../Context/AuthContext";
 import MenuLink from "./MenuLink";
 import MenuItem from "./MenuItem";
 import api from "../library/api";
+import { useEffect, useState } from "react";
 
 const Sidebar = ({ isOpen, closeSidebar }) => {
   const { user, logout } = useAuth();
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
   const handleSettings = () => {
@@ -40,6 +42,23 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
       navigate("/login");
     }
   };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+
+      if (res.data.status === "success") {
+        console.log("Fetched categories:", res.data.data);
+        setCategories(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return (
     <>
@@ -195,20 +214,12 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
         {/* CATEGORY LIST */}
         <ul className="text-gray-700">
-          {[
-            "Computers and Accessories",
-            "Phones and Tablets",
-            "Electronics",
-            "Fashions",
-            "Home and Kitchen",
-            "Baby, Kids and Toys",
-            "Other Categories",
-          ].map((item, index) => (
+          {(categories || []).map((item, index) => (
             <li
-              key={index}
+              key={item._id || index}
               className="flex justify-between items-center px-4 py-4 border-b"
             >
-              {item}
+              {item.name}
               <FaChevronRight size={12} />
             </li>
           ))}

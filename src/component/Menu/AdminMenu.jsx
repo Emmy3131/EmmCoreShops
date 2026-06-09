@@ -15,6 +15,7 @@ const AdminMenu = () => {
       <MenuItem to="/admin/vendors" title="Vendors" icon={<FaLink />} />
       <MenuItem to="/admin/newsletter" title="Newsletter" icon={<FaLink />} />
       <MenuItem to="/admin/profile" title="Settings" icon={<FaLink />} />
+      <MenuItem to="/admin/hero-banners" title="Hero Banners" icon={<FaLink />} />
     </>
   );
 };

@@ -8,7 +8,7 @@ const Hero = () => {
 
   const fetchHeroBanners = async () => {
     try {
-      const res = await api.get("/heroes");
+      const res = await api.get("/hero-banners");
 
       if (res.data.status === "success") {
         setBanners(res.data.data || []);
@@ -66,7 +66,7 @@ const Hero = () => {
         <div className="grid md:grid-cols-2 gap-12 items-center min-h-[90vh] md:min-h-screen">
 
           {/* LEFT SIDE */}
-          <div>
+          <div className="py-8">
 
             <span className="inline-flex items-center bg-[#ED017F]/20 text-[#ED017F] border border-[#ED017F]/30 px-4 py-2 rounded-full text-sm font-medium mb-6">
               🔥 Featured Collection
@@ -151,7 +151,7 @@ const Hero = () => {
           </div>
 
           {/* RIGHT SIDE IMAGE */}
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center mb-8">
 
             <img
               src={banner.image}

@@ -30,7 +30,7 @@ const Home = () => {
       <FeaturedCategories />
 
       {/* NEWSLETTER */}
-      <Newsletter />
+      {/* <Newsletter /> */}
     </div>
   );
 };

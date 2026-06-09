@@ -31,19 +31,12 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="bg-orange-600 py-12 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold text-white">
-          Subscribe To Our Newsletter
-        </h2>
-
-        <p className="text-white mt-2">
-          Get updates on new arrivals, discounts and flash sales.
-        </p>
-
+    <section className="bg-orange-600 rounded-lg">
+      <div className=" mx-auto text-center">
+       
         <form
           onSubmit={handleSubscribe}
-          className="flex flex-col md:flex-row gap-3 mt-6"
+          className="flex flex-col md:flex-row gap-3 "
         >
           <input
             type="email"

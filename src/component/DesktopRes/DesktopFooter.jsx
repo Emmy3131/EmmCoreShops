@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 
 import { FaXTwitter } from "react-icons/fa6";
+import Newsletter from "../Home/NewsLatter";
 
 const DesktopFooter = () => {
   return (
@@ -67,21 +68,8 @@ const DesktopFooter = () => {
             <p className="text-gray-400 text-xs mb-2">
               Our best promotions sent to your inbox.
             </p>
-
-            <form className="flex">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-72 px-4 py-3 text-black outline-none"
-              />
-
-              <button
-                type="submit"
-                className="bg-pink-600 hover:bg-pink-700 px-6 font-semibold"
-              >
-                Subscribe
-              </button>
-            </form>
+            <Newsletter />
+            
           </div>
         </div>
       </div>

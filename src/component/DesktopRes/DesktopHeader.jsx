@@ -201,8 +201,9 @@ const Header = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex gap-3">
-                  <Link to="/login" className="hover:text-orange-300">
+                <div className="flex gap-3 justify-center">
+                  <Link to="/login" className="hover:text-orange-300  px-4
+                  py-2">
                     Login
                   </Link>
 

@@ -11,6 +11,8 @@ import AdminLayout from "./Layout/AdminLayout";
 import Home from "./pages/public/Home";
 import Cart from "./pages/public/Cart";
 import Deals from "./pages/public/Deal";
+import StaticPage from "./component/CMS/StaticsPages";
+import AllProduct from "./pages/public/AllProducts";
 
 /* AUTH */
 import Login from "./pages/Auth/Login";
@@ -49,13 +51,15 @@ import Vendors from "./pages/Admin/Vendors";
 import NewsletterSub from "./pages/Admin/NewsletterSub";
 import AddHeroBanners from "./pages/Admin/HeroBanners/AddHeroBanner";
 import HeroBanners from "./pages/Admin/HeroBanners/HeroBanners";
+import PageList from "./pages/Admin/CMSPages/PageList";
+import CreateCMSPage from "./pages/Admin/CMSPages/CreateCMSPage";
+import EditCMSPage from "./pages/Admin/CMSPages/EditCMSPage";
 
 import { useAuth } from "./Context/AuthContext";
 import CategoryProducts from "./pages/public/categories/CategoryProduct";
 
 const AppRouter = () => {
- 
-   const { loading } = useAuth();
+  const { loading } = useAuth();
 
   // 🚨 BLOCK ENTIRE ROUTER UNTIL AUTH IS READY
   if (loading) {
@@ -67,78 +71,80 @@ const AppRouter = () => {
   }
 
   return (
-   
-      <BrowserRouter>
-        <Routes>
-          {/* ================= MAIN WEBSITE ================= */}
-          <Route element={<MainLayout />}>
-            {/* PUBLIC */}
-            <Route path="/" element={<Home />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/deals" element={<Deals />} />
-            <Route path="/category/:id" element={<CategoryProducts />} />
-            <Route path="/search" element={<SearchProducts />} />
-            {/* ================= USER AREA ================= */}
+    <BrowserRouter>
+      <Routes>
+        {/* ================= MAIN WEBSITE ================= */}
+        <Route element={<MainLayout />}>
+          {/* PUBLIC */}
+          <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/deals" element={<Deals />} />
+          <Route path="/category/:id" element={<CategoryProducts />} />
+          <Route path="/search" element={<SearchProducts />} />
+          <Route path="/page/:slug" element={<StaticPage />} />
+          <Route path="/products" element={<AllProduct />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route element={<UserLayout />}>
-                <Route path="/user/orders" element={<MyOrder />} />
-                <Route path="/user/wallet" element={<MyWallet />} />
-                <Route path="/saved" element={<MySavedItems />} />
-                <Route path="/sell" element={<SellOnEmmCoreShopes />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-              </Route>
-            </Route>
-          </Route>
+          
+          {/* ================= USER AREA ================= */}
 
-          {/* ================= VENDOR AREA ================= */}
           <Route element={<ProtectedRoute />}>
-            <Route element={<VendorLayout />}>
-              <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+            <Route element={<UserLayout />}>
+              <Route path="/user/orders" element={<MyOrder />} />
+              <Route path="/user/wallet" element={<MyWallet />} />
+              <Route path="/saved" element={<MySavedItems />} />
+              <Route path="/sell" element={<SellOnEmmCoreShopes />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
             </Route>
           </Route>
+        </Route>
 
-          {/* ================= ADMIN AREA ================= */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<Users />} />
-              <Route path="/admin/orders" element={<Orders />} />
-              <Route path="/admin/products" element={<Products />} />
-              <Route path="/admin/category" element={<Category />} />
-              <Route path="/admin/hero-banners" element={<HeroBanners />} />
-              <Route path="/admin/hero-banners/add" element={<AddHeroBanners />} />
-              <Route path="/admin/newsletter" element={<NewsletterSub />} />
-              <Route path="/admin/category/add" element={<AddCategory />} />
-              <Route
-                path="/admin/category/edit/:id"
-                element={<EditCategory />}
-              />
-              <Route path="/admin/reviews" element={<Reviews />} />
-              <Route path="/admin/payments" element={<Payments />} />
-              <Route path="/admin/report" element={<Report />} />
-              <Route path="/admin/vendors" element={<Vendors />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin/products/add" element={<AddProduct />} />
-              <Route
-                path="/admin/products/edit/:id"
-                element={<EditProduct />}
-              />
-            </Route>
+        {/* ================= VENDOR AREA ================= */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<VendorLayout />}>
+            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
           </Route>
+        </Route>
 
-          {/* ================= AUTH ================= */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
+        {/* ================= ADMIN AREA ================= */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/orders" element={<Orders />} />
+            <Route path="/admin/products" element={<Products />} />
+            <Route path="/admin/category" element={<Category />} />
+            <Route path="/admin/hero-banners" element={<HeroBanners />} />
+            <Route
+              path="/admin/hero-banners/add"
+              element={<AddHeroBanners />}
+            />
+            <Route path="/admin/newsletter" element={<NewsletterSub />} />
+            <Route path="/admin/category/add" element={<AddCategory />} />
+            <Route path="/admin/category/edit/:id" element={<EditCategory />} />
+            <Route path="/admin/reviews" element={<Reviews />} />
+            <Route path="/admin/payments" element={<Payments />} />
+            <Route path="/admin/report" element={<Report />} />
+            <Route path="/admin/vendors" element={<Vendors />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/products/add" element={<AddProduct />} />
+            <Route path="/admin/products/edit/:id" element={<EditProduct />} />
+            <Route path="/admin/cms-pages" element={<PageList />} />
+            <Route path="/admin/cms-pages/create" element={<CreateCMSPage />} />
+            <Route path="/admin/cms-pages/edit/:id" element={<EditCMSPage />} />
           </Route>
-        </Routes>
-      </BrowserRouter>
-   
+        </Route>
+
+        {/* ================= AUTH ================= */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 };
 

@@ -114,7 +114,7 @@ const Hero = () => {
             <img
               src={banner.image}
               alt={banner.title}
-              className="w-full max-w-2xl object-contain drop-shadow-[0_30px_80px_rgba(237,1,127,0.35)] transition-all duration-700"
+              className="w-full object-contain drop-shadow-[0_30px_80px_rgba(237,1,127,0.35)] transition-all duration-700"
             />
           </div>
 

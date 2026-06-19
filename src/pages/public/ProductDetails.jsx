@@ -71,7 +71,7 @@ const ProductDetails = () => {
   }
 
   return (
-    <div className="mt-19 bg-amber-500 p-6 h-screen">
+    <div className="mt-19 bg-amber-500 p-6">
 
       {/* MODERN PRODUCT CARD */}
       <ProductDetailsCard

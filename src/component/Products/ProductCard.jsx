@@ -1,6 +1,7 @@
 import { FaStar, FaShoppingCart, FaHeart } from "react-icons/fa";
 import api from "../../library/api";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
@@ -40,10 +41,8 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-
       {/* IMAGE CONTAINER */}
       <div className="relative bg-gray-100 overflow-hidden h-64">
-
         {/* WISHLIST */}
         <button className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-md p-2 rounded-full shadow-md hover:bg-[#ED017F] hover:text-white transition">
           <FaHeart size={14} />
@@ -55,16 +54,18 @@ const ProductCard = ({ product }) => {
         </span>
 
         {/* PRODUCT IMAGE */}
-        <img
-          src={product?.image}
-          alt={product?.name}
-          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
-        />
+
+        <Link to={`/product/${product.id}`}>
+          <img
+            src={product?.image}
+            alt={product?.name}
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
+          />
+        </Link>
       </div>
 
       {/* CONTENT */}
       <div className="p-5 space-y-3">
-
         {/* CATEGORY */}
         <div className="flex items-center justify-between">
           <span className="text-xs bg-pink-100 text-[#ED017F] px-3 py-1 rounded-full font-medium">
@@ -77,9 +78,11 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* PRODUCT NAME */}
-        <h3 className="text-base font-bold text-gray-800 line-clamp-2 leading-6 min-h-[48px]">
-          {product?.name}
-        </h3>
+        <Link to={`/product/${product.id}`}>
+          <h3 className="text-base font-bold text-gray-800 line-clamp-2 leading-6 min-h-[48px] hover:text-[#ED017F]">
+            {product?.name}
+          </h3>
+        </Link>
 
         {/* PRICE */}
         <div className="flex items-center justify-between">

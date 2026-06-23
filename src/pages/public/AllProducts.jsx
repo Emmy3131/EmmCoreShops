@@ -23,7 +23,7 @@ const Products = () => {
   }, []);
 
   return (
-    <div className="px-3 mt-24">
+    <div className="px-3 md:mt-24 mt-20">
 
       {/* HEADER */}
       <h2 className="font-semibold text-lg mb-3">

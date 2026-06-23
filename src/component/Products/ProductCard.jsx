@@ -5,25 +5,32 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
+  const [addToCart, setAddToCart] = useState([])
 
   /* ================= ADD TO CART ================= */
-  const handleAddToCart = async () => {
-    try {
-      setLoading(true);
+ const handleAddToCart = async () => {
+  if (!product?._id) {
+    alert("Product ID not found");
+    return;
+  }
 
-      await api.post("/cart", {
-        productId: product._id,
-        quantity: 1,
-      });
+  try {
+    setLoading(true);
 
+    const res = await api.post("/cart", {
+      productId: product._id,
+      quantity: 1,
+    });
+
+    if (res.data.status === "success") {
       alert("Added to cart 🛒");
-    } catch (err) {
-      console.error("Add to cart error:", err.response?.data || err.message);
-      alert("Failed to add to cart");
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ================= STARS ================= */
   const renderStars = (rating = 0) => {

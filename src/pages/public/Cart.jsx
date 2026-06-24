@@ -173,7 +173,8 @@ const Cart = () => {
                     <h2 className="font-semibold text-lg">{item.name}</h2>
 
                     <div className="mt-2">
-                      <div className="flex items-center gap-2">
+                      <div className="md:flex items-center gap-2">
+                        <span className="text-md font-bold text-amber-700">Quantity</span>
                         <button
                           onClick={() =>
                             handleQuantityChange(item.product._id, "decrease")
@@ -182,7 +183,7 @@ const Cart = () => {
                         >
                           -
                         </button>
-                          <span>{item.quantity}</span>
+                          <span className="p-3">{item.quantity}</span>
                         <button
                           onClick={() =>
                             handleQuantityChange(item.product._id, "increase")

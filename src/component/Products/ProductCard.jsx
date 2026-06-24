@@ -5,32 +5,32 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
-  const [addToCart, setAddToCart] = useState([])
+  const [addToCart, setAddToCart] = useState([]);
 
   /* ================= ADD TO CART ================= */
- const handleAddToCart = async () => {
-  if (!product?._id) {
-    alert("Product ID not found");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const res = await api.post("/cart", {
-      productId: product._id,
-      quantity: 1,
-    });
-
-    if (res.data.status === "success") {
-      alert("Added to cart 🛒");
+  const handleAddToCart = async () => {
+    if (!product?._id) {
+      alert("Product ID not found");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
+
+    try {
+      setLoading(true);
+
+      const res = await api.post("/cart", {
+        productId: product._id,
+        quantity: 1,
+      });
+
+      if (res.data.status === "success") {
+        alert("Added to cart 🛒");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ================= STARS ================= */
   const renderStars = (rating = 0) => {
@@ -47,9 +47,8 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-      {/* IMAGE CONTAINER */}
-      <div className="relative bg-gray-100 overflow-hidden h-64">
+    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
+      <div className="relative bg-gray-50 overflow-hidden h-44 md:h-64">
         {/* WISHLIST */}
         <button className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-md p-2 rounded-full shadow-md hover:bg-[#ED017F] hover:text-white transition">
           <FaHeart size={14} />
@@ -72,21 +71,21 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* CONTENT */}
-      <div className="p-5 space-y-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
         {/* CATEGORY */}
         <div className="flex items-center justify-between">
-          <span className="text-xs bg-pink-100 text-[#ED017F] px-3 py-1 rounded-full font-medium">
+          <span className="text-[10px] md:text-xs bg-pink-100 text-[#ED017F] px-2 py-1 rounded-full font-medium truncate max-w-[90px]">
             {product?.category?.name || "General"}
           </span>
 
-          <span className="text-xs text-gray-500">
-            Stock: {product?.stock || 0}
+          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full">
+            {product?.stock} left
           </span>
         </div>
 
         {/* PRODUCT NAME */}
         <Link to={`/product/${product.id}`}>
-          <h3 className="text-base font-bold text-gray-800 line-clamp-2 leading-6 min-h-[48px] hover:text-[#ED017F]">
+          <h3 className="text-sm md:text-base font-semibold text-gray-800 line-clamp-2 min-h-[40px] hover:text-[#ED017F] transition">
             {product?.name}
           </h3>
         </Link>
@@ -94,23 +93,20 @@ const ProductCard = ({ product }) => {
         {/* PRICE */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-extrabold text-[#ED017F]">
+            <p className="text-lg md:text-2xl font-bold text-[#ED017F]">
               ₦{product?.price?.toLocaleString()}
             </p>
 
-            <p className="text-sm text-gray-400 line-through">
+            <p className="text-xs text-gray-400 line-through">
               ₦{(product?.price * 1.2)?.toLocaleString()}
             </p>
           </div>
 
-          {/* RATING */}
           <div className="flex flex-col items-end">
-            <div className="flex items-center gap-1">
-              {renderStars(product?.rating)}
-            </div>
+            <div className="flex gap-0.5">{renderStars(product?.rating)}</div>
 
-            <span className="text-xs text-gray-500 mt-1">
-              ({product?.rating || 0})
+            <span className="text-[10px] text-gray-500">
+              {product?.rating || 0}
             </span>
           </div>
         </div>
@@ -119,10 +115,9 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           disabled={loading}
-          className="w-full mt-4 bg-[#ED017F] hover:bg-pink-700 text-white py-3 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50 shadow-md hover:shadow-lg"
+          className="w-full bg-[#ED017F] hover:bg-pink-700 text-white py-2.5 md:py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50"
         >
-          <FaShoppingCart />
-
+          <FaShoppingCart size={14} />
           {loading ? "Adding..." : "Add To Cart"}
         </button>
       </div>

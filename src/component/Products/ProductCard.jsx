@@ -115,9 +115,9 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           disabled={loading}
-          className="w-full bg-[#ED017F] hover:bg-pink-700 text-white py-2.5 md:py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+          className="w-full bg-[#ED017F] hover:bg-pink-700 text-white  md:py-3 rounded-xl font-medium flex items-center justify-center gap-1 transition-all disabled:opacity-50"
         >
-          <FaShoppingCart size={14} />
+          <FaShoppingCart size={14} className="hidden md:block" />
           {loading ? "Adding..." : "Add To Cart"}
         </button>
       </div>

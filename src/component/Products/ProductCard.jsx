@@ -102,13 +102,13 @@ const ProductCard = ({ product }) => {
             </p>
           </div>
 
-          <div className="flex flex-col items-end">
+          {/* <div className="flex flex-col items-end">
             <div className="flex gap-0.5">{renderStars(product?.rating)}</div>
 
             <span className="text-[10px] text-gray-500">
               {product?.rating || 0}
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* BUTTON */}

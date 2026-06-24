@@ -71,9 +71,9 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* CONTENT */}
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-3 py-1">
         {/* CATEGORY */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
           <span className="text-[10px] md:text-xs bg-pink-100 text-[#ED017F] px-2 py-1 rounded-full font-medium truncate max-w-[90px]">
             {product?.category?.name || "General"}
           </span>

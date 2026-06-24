@@ -55,22 +55,25 @@ const Cart = () => {
   }, []);
 
   /* ================= UPDATE QUANTITY ================= */
-  const handleQuantityChange = async (productId, action) => {
-    try {
-      const res = await api.patch(`/cart/${productId}`, {
-        action, // "increase" or "decrease"
-      });
+ const handleQuantityChange = async (productId, type) => {
+  try {
+    const quantity = type === "increase" ? 1 : -1;
 
-      if (res.data.status === "success") {
-        fetchCart();
-      }
-    } catch (err) {
-      console.error(
-        "Quantity update error:",
-        err.response?.data || err.message,
-      );
+    const res = await api.patch("/cart/update", {
+      productId,
+      quantity,
+    });
+
+    if (res.data.status === "success") {
+      fetchCart();
     }
-  };
+  } catch (err) {
+    console.error(
+      "Quantity update error:",
+      err.response?.data || err.message
+    );
+  }
+};
 
   /* ================= REMOVE ITEM ================= */
   const handleRemove = async (id) => {
@@ -179,11 +182,7 @@ const Cart = () => {
                         >
                           -
                         </button>
-
-                        <span className="font-semibold min-w-[30px] text-center">
-                          {item.quantity || 1}
-                        </span>
-
+                          <span>{item.quantity}</span>
                         <button
                           onClick={() =>
                             handleQuantityChange(item.product._id, "increase")
@@ -215,7 +214,7 @@ const Cart = () => {
             ))
           )}
         </div>
-        {/* ================= SUMMARY ================= */}
+        
         {/* ================= SUMMARY ================= */}
         {cartItems.length > 0 && (
           <div className="w-full lg:w-1/3 space-y-4">

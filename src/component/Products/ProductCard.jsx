@@ -71,7 +71,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* CONTENT */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-2">
         {/* CATEGORY */}
         <div className="flex items-center justify-between">
           <span className="text-[10px] md:text-xs bg-pink-100 text-[#ED017F] px-2 py-1 rounded-full font-medium truncate max-w-[90px]">
@@ -102,13 +102,6 @@ const ProductCard = ({ product }) => {
             </p>
           </div>
 
-          {/* <div className="flex flex-col items-end">
-            <div className="flex gap-0.5">{renderStars(product?.rating)}</div>
-
-            <span className="text-[10px] text-gray-500">
-              {product?.rating || 0}
-            </span>
-          </div> */}
         </div>
 
         {/* BUTTON */}

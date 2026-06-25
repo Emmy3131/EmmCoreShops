@@ -149,7 +149,7 @@ const AdminOrders = () => {
                     : "bg-yellow-100 text-yellow-700"
                 }`}
               >
-                {order.paymentStatus || "unpaid"}
+                {order.paymentStatus || "pending"}
               </span>
             </div>
 

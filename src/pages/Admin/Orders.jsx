@@ -4,13 +4,12 @@ import api from "../../library/api";
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  /* ================= FETCH ORDERS ================= */
   const fetchOrders = async () => {
     try {
       const res = await api.get("/orders");
-
       setOrders(res.data.data || []);
     } catch (err) {
       console.error("Fetch orders error:", err);
@@ -23,15 +22,16 @@ const AdminOrders = () => {
     fetchOrders();
   }, []);
 
-  const updateOrderStatus = async (id, status) => {
+  /* ================= UPDATE ORDER STATUS ================= */
+  const updateOrderStatus = async (id, orderStatus) => {
     try {
       await api.patch(`/orders/${id}`, {
-        status,
+        orderStatus,
       });
 
       fetchOrders();
     } catch (err) {
-      console.error(err);
+      console.error("Update order error:", err);
     }
   };
 
@@ -66,8 +66,11 @@ const AdminOrders = () => {
                     : "Deleted User"}
                 </td>
 
-                <td className="p-3">₦{order.totalPrice?.toLocaleString()}</td>
+                <td className="p-3">
+                  ₦{order.totalPrice?.toLocaleString()}
+                </td>
 
+                {/* PAYMENT STATUS */}
                 <td className="p-3">
                   <span
                     className={`px-2 py-1 rounded text-xs ${
@@ -76,10 +79,11 @@ const AdminOrders = () => {
                         : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {order.paymentStatus || "pending"}
+                    {order.paymentStatus || "unpaid"}
                   </span>
                 </td>
 
+                {/* ORDER STATUS */}
                 <td className="p-3">
                   <select
                     value={order.orderStatus}
@@ -89,7 +93,6 @@ const AdminOrders = () => {
                     className="border rounded px-2 py-1"
                   >
                     <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
                     <option value="processing">Processing</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
@@ -137,6 +140,7 @@ const AdminOrders = () => {
               </span>
             </div>
 
+            {/* PAYMENT STATUS */}
             <div className="mb-2">
               <span
                 className={`px-2 py-1 rounded text-xs ${
@@ -145,21 +149,24 @@ const AdminOrders = () => {
                     : "bg-yellow-100 text-yellow-700"
                 }`}
               >
-                {order.paymentStatus || "pending"}
+                {order.paymentStatus || "unpaid"}
               </span>
             </div>
 
+            {/* ORDER STATUS */}
             <div className="mb-3">
               <select
-                value={order.status}
-                onChange={(e) => updateStatus(order._id, e.target.value)}
+                value={order.orderStatus}
+                onChange={(e) =>
+                  updateOrderStatus(order._id, e.target.value)
+                }
                 className="border p-2 rounded w-full"
               >
+                <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
-
                 <option value="shipped">Shipped</option>
-
                 <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
 
@@ -207,11 +214,8 @@ const AdminOrders = () => {
               <h3 className="font-semibold mb-2">Shipping Address</h3>
 
               <p>{selectedOrder.shippingAddress?.fullName}</p>
-
               <p>{selectedOrder.shippingAddress?.phone}</p>
-
               <p>{selectedOrder.shippingAddress?.address}</p>
-
               <p>
                 {selectedOrder.shippingAddress?.city},{" "}
                 {selectedOrder.shippingAddress?.state}
@@ -226,9 +230,7 @@ const AdminOrders = () => {
                 {selectedOrder.orderItems?.map((item, index) => (
                   <div key={index} className="border rounded p-3">
                     <p className="font-medium">{item.name}</p>
-
                     <p>Quantity: {item.quantity}</p>
-
                     <p>Price: ₦{item.price?.toLocaleString()}</p>
                   </div>
                 ))}

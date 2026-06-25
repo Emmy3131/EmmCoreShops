@@ -23,15 +23,15 @@ const AdminOrders = () => {
     fetchOrders();
   }, []);
 
-  const updateStatus = async (id, status) => {
+  const updateOrderStatus = async (id, status) => {
     try {
-      await api.patch(`/orders/${id}/status`, {
+      await api.patch(`/orders/${id}`, {
         status,
       });
 
       fetchOrders();
     } catch (err) {
-      console.error("Update error:", err);
+      console.error(err);
     }
   };
 
@@ -41,9 +41,7 @@ const AdminOrders = () => {
 
   return (
     <div className="md:p-6 p-3">
-      <h1 className="text-2xl font-bold mb-4">
-        Admin Orders
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
 
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow">
@@ -68,9 +66,7 @@ const AdminOrders = () => {
                     : "Deleted User"}
                 </td>
 
-                <td className="p-3">
-                  ₦{order.totalPrice?.toLocaleString()}
-                </td>
+                <td className="p-3">₦{order.totalPrice?.toLocaleString()}</td>
 
                 <td className="p-3">
                   <span
@@ -86,37 +82,28 @@ const AdminOrders = () => {
 
                 <td className="p-3">
                   <select
-                    value={order.status}
+                    value={order.orderStatus}
                     onChange={(e) =>
-                      updateStatus(order._id, e.target.value)
+                      updateOrderStatus(order._id, e.target.value)
                     }
-                    className="border p-1 rounded"
+                    className="border rounded px-2 py-1"
                   >
-                    <option value="processing">
-                      Processing
-                    </option>
-
-                    <option value="shipped">
-                      Shipped
-                    </option>
-
-                    <option value="delivered">
-                      Delivered
-                    </option>
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </td>
 
                 <td className="p-3">
-                  {new Date(
-                    order.createdAt
-                  ).toLocaleDateString()}
+                  {new Date(order.createdAt).toLocaleDateString()}
                 </td>
 
                 <td className="p-3">
                   <button
-                    onClick={() =>
-                      setSelectedOrder(order)
-                    }
+                    onClick={() => setSelectedOrder(order)}
                     className="text-blue-500"
                   >
                     View
@@ -131,10 +118,7 @@ const AdminOrders = () => {
       {/* ================= MOBILE CARDS ================= */}
       <div className="md:hidden space-y-4">
         {orders.map((order) => (
-          <div
-            key={order._id}
-            className="bg-white rounded-lg shadow p-4"
-          >
+          <div key={order._id} className="bg-white rounded-lg shadow p-4">
             <div className="flex justify-between mb-2">
               <span className="font-semibold">
                 {order.user
@@ -143,9 +127,7 @@ const AdminOrders = () => {
               </span>
 
               <span className="text-sm text-gray-500">
-                {new Date(
-                  order.createdAt
-                ).toLocaleDateString()}
+                {new Date(order.createdAt).toLocaleDateString()}
               </span>
             </div>
 
@@ -170,29 +152,19 @@ const AdminOrders = () => {
             <div className="mb-3">
               <select
                 value={order.status}
-                onChange={(e) =>
-                  updateStatus(order._id, e.target.value)
-                }
+                onChange={(e) => updateStatus(order._id, e.target.value)}
                 className="border p-2 rounded w-full"
               >
-                <option value="processing">
-                  Processing
-                </option>
+                <option value="processing">Processing</option>
 
-                <option value="shipped">
-                  Shipped
-                </option>
+                <option value="shipped">Shipped</option>
 
-                <option value="delivered">
-                  Delivered
-                </option>
+                <option value="delivered">Delivered</option>
               </select>
             </div>
 
             <button
-              onClick={() =>
-                setSelectedOrder(order)
-              }
+              onClick={() => setSelectedOrder(order)}
               className="text-blue-500 text-sm"
             >
               View Details
@@ -205,16 +177,11 @@ const AdminOrders = () => {
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white w-full max-w-2xl rounded-lg p-6 overflow-y-auto max-h-[90vh]">
-
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
-                Order Details
-              </h2>
+              <h2 className="text-xl font-bold">Order Details</h2>
 
               <button
-                onClick={() =>
-                  setSelectedOrder(null)
-                }
+                onClick={() => setSelectedOrder(null)}
                 className="text-red-500 text-xl"
               >
                 ✕
@@ -223,9 +190,7 @@ const AdminOrders = () => {
 
             {/* CUSTOMER */}
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">
-                Customer Info
-              </h3>
+              <h3 className="font-semibold mb-2">Customer Info</h3>
 
               <p>
                 Name:{" "}
@@ -234,89 +199,46 @@ const AdminOrders = () => {
                   : "Deleted User"}
               </p>
 
-              <p>
-                Email:{" "}
-                {selectedOrder.user?.email}
-              </p>
+              <p>Email: {selectedOrder.user?.email}</p>
             </div>
 
             {/* SHIPPING */}
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">
-                Shipping Address
-              </h3>
+              <h3 className="font-semibold mb-2">Shipping Address</h3>
+
+              <p>{selectedOrder.shippingAddress?.fullName}</p>
+
+              <p>{selectedOrder.shippingAddress?.phone}</p>
+
+              <p>{selectedOrder.shippingAddress?.address}</p>
 
               <p>
-                {
-                  selectedOrder.shippingAddress
-                    ?.fullName
-                }
-              </p>
-
-              <p>
-                {
-                  selectedOrder.shippingAddress
-                    ?.phone
-                }
-              </p>
-
-              <p>
-                {
-                  selectedOrder.shippingAddress
-                    ?.address
-                }
-              </p>
-
-              <p>
-                {
-                  selectedOrder.shippingAddress
-                    ?.city
-                }
-                ,{" "}
-                {
-                  selectedOrder.shippingAddress
-                    ?.state
-                }
+                {selectedOrder.shippingAddress?.city},{" "}
+                {selectedOrder.shippingAddress?.state}
               </p>
             </div>
 
             {/* ITEMS */}
             <div>
-              <h3 className="font-semibold mb-3">
-                Ordered Items
-              </h3>
+              <h3 className="font-semibold mb-3">Ordered Items</h3>
 
               <div className="space-y-3">
-                {selectedOrder.orderItems?.map(
-                  (item, index) => (
-                    <div
-                      key={index}
-                      className="border rounded p-3"
-                    >
-                      <p className="font-medium">
-                        {item.name}
-                      </p>
+                {selectedOrder.orderItems?.map((item, index) => (
+                  <div key={index} className="border rounded p-3">
+                    <p className="font-medium">{item.name}</p>
 
-                      <p>
-                        Quantity: {item.quantity}
-                      </p>
+                    <p>Quantity: {item.quantity}</p>
 
-                      <p>
-                        Price: ₦
-                        {item.price?.toLocaleString()}
-                      </p>
-                    </div>
-                  )
-                )}
+                    <p>Price: ₦{item.price?.toLocaleString()}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* TOTAL */}
             <div className="mt-5 text-right font-bold text-lg">
-              Total: ₦
-              {selectedOrder.totalPrice?.toLocaleString()}
+              Total: ₦{selectedOrder.totalPrice?.toLocaleString()}
             </div>
-
           </div>
         </div>
       )}

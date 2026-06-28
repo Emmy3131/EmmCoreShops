@@ -59,6 +59,7 @@ import { useAuth } from "./Context/AuthContext";
 import CategoryProducts from "./pages/public/categories/CategoryProduct";
 import ProductDetails from './pages/public/ProductDetails';
 
+
 const AppRouter = () => {
   const { loading } = useAuth();
 
@@ -91,7 +92,7 @@ const AppRouter = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLayout />}>
-              <Route path="/user/orders" element={<MyOrder />} />
+              <Route path="/orders" element={<MyOrder />} />
               <Route path="/user/wallet" element={<MyWallet />} />
               <Route path="/saved" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />

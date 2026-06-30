@@ -41,7 +41,7 @@ const MyOrder = () => {
 
       setOrders({
         ongoing: data.filter(
-          (o) => o.orderStatus === "pending"
+          (o) => o.orderStatus === "paid"
         ),
 
         delivered: data.filter(

@@ -41,18 +41,16 @@ const MyOrder = () => {
 
       setOrders({
         ongoing: data.filter(
-          (o) => o.orderStatus === "paid"
+          (o) =>
+            o.paymentStatus === "paid" &&
+            o.orderStatus !== "delivered" &&
+            o.orderStatus !== "cancelled",
         ),
 
-        delivered: data.filter(
-          (o) => o.isDelivered === true
-        ),
+        delivered: data.filter((o) => o.orderStatus === "delivered"),
 
-        cancelled: data.filter(
-          (o) => o.orderStatus === "cancelled"
-        ),
+        cancelled: data.filter((o) => o.orderStatus === "cancelled"),
       });
-
     } catch (err) {
       console.error("Fetch orders error:", err);
     } finally {
@@ -75,7 +73,6 @@ const MyOrder = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-
       <div className="bg-white p-4 shadow">
         <h1 className="text-xl font-semibold">My Orders</h1>
       </div>
@@ -94,9 +91,7 @@ const MyOrder = () => {
           >
             {tab.icon}
             <div>{tab.label}</div>
-            <div className="text-xs">
-              {orders[tab.key].length}
-            </div>
+            <div className="text-xs">{orders[tab.key].length}</div>
           </button>
         ))}
       </div>
@@ -104,16 +99,11 @@ const MyOrder = () => {
       {/* ORDERS */}
       <div className="p-4 space-y-4">
         {orders[activeTab].length === 0 ? (
-          <p className="text-center text-gray-400">
-            No orders found
-          </p>
+          <p className="text-center text-gray-400">No orders found</p>
         ) : (
           orders[activeTab].map((order) => (
             <div key={order._id} className="bg-white p-4 rounded shadow">
-
-              <h2 className="font-semibold">
-                Order #{order._id.slice(-6)}
-              </h2>
+              <h2 className="font-semibold">Order #{order._id.slice(-6)}</h2>
 
               <p className="text-sm text-gray-500">
                 {new Date(order.createdAt).toLocaleString()}
@@ -121,7 +111,9 @@ const MyOrder = () => {
 
               {order.orderItems.map((item, i) => (
                 <div key={i} className="flex justify-between text-sm mt-2">
-                  <span>{item.name} x {item.quantity}</span>
+                  <span>
+                    {item.name} x {item.quantity}
+                  </span>
                   <span>₦{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
@@ -130,7 +122,6 @@ const MyOrder = () => {
                 <span>Total</span>
                 <span>₦{order.totalPrice.toLocaleString()}</span>
               </div>
-
             </div>
           ))
         )}

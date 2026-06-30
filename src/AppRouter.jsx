@@ -92,7 +92,7 @@ const AppRouter = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLayout />}>
-              <Route path="/orders" element={<MyOrder />} />
+              <Route path="user/orders" element={<MyOrder />} />
               <Route path="/user/wallet" element={<MyWallet />} />
               <Route path="/saved" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />

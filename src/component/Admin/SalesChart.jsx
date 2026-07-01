@@ -25,26 +25,26 @@ const SalesChart = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSales = async () => {
-      try {
-        const res = await api.get("/stats/sales-overview");
+ useEffect(() => {
+  const fetchSales = async () => {
+    try {
+      const res = await api.get("/stats/sales-overview");
 
-        if (res.data.status === "success") {
-          setSales(res.data.data || []); // ✅ FIXED
-        } else {
-          setSales([]);
-        }
-      } catch (err) {
-        console.error("Failed to load sales overview:", err);
-        setSales([]);
-      } finally {
-        setLoading(false);
+      console.log("Sales API:", res.data);
+
+      if (res.data.status === "success") {
+        setSales(res.data.data || []);
       }
-    };
+    } catch (err) {
+      console.error("Failed to load sales overview:", err);
+      setSales([]); // safety fallback
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchSales();
-  }, []);
+  fetchSales();
+}, []);
 
   if (loading) {
     return <p>Loading chart...</p>;
@@ -53,25 +53,25 @@ const SalesChart = () => {
   const safeSales = sales || [];
 
   const chartData = {
-    labels: safeSales.map((item) => item.date),
+  labels: sales.map((item) => item._id),
 
-    datasets: [
-      {
-        label: "Revenue (₦)",
-        data: safeSales.map((item) => item.totalSales),
-        borderColor: "green",
-        backgroundColor: "rgba(0,255,0,0.2)",
-        tension: 0.3,
-      },
-      {
-        label: "Orders",
-        data: safeSales.map((item) => item.totalOrders),
-        borderColor: "blue",
-        backgroundColor: "rgba(0,0,255,0.2)",
-        tension: 0.3,
-      },
-    ],
-  };
+  datasets: [
+    {
+      label: "Revenue (₦)",
+      data: sales.map((item) => item.totalSales),
+      borderColor: "green",
+      backgroundColor: "rgba(0,255,0,0.2)",
+      tension: 0.3,
+    },
+    {
+      label: "Orders",
+      data: sales.map((item) => item.totalOrders),
+      borderColor: "blue",
+      backgroundColor: "rgba(0,0,255,0.2)",
+      tension: 0.3,
+    },
+  ],
+};
 
   return (
     <div className="bg-white p-4 rounded shadow">

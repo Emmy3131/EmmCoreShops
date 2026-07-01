@@ -15,8 +15,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const handleUser = () => {
-    navigate("/admin/users");
-   }
+  console.log("Button clicked");
+  navigate("/admin/users");
+};
 
   const [stats, setStats] = useState({
     totalUsers: 0,

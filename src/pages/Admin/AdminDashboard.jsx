@@ -7,6 +7,7 @@ import {
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
+import SalesChart from "../../component/Admin/SalesChart";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -78,7 +79,7 @@ const AdminDashboard = () => {
           <h2 className="font-semibold mb-4">Sales Overview</h2>
 
           <div className="h-64 flex items-center justify-center text-gray-400">
-            Chart goes here (Recharts / Chart.js)
+            <SalesChart />
           </div>
         </div>
 

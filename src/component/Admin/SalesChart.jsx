@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
-import { getSalesOverview } from "../../api/statsApi";
+import api from "../../library/api";
 
 import {
   Chart as ChartJS,
@@ -28,8 +28,10 @@ const SalesChart = () => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const data = await getSalesOverview();
-        setSales(data);
+        const res = await api.get("/stats/sales-overview");
+        if(res.data.status === "success") {
+          setSales(res.data.sales);
+        }
       } catch (err) {
         console.error("Failed to load sales overview:", err);
       } finally {

@@ -8,9 +8,16 @@ import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
 import SalesChart from "../../component/Admin/SalesChart";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleUser = () => {
+    navigate("/admin/users");
+   }
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalOrders: 0,
@@ -88,7 +95,7 @@ const AdminDashboard = () => {
           <h2 className="font-semibold mb-4">Quick Actions</h2>
 
           <div className="space-y-3">
-            <button className="w-full bg-[#ED017F] text-white py-2 rounded">
+            <button onClick={handleUser} className="w-full bg-[#ED017F] text-white py-2 rounded">
               Manage Users
             </button>
 

@@ -95,7 +95,7 @@ const AdminDashboard = () => {
           <h2 className="font-semibold mb-4">Quick Actions</h2>
 
           <div className="space-y-3">
-            <button onClick={handleUser} className="w-full bg-[#ED017F] text-white py-2 rounded">
+            <button   onClick={() => handleUser()} className="w-full bg-[#ED017F] text-white py-2 rounded">
               Manage Users
             </button>
 

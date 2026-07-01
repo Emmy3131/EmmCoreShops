@@ -11,6 +11,7 @@ const SalesChart = () => {
 
         if (res.data.status === "success") {
           setSales(res.data.sales || []);
+          console.log("Sales Data:", res.data.sales);
         }
       } catch (err) {
         console.error("Failed to load sales overview:", err);

@@ -29,11 +29,15 @@ const SalesChart = () => {
     const fetchSales = async () => {
       try {
         const res = await api.get("/stats/sales-overview");
-        if(res.data.status === "success") {
-          setSales(res.data.sales);
+
+        if (res.data.status === "success") {
+          setSales(res.data.data || []); // ✅ FIXED
+        } else {
+          setSales([]);
         }
       } catch (err) {
         console.error("Failed to load sales overview:", err);
+        setSales([]);
       } finally {
         setLoading(false);
       }
@@ -46,20 +50,22 @@ const SalesChart = () => {
     return <p>Loading chart...</p>;
   }
 
+  const safeSales = sales || [];
+
   const chartData = {
-    labels: sales.map((item) => item.date),
+    labels: safeSales.map((item) => item.date),
 
     datasets: [
       {
         label: "Revenue (₦)",
-        data: sales.map((item) => item.totalSales),
+        data: safeSales.map((item) => item.totalSales),
         borderColor: "green",
         backgroundColor: "rgba(0,255,0,0.2)",
         tension: 0.3,
       },
       {
         label: "Orders",
-        data: sales.map((item) => item.totalOrders),
+        data: safeSales.map((item) => item.totalOrders),
         borderColor: "blue",
         backgroundColor: "rgba(0,0,255,0.2)",
         tension: 0.3,

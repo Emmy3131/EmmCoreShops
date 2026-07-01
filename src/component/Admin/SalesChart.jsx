@@ -10,7 +10,7 @@ const SalesChart = () => {
         console.log("Sales API:", res.data);
 
         if (res.data.status === "success") {
-          setSales(res.data.data || []);
+          setSales(res.data.sales || []);
         }
       } catch (err) {
         console.error("Failed to load sales overview:", err);

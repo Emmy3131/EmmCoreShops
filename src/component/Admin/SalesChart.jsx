@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
+import api from "../../library/api";
+
 const SalesChart = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,3 +57,5 @@ const SalesChart = () => {
     </div>
   );
 };
+
+export default SalesChart;

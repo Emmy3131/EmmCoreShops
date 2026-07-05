@@ -112,12 +112,12 @@ const User = () => {
               {/* ONLINE STATUS */}
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
-                  user.isOnline
+                  user.status === "active"
                     ? "bg-green-100 text-green-600"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >
-                {user.isOnline ? "Online" : "Offline"}
+                {user.status === "active" ? "active" : "inactive"}
               </span>
             </div>
 

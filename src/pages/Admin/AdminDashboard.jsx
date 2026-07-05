@@ -15,6 +15,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
 import SalesChart from "../../component/Admin/SalesChart";
 import { useNavigate } from "react-router-dom";
+import StatCard from "../../component/Admin/StatsCard";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -23,7 +24,6 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
   const handleOrder = () => navigate("/admin/orders");
   const handleUser = () => navigate("/admin/users");
 
@@ -237,14 +237,4 @@ const AdminDashboard = () => {
 export default AdminDashboard;
 
 /* ================= CARD ================= */
-const StatCard = ({ title, value, icon, color }) => {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow flex justify-between">
-      <div>
-        <p className="text-gray-500 text-sm">{title}</p>
-        <h3 className="text-xl font-bold">{value}</h3>
-      </div>
-      <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
-    </div>
-  );
-};
+

@@ -1,31 +1,27 @@
 import { useEffect, useState } from "react";
-import { FaSearch, FaUserSlash, FaEye, FaTrash } from "react-icons/fa";
+import {
+  FaSearch,
+  FaEye,
+  FaTrash,
+  FaUserCheck,
+  FaUserSlash,
+} from "react-icons/fa";
 import api from "../../library/api";
+import UserModal from "../../component/Admin/UserModel";
 
 const User = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
 
+  /* ================= FETCH USERS ================= */
   const fetchUsers = async () => {
     try {
       setLoading(true);
-
       const res = await api.get("/users");
-
-      if (res.data.status !== "success") {
-        console.error("Failed to fetch users:", res.data);
-        return;
-      }
-
-      // SAFE extraction
-      const data =
-        res.data.data?.users ||
-        res.data.data ||
-        [];
-
+      const data = res.data.data?.users || res.data.data || [];
       setUsers(Array.isArray(data) ? data : []);
-
     } catch (err) {
       console.error("Fetch users error:", err);
     } finally {
@@ -37,155 +33,133 @@ const User = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((u) =>
-    (u.name || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  /* ================= DELETE USER ================= */
+  const deleteUser = async (id) => {
+    try {
+      const res = await api.delete(`/users/${id}`);
+      if (res.data.status === "success") {
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error("Delete user error:", err);
+    }
+  };
+
+  /* ================= ACTIVATE / DEACTIVATE ================= */
+  const toggleStatus = async (id, status) => {
+    try {
+      const res = await api.patch(`/users/${id}/toggle-status`, {
+        status: status === "active" ? "inactive" : "active",
+      });
+
+      if (res.data.status === "success") {
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error("Toggle user status error:", err);
+    }
+  };
+
+  /* ================= FILTER ================= */
+  const filteredUsers = users.filter((u) => {
+    const fullName = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+    const email = (u.email || "").toLowerCase();
+    const role = (u.role || "").toLowerCase();
+
+    return (
+      fullName.includes(search.toLowerCase()) ||
+      email.includes(search.toLowerCase()) ||
+      role.includes(search.toLowerCase())
+    );
+  });
 
   if (loading) {
-    return (
-      <div className="p-6 text-center">
-        Loading users...
-      </div>
-    );
+    return <div className="p-6 text-gray-500">Loading users...</div>;
   }
 
   return (
-    <div className="space-y-6">
-
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
       <div>
-        <h1 className="text-2xl font-bold">Manage Users</h1>
-        <p className="text-gray-500">
-          View and manage all users
-        </p>
+        <h1 className="text-2xl font-bold">Users Management</h1>
+        <p className="text-gray-500">Manage all platform users</p>
       </div>
 
       {/* SEARCH */}
-      <div className="flex items-center gap-2 bg-white p-3 rounded-lg shadow">
+      <div className="flex items-center gap-2 bg-white p-3 rounded-xl shadow">
         <FaSearch className="text-gray-400" />
         <input
-          type="text"
-          placeholder="Search users..."
           className="w-full outline-none"
+          placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* TABLE */}
-      <div className="hidden md:block bg-white rounded-xl shadow overflow-x-auto">
+      {/* USERS GRID */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredUsers.map((user) => (
+          <div
+            key={user._id}
+            className="bg-white rounded-2xl shadow p-4 space-y-3 hover:shadow-lg transition"
+          >
+            {/* HEADER */}
+            <div className="flex justify-between items-center">
+              <h2 className="font-bold text-lg">
+                {user.firstName} {user.lastName}
+              </h2>
 
-        <table className="w-full text-sm">
-
-          <thead className="bg-gray-100 text-left">
-            <tr>
-              <th className="p-3">Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="p-4 text-center text-gray-500">
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              filteredUsers.map((user) => (
-                <tr key={user._id} className="border-b">
-
-                  <td className="p-3 font-medium">
-                    {user.name}
-                  </td>
-
-                  <td>{user.email}</td>
-
-                  <td>{user.role}</td>
-
-                  <td>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        user.status === "Active"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {user.status || "Inactive"}
-                    </span>
-                  </td>
-
-                  <td className="flex gap-3 p-3 text-gray-600">
-
-                    <button className="hover:text-blue-500">
-                      <FaEye />
-                    </button>
-
-                    <button className="hover:text-yellow-500">
-                      <FaUserSlash />
-                    </button>
-
-                    <button className="hover:text-red-500">
-                      <FaTrash />
-                    </button>
-
-                  </td>
-
-                </tr>
-              ))
-            )}
-          </tbody>
-
-        </table>
-      </div>
-
-      {/* MOBILE */}
-      <div className="md:hidden space-y-4">
-
-        {filteredUsers.length === 0 ? (
-          <p className="text-center text-gray-500">
-            No users found
-          </p>
-        ) : (
-          filteredUsers.map((user) => (
-            <div
-              key={user._id}
-              className="bg-white p-4 rounded-xl shadow space-y-2"
-            >
-              <div className="flex justify-between">
-                <h2 className="font-semibold">
-                  {user.name}
-                </h2>
-
-                <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                  {user.status || "Inactive"}
-                </span>
-              </div>
-
-              <p className="text-sm text-gray-500">
-                {user.email}
-              </p>
-
-              <p className="text-sm">
-                Role: {user.role}
-              </p>
-
-              <div className="flex justify-end gap-4 text-gray-600 pt-2">
-                <FaEye />
-                <FaUserSlash />
-                <FaTrash />
-              </div>
-
+              {/* ONLINE STATUS */}
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  user.isOnline
+                    ? "bg-green-100 text-green-600"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {user.isOnline ? "Online" : "Offline"}
+              </span>
             </div>
-          ))
-        )}
+
+            <p className="text-sm text-gray-500">{user.email}</p>
+
+            <p className="text-sm">
+              Role: <span className="font-medium">{user.role}</span>
+            </p>
+
+            {/* ACTIONS */}
+            <div className="flex justify-between pt-2">
+              <button
+                onClick={() => setSelectedUser(user)}
+                className="text-blue-600"
+              >
+                <FaEye />
+              </button>
+
+              <button
+                onClick={() => toggleStatus(user._id, user.status)}
+                className={`transition text-lg ${
+                  user.status === "active"
+                    ? "text-blue-600 hover:text-blue-800"
+                    : "text-yellow-600 hover:text-yellow-800"
+                }`}
+              >
+                {user.status === "active" ? <FaUserCheck /> : <FaUserSlash />}
+              </button>
+
+              <button
+                onClick={() => deleteUser(user._id)}
+                className="text-red-600"
+              >
+                <FaTrash />
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
+      {/* MODAL */}
+      <UserModal user={selectedUser} onClose={() => setSelectedUser(null)} />
     </div>
   );
 };

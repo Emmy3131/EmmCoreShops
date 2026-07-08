@@ -10,7 +10,6 @@ const AdminMenu = () => {
       <MenuItem to="/admin/products" title="Products" icon={<FaLink />} />
       <MenuItem to="/admin/category" title="Category" icon={<FaLink />} />
       <MenuItem to="/admin/reviews" title="Reviews" icon={<FaLink />} />
-      <MenuItem to="/admin/payments" title="Payments" icon={<FaLink />} />
       <MenuItem to="/admin/report" title="Report" icon={<FaLink />} />
       <MenuItem to="/admin/vendors" title="Vendors" icon={<FaLink />} />
       <MenuItem to="/admin/newsletter" title="Newsletter" icon={<FaLink />} />

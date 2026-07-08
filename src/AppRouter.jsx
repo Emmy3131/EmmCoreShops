@@ -44,7 +44,6 @@ import Category from "./pages/Admin/category/Category";
 import AddCategory from "./pages/Admin/category/AddCategory";
 import EditCategory from "./pages/Admin/category/EditCategory";
 import Reviews from "./pages/Admin/Reviews";
-import Payments from "./pages/Admin/Payments";
 import Report from "./pages/Admin/Report";
 import Profile from "./pages/Admin/Profile";
 import Vendors from "./pages/Admin/Vendors";
@@ -127,7 +126,6 @@ const AppRouter = () => {
             <Route path="/admin/category/add" element={<AddCategory />} />
             <Route path="/admin/category/edit/:id" element={<EditCategory />} />
             <Route path="/admin/reviews" element={<Reviews />} />
-            <Route path="/admin/payments" element={<Payments />} />
             <Route path="/admin/report" element={<Report />} />
             <Route path="/admin/vendors" element={<Vendors />} />
             <Route path="/profile" element={<Profile />} />

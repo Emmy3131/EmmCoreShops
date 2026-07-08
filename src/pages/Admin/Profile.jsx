@@ -1,149 +1,545 @@
-import { useState } from "react";
-import { FaUserCircle, FaEdit, FaLock } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import {
+  FaUserCircle,
+  FaEdit,
+  FaLock,
+  FaCamera,
+  FaShieldAlt,
+  FaCalendarAlt,
+  FaChartLine,
+  FaSave,
+} from "react-icons/fa";
+
+import api from "../../library/api";
 
 const Profile = () => {
   const [editMode, setEditMode] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "Super Admin",
-    phone: "08012345678",
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+
+  const [password, setPassword] = useState({
+    currentPassword: "",
+    newPassword: "",
   });
 
+  /* ================= FETCH PROFILE ================= */
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/users/me");
+
+      if (res.data.status === "success") {
+        setProfileData(res.data.data.user);
+        setPreview(res.data.data.user.image);
+      }
+    } catch (error) {
+      console.error(
+        "Fetch profile error:",
+        error.response?.data || error.message,
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  /* ================= HANDLE INPUT ================= */
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setProfileData({
+      ...profileData,
+
       [e.target.name]: e.target.value,
     });
   };
 
+  /* ================= IMAGE ================= */
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setProfileData({
+      ...profileData,
+
+      image: file,
+    });
+
+    setPreview(URL.createObjectURL(file));
+  };
+
+  /* ================= SAVE PROFILE ================= */
+
+  const updateProfile = async () => {
+    try {
+      setLoading(true);
+
+      await api.patch("/users/updateMe", {
+        firstName: formData.firstName,
+
+        lastName: formData.lastName,
+
+        phone: formData.phone,
+      });
+
+      alert("Profile updated successfully");
+
+      setEditMode(false);
+
+      fetchProfile();
+    } catch (error) {
+      console.error(error);
+
+      alert(error.response?.data?.message || "Update failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= PASSWORD UPDATE ================= */
+
+  const updatePassword = async () => {
+    try {
+      await api.patch("/users/updatePassword", password);
+
+      alert("Password updated successfully");
+
+      setPassword({
+        currentPassword: "",
+        newPassword: "",
+      });
+    } catch (error) {
+      console.error(error);
+
+      alert(error.response?.data?.message || "Password update failed");
+    }
+  };
+
   return (
-    <div className=" md:p-6 min-h-screen">
-
+    <div
+      className="
+min-h-screen
+bg-gray-50
+p-4
+md:p-8
+space-y-6
+"
+    >
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Admin Profile</h1>
 
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
+      <div
+        className="
+bg-gradient-to-r
+from-pink-600
+via-purple-600
+to-indigo-600
+rounded-3xl
+p-6
+md:p-8
+text-white
+shadow-xl
+"
+      >
+        <div
+          className="
+flex
+flex-col
+md:flex-row
+justify-between
+gap-5
+"
         >
-          <FaEdit />
-          {editMode ? "Cancel" : "Edit Profile"}
-        </button>
-      </div>
+          <div>
+            <h1
+              className="
+text-3xl
+font-bold
+"
+            >
+              Admin Profile
+            </h1>
 
-      {/* PROFILE CARD */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {/* LEFT CARD */}
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-
-          <div className="flex justify-center mb-4 text-gray-400 text-6xl">
-            <FaUserCircle />
+            <p className="text-white/80 mt-2">
+              Manage your administrator account
+            </p>
           </div>
 
-          <h2 className="text-xl font-bold">{formData.name}</h2>
-          <p className="text-gray-500 text-sm">{formData.email}</p>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="
+bg-white
+text-purple-700
+px-5
+py-3
+rounded-xl
+flex
+items-center
+gap-2
+font-semibold
+"
+          >
+            <FaEdit />
 
-          <span className="inline-block mt-2 px-3 py-1 text-xs bg-pink-100 text-pink-600 rounded-full">
-            {formData.role}
+            {editMode ? "Cancel" : "Edit Profile"}
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="
+grid
+grid-cols-1
+lg:grid-cols-3
+gap-6
+"
+      >
+        {/* PROFILE CARD */}
+
+        <div
+          className="
+bg-white
+rounded-3xl
+shadow-lg
+p-6
+text-center
+"
+        >
+          <div
+            className="
+relative
+flex
+justify-center
+"
+          >
+            {preview ? (
+              <img
+                src={preview}
+                className="
+w-32
+h-32
+rounded-full
+object-cover
+border-4
+border-purple-500
+"
+              />
+            ) : (
+              <FaUserCircle
+                className="
+text-gray-300
+text-[130px]
+"
+              />
+            )}
+
+            {editMode && (
+              <label
+                className="
+absolute
+bottom-2
+right-20
+bg-purple-600
+text-white
+p-3
+rounded-full
+cursor-pointer
+"
+              >
+                <FaCamera />
+
+                <input type="file" hidden onChange={handleImage} />
+              </label>
+            )}
+          </div>
+
+          <h2
+            className="
+text-2xl
+font-bold
+mt-4
+"
+          >
+            {profileData?.firstName} {profileData?.lastName}
+          </h2>
+
+          <p className="text-gray-500">{profileData?.email}</p>
+
+          <span
+            className="
+inline-block
+mt-3
+px-4
+py-1
+rounded-full
+bg-purple-100
+text-purple-700
+text-sm
+font-semibold
+"
+          >
+            {profileData?.role}
           </span>
 
-          <div className="mt-4 text-sm text-gray-500">
-            <p>📞 {formData.phone}</p>
+          <div
+            className="
+mt-5
+space-y-3
+text-gray-600
+text-sm
+"
+          >
+            <p>📞 {profileData?.phone}</p>
+
+            <p
+              className="
+flex
+justify-center
+items-center
+gap-2
+"
+            >
+              <FaCalendarAlt />
+              Joined:
+              {profileData?.createdAt &&
+                new Date(profileData.createdAt).toLocaleDateString()}
+            </p>
           </div>
         </div>
 
-        {/* RIGHT FORM */}
-        <div className="md:col-span-2 bg-white p-6 rounded-xl shadow">
+        {/* RIGHT SIDE */}
 
-          <h2 className="text-lg font-semibold mb-4">
-            Profile Information
-          </h2>
+        <div
+          className="
+lg:col-span-2
+space-y-6
+"
+        >
+          {/* INFORMATION */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            className="
+bg-white
+rounded-3xl
+shadow-lg
+p-6
+"
+          >
+            <h2
+              className="
+text-xl
+font-bold
+mb-5
+"
+            >
+              Personal Information
+            </h2>
 
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={!editMode}
-              className="border p-3 rounded-lg w-full"
-              placeholder="Full Name"
-            />
+            <div
+              className="
+grid
+md:grid-cols-2
+gap-5
+"
+            >
+              <input
+                name="firstName"
+                value={profileData?.firstName}
+                disabled={!editMode}
+                onChange={handleChange}
+                className="
+border
+rounded-xl
+p-3
+disabled:bg-gray-100
+"
+              />
 
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={!editMode}
-              className="border p-3 rounded-lg w-full"
-              placeholder="Email"
-            />
+              <input
+                name="lastName"
+                value={profileData?.lastName}
+                disabled={!editMode}
+                onChange={handleChange}
+                className="
+border
+rounded-xl
+p-3
+disabled:bg-gray-100
+"
+              />
 
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={!editMode}
-              className="border p-3 rounded-lg w-full"
-              placeholder="Phone Number"
-            />
+              <input
+                name="email"
+                value={profileData?.email}
+                disabled
+                className="
+border
+rounded-xl
+p-3
+bg-gray-100
+"
+              />
 
-            <input
-              type="text"
-              name="role"
-              value={formData.role}
-              disabled
-              className="border p-3 rounded-lg w-full bg-gray-100"
-            />
+              <input
+                name="phone"
+                value={profileData?.phone}
+                disabled={!editMode}
+                onChange={handleChange}
+                className="
+border
+rounded-xl
+p-3
+disabled:bg-gray-100
+"
+              />
+            </div>
 
+            {editMode && (
+              <button
+                onClick={updateProfile}
+                disabled={loading}
+                className="
+mt-6
+bg-green-600
+text-white
+px-6
+py-3
+rounded-xl
+flex
+items-center
+gap-2
+"
+              >
+                <FaSave />
+
+                {loading ? "Saving..." : "Save Changes"}
+              </button>
+            )}
           </div>
 
-          {/* SAVE BUTTON */}
-          {editMode && (
-            <button className="mt-5 bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700">
-              Save Changes
-            </button>
-          )}
+          {/* PASSWORD */}
 
-          {/* PASSWORD SECTION */}
-          <div className="mt-8 border-t pt-6">
+          <div
+            className="
+bg-white
+rounded-3xl
+shadow-lg
+p-6
+"
+          >
+            <h2
+              className="
+flex
+items-center
+gap-2
+font-bold
+text-xl
+mb-5
+"
+            >
+              <FaShieldAlt />
+              Security
+            </h2>
 
-            <h3 className="flex items-center gap-2 font-semibold text-gray-700 mb-4">
-              <FaLock /> Change Password
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+            <div
+              className="
+grid
+md:grid-cols-2
+gap-5
+"
+            >
               <input
                 type="password"
                 placeholder="Current Password"
-                className="border p-3 rounded-lg w-full"
+                value={password.currentPassword}
+                onChange={(e) =>
+                  setPassword({
+                    ...password,
+                    currentPassword: e.target.value,
+                  })
+                }
+                className="
+border
+rounded-xl
+p-3
+"
               />
 
               <input
                 type="password"
                 placeholder="New Password"
-                className="border p-3 rounded-lg w-full"
+                value={password.newPassword}
+                onChange={(e) =>
+                  setPassword({
+                    ...password,
+                    newPassword: e.target.value,
+                  })
+                }
+                className="
+border
+rounded-xl
+p-3
+"
               />
-
             </div>
 
-            <button className="mt-4 bg-pink-600 text-white px-5 py-2 rounded-lg hover:bg-pink-700">
+            <button
+              onClick={updatePassword}
+              className="
+mt-5
+bg-pink-600
+text-white
+px-6
+py-3
+rounded-xl
+flex
+items-center
+gap-2
+"
+            >
+              <FaLock />
               Update Password
             </button>
+          </div>
 
+          {/* STATS */}
+
+          <div
+            className="
+grid
+md:grid-cols-3
+gap-4
+"
+          >
+            <div className="bg-white rounded-2xl p-5 shadow">
+              <FaChartLine className="text-purple-600 text-2xl" />
+
+              <p className="text-gray-500 mt-3">Actions</p>
+
+              <h2 className="text-3xl font-bold">245</h2>
+            </div>
+
+            <div className="bg-white rounded-2xl p-5 shadow">
+              <FaShieldAlt className="text-green-600 text-2xl" />
+
+              <p className="text-gray-500 mt-3">Security</p>
+
+              <h2 className="font-bold">High</h2>
+            </div>
+
+            <div className="bg-white rounded-2xl p-5 shadow">
+              <FaCalendarAlt className="text-blue-600 text-2xl" />
+
+              <p className="text-gray-500 mt-3">Last Login</p>
+
+              <h2 className="font-bold">Today</h2>
+            </div>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 };

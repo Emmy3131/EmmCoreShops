@@ -128,7 +128,7 @@ const AppRouter = () => {
             <Route path="/admin/reviews" element={<Reviews />} />
             <Route path="/admin/report" element={<Report />} />
             <Route path="/admin/vendors" element={<Vendors />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/profile" element={<Profile />} />
             <Route path="/admin/products/add" element={<AddProduct />} />
             <Route path="/admin/products/edit/:id" element={<EditProduct />} />
             <Route path="/admin/cms-pages" element={<PageList />} />

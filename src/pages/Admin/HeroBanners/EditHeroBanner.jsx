@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { FaArrowLeft, FaSave, FaImage, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaImage } from "react-icons/fa";
 
 import api from "../../../library/api";
 
-const AddHeroBanner = () => {
+const EditHeroBanner = () => {
+  const { id } = useParams();
+
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -16,11 +18,50 @@ const AddHeroBanner = () => {
     title: "",
     subtitle: "",
     image: "",
-    buttonText: "Shop Now",
-    buttonLink: "/",
+    buttonText: "",
+    buttonLink: "",
     active: true,
     order: 0,
   });
+
+  /* ================= FETCH BANNER ================= */
+
+  const fetchBanner = async () => {
+    try {
+      const res = await api.get(`/hero-banners/${id}`);
+
+      if (res.data.status === "success") {
+        const data = res.data.data;
+
+        setFormData({
+          title: data.title || "",
+
+          subtitle: data.subtitle || "",
+
+          image: data.image || "",
+
+          buttonText: data.buttonText || "Shop Now",
+
+          buttonLink: data.buttonLink || "/",
+
+          active: data.active,
+
+          order: data.order || 0,
+        });
+
+        setPreview(data.image);
+      }
+    } catch (error) {
+      console.error(
+        "Fetch banner error:",
+        error.response?.data || error.message,
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchBanner();
+  }, [id]);
 
   /* ================= INPUT ================= */
 
@@ -34,7 +75,7 @@ const AddHeroBanner = () => {
     }));
   };
 
-  /* ================= IMAGE CONVERTER ================= */
+  /* ================= BASE64 ================= */
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -46,8 +87,8 @@ const AddHeroBanner = () => {
         resolve(reader.result);
       };
 
-      reader.onerror = (error) => {
-        reject(error);
+      reader.onerror = (err) => {
+        reject(err);
       };
     });
   };
@@ -70,7 +111,7 @@ const AddHeroBanner = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  /* ================= SUBMIT ================= */
+  /* ================= UPDATE ================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,20 +119,17 @@ const AddHeroBanner = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/hero-banners", formData);
+      const res = await api.patch(`/hero-banners/${id}`, formData);
 
       if (res.data.status === "success") {
-        alert("Hero banner created successfully");
+        alert("Hero banner updated successfully");
 
         navigate("/admin/hero-banners");
       }
     } catch (error) {
-      console.error(
-        "Create banner error:",
-        error.response?.data || error.message,
-      );
+      console.error("Update error:", error.response?.data || error.message);
 
-      alert(error.response?.data?.message || "Failed to create banner");
+      alert(error.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }
@@ -110,65 +148,41 @@ const AddHeroBanner = () => {
 
       <div
         className="
-        bg-gradient-to-r
-        from-pink-600
-        via-purple-600
-        to-indigo-600
-        rounded-3xl
-        p-8
-        text-white
-        shadow-xl
+        flex
+        items-center
+        gap-4
         mb-6
         "
       >
-        <div
+        <button
+          onClick={() => navigate(-1)}
           className="
-          flex
-          justify-between
-          items-center
+          bg-white
+          shadow
+          p-3
+          rounded-xl
           "
         >
-          <div>
-            <h1
-              className="
-              text-3xl
-              font-bold
-              flex
-              gap-3
-              items-center
-              "
-            >
-              <FaPlus />
-              Add Hero Banner
-            </h1>
+          <FaArrowLeft />
+        </button>
 
-            <p
-              className="
-              text-white/80
-              mt-2
-              "
-            >
-              Create homepage promotional slider
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate(-1)}
+        <div>
+          <h1
             className="
-            bg-white
-            text-purple-700
-            px-5
-            py-3
-            rounded-xl
-            flex
-            gap-2
-            items-center
-            font-semibold
+            text-3xl
+            font-bold
             "
           >
-            <FaArrowLeft />
-            Back
-          </button>
+            Edit Hero Banner
+          </h1>
+
+          <p
+            className="
+            text-gray-500
+            "
+          >
+            Update homepage promotional content
+          </p>
         </div>
       </div>
 
@@ -187,7 +201,7 @@ const AddHeroBanner = () => {
           lg:col-span-2
           bg-white
           rounded-3xl
-          shadow-lg
+          shadow
           p-6
           space-y-5
           "
@@ -196,28 +210,28 @@ const AddHeroBanner = () => {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            placeholder="Banner title"
-            required
             className="
-            w-full
             border
             rounded-xl
             p-3
+            w-full
             "
+            placeholder="Banner title"
+            required
           />
 
           <textarea
             name="subtitle"
             value={formData.subtitle}
             onChange={handleChange}
-            placeholder="Banner subtitle"
             rows="4"
             className="
-            w-full
             border
             rounded-xl
             p-3
+            w-full
             "
+            placeholder="Subtitle"
           />
 
           <div>
@@ -228,18 +242,17 @@ const AddHeroBanner = () => {
               mb-2
               "
             >
-              Banner Image
+              Change Image
             </label>
 
             <input
               type="file"
               accept="image/*"
               onChange={handleImage}
-              required
               className="
               border
-              rounded-xl
               p-3
+              rounded-xl
               w-full
               "
             />
@@ -256,24 +269,24 @@ const AddHeroBanner = () => {
               name="buttonText"
               value={formData.buttonText}
               onChange={handleChange}
-              placeholder="Button text"
               className="
               border
               rounded-xl
               p-3
               "
+              placeholder="Button text"
             />
 
             <input
               name="buttonLink"
               value={formData.buttonLink}
               onChange={handleChange}
-              placeholder="Button link"
               className="
               border
               rounded-xl
               p-3
               "
+              placeholder="Button link"
             />
           </div>
 
@@ -282,20 +295,20 @@ const AddHeroBanner = () => {
             name="order"
             value={formData.order}
             onChange={handleChange}
-            placeholder="Display order"
             className="
             border
             rounded-xl
             p-3
             w-full
             "
+            placeholder="Order"
           />
 
           <label
             className="
             flex
-            items-center
             gap-3
+            items-center
             "
           >
             <input
@@ -304,7 +317,7 @@ const AddHeroBanner = () => {
               checked={formData.active}
               onChange={handleChange}
             />
-            Publish banner immediately
+            Active Banner
           </label>
 
           <button
@@ -318,13 +331,13 @@ const AddHeroBanner = () => {
             py-3
             rounded-xl
             flex
-            items-center
             gap-2
+            items-center
             "
           >
             <FaSave />
 
-            {loading ? "Saving..." : "Create Banner"}
+            {loading ? "Updating..." : "Save Changes"}
           </button>
         </form>
 
@@ -334,17 +347,17 @@ const AddHeroBanner = () => {
           className="
           bg-white
           rounded-3xl
-          shadow-lg
+          shadow
           p-6
           "
         >
           <h2
             className="
             font-bold
-            flex
-            items-center
-            gap-2
             mb-4
+            flex
+            gap-2
+            items-center
             "
           >
             <FaImage />
@@ -355,8 +368,8 @@ const AddHeroBanner = () => {
             <img
               src={preview}
               className="
-              h-48
               w-full
+              h-48
               object-cover
               rounded-2xl
               "
@@ -366,14 +379,13 @@ const AddHeroBanner = () => {
               className="
               h-48
               bg-gray-100
-              rounded-2xl
+              rounded-xl
               flex
               justify-center
               items-center
-              text-gray-400
               "
             >
-              Image Preview
+              No Image
             </div>
           )}
 
@@ -384,7 +396,7 @@ const AddHeroBanner = () => {
             mt-4
             "
           >
-            {formData.title || "Banner Title"}
+            {formData.title}
           </h3>
 
           <p
@@ -393,7 +405,7 @@ const AddHeroBanner = () => {
             mt-2
             "
           >
-            {formData.subtitle || "Banner description"}
+            {formData.subtitle}
           </p>
         </div>
       </div>
@@ -401,4 +413,4 @@ const AddHeroBanner = () => {
   );
 };
 
-export default AddHeroBanner;
+export default EditHeroBanner;

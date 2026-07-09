@@ -50,6 +50,7 @@ import Vendors from "./pages/Admin/Vendors";
 import NewsletterSub from "./pages/Admin/NewsletterSub";
 import AddHeroBanners from "./pages/Admin/HeroBanners/AddHeroBanner";
 import HeroBanners from "./pages/Admin/HeroBanners/HeroBanners";
+import EditHeroBanner from "./pages/Admin/HeroBanners/EditHeroBanner";
 import PageList from "./pages/Admin/CMSPages/PageList";
 import CreateCMSPage from "./pages/Admin/CMSPages/CreateCMSPage";
 import EditCMSPage from "./pages/Admin/CMSPages/EditCMSPage";
@@ -118,6 +119,7 @@ const AppRouter = () => {
             <Route path="/admin/products" element={<Products />} />
             <Route path="/admin/category" element={<Category />} />
             <Route path="/admin/hero-banners" element={<HeroBanners />} />
+            <Route path="/admin/hero-banners/edit/:id" element={<EditHeroBanner />} />
             <Route
               path="/admin/hero-banners/add"
               element={<AddHeroBanners />}

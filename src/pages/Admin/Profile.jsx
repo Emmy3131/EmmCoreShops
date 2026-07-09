@@ -160,72 +160,22 @@ const Profile = () => {
   };
 
   return (
-    <div
-      className="
-min-h-screen
-bg-gray-50
-p-4
-md:p-8
-space-y-6
-"
-    >
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 space-y-6">
       {/* HEADER */}
 
-      <div
-        className="
-bg-gradient-to-r
-from-pink-600
-via-purple-600
-to-indigo-600
-rounded-3xl
-p-6
-md:p-8
-text-white
-shadow-xl
-"
-      >
-        <div
-          className="
-flex
-flex-col
-md:flex-row
-justify-between
-gap-5
-"
-        >
+      <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-3xl p-6 md:p-8 text-white shadow-xl">
+        <div className="flex flex-col md:flex-row justify-between gap-5">
           <div>
-            <h1
-              className="
-text-3xl
-font-bold
-"
-            >
-              Admin Profile
-            </h1>
+            <h1 className="text-3xl font-bold">Admin Profile</h1>
 
-            <p
-              className="
-text-white/80
-mt-2
-"
-            >
+            <p className="text-white/80 mt-2">
               Manage your administrator account
             </p>
           </div>
 
           <button
             onClick={() => setEditMode(!editMode)}
-            className="
-bg-white
-text-purple-700
-px-6
-py-3
-rounded-xl
-font-semibold
-flex
-items-center
-gap-2
-"
+            className="bg-white text-purple-700 px-6 py-3 rounded-xl font-semibold flex items-center gap-2"
           >
             <FaEdit />
 
@@ -234,66 +184,22 @@ gap-2
         </div>
       </div>
 
-      <div
-        className="
-grid
-grid-cols-1
-lg:grid-cols-3
-gap-6
-"
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* PROFILE CARD */}
 
-        <div
-          className="
-bg-white
-rounded-3xl
-shadow-lg
-p-6
-text-center
-"
-        >
-          <div
-            className="
-relative
-flex
-justify-center
-"
-          >
+        <div className="bg-white rounded-3xl shadow-lg p-6 text-center">
+          <div className="relative flex justify-center">
             {preview ? (
               <img
                 src={preview}
-                className="
-w-32
-h-32
-rounded-full
-object-cover
-border-4
-border-purple-500
-"
+                className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
               />
             ) : (
-              <FaUserCircle
-                className="
-text-gray-300
-text-[130px]
-"
-              />
+              <FaUserCircle className="text-gray-300 text-[130px]" />
             )}
 
             {editMode && (
-              <label
-                className="
-absolute
-bottom-2
-right-20
-bg-purple-600
-text-white
-p-3
-rounded-full
-cursor-pointer
-"
-              >
+              <label className="absolute bottom-2 right-20 bg-purple-600 text-white p-3 rounded-full cursor-pointer">
                 <FaCamera />
 
                 <input type="file" hidden onChange={handleImage} />
@@ -301,57 +207,21 @@ cursor-pointer
             )}
           </div>
 
-          <h2
-            className="
-text-2xl
-font-bold
-mt-4
-"
-          >
+          <h2 className=" text-2xl font-bold mt-4">
             {profileData.firstName} {profileData.lastName}
           </h2>
 
-          <p
-            className="
-text-gray-500
-"
-          >
-            {profileData.email}
-          </p>
+          <p className="text-gray-500">{profileData.email}</p>
 
-          <span
-            className="
-inline-block
-mt-3
-px-4
-py-1
-rounded-full
-bg-purple-100
-text-purple-700
-text-sm
-font-semibold
-"
-          >
+          <span className="inline-block mt-3 px-4 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-semibold">
             {profileData.role}
           </span>
 
-          <div
-            className="
-mt-5
-space-y-3
-text-sm
-text-gray-600
-"
-          >
+          <div className="mt-5 space-y-3 text-sm text-gray-600">
             <p>📞 {profileData.phone}</p>
 
             <p
-              className="
-flex
-justify-center
-items-center
-gap-2
-"
+              className="flex justify-center items-center gap-2"
             >
               <FaCalendarAlt />
               Joined:
@@ -363,37 +233,21 @@ gap-2
         {/* RIGHT SIDE */}
 
         <div
-          className="
-lg:col-span-2
-space-y-6
-"
+          className="lg:col-span-2 space-y-6"
         >
           {/* PERSONAL INFORMATION */}
 
           <div
-            className="
-bg-white
-rounded-3xl
-shadow-lg
-p-6
-"
+            className="bg-white rounded-3xl shadow-lg p-6"
           >
             <h2
-              className="
-text-xl
-font-bold
-mb-6
-"
+              className="text-xl font-bold mb-6"
             >
               Personal Information
             </h2>
 
             <div
-              className="
-grid
-md:grid-cols-2
-gap-5
-"
+              className="grid md:grid-cols-2 gap-5"
             >
               {[
                 ["firstName", "First Name"],
@@ -403,13 +257,7 @@ gap-5
               ].map(([name, label]) => (
                 <div key={name}>
                   <label
-                    className="
-block
-text-sm
-font-medium
-text-gray-600
-mb-2
-"
+                    className="block text-sm font-medium text-gray-600 mb-2"
                   >
                     {label}
                   </label>
@@ -419,25 +267,14 @@ mb-2
                     value={profileData[name] || ""}
                     disabled={!editMode}
                     onChange={handleChange}
-                    className="
-w-full
-border
-rounded-xl
-p-3
-disabled:bg-gray-100
-"
+                    className="w-full border rounded-xl p-3 disabled:bg-gray-100"
                   />
                 </div>
               ))}
 
               <div>
                 <label
-                  className="
-block
-text-sm
-font-medium
-mb-2
-"
+                  className="block text-sm font-medium mb-2"
                 >
                   Gender
                 </label>
@@ -447,13 +284,7 @@ mb-2
                   value={profileData.gender}
                   disabled={!editMode}
                   onChange={handleChange}
-                  className="
-w-full
-border
-rounded-xl
-p-3
-disabled:bg-gray-100
-"
+                  className="w-full border rounded-xl p-3 disabled:bg-gray-100"
                 >
                   <option value="">Select Gender</option>
 
@@ -467,12 +298,7 @@ disabled:bg-gray-100
 
               <div>
                 <label
-                  className="
-block
-text-sm
-font-medium
-mb-2
-"
+                  className="block text-sm font-medium mb-2"
                 >
                   Date Of Birth
                 </label>
@@ -487,28 +313,15 @@ mb-2
                   }
                   disabled={!editMode}
                   onChange={handleChange}
-                  className="
-w-full
-border
-rounded-xl
-p-3
-disabled:bg-gray-100
-"
+                  className="w-full border rounded-xl p-3 disabled:bg-gray-100"
                 />
               </div>
 
               <div
-                className="
-md:col-span-2
-"
+                className="md:col-span-2"
               >
                 <label
-                  className="
-block
-text-sm
-font-medium
-mb-2
-"
+                  className="block text-sm font-medium mb-2"
                 >
                   Address
                 </label>
@@ -519,13 +332,7 @@ mb-2
                   value={profileData.address}
                   disabled={!editMode}
                   onChange={handleChange}
-                  className="
-w-full
-border
-rounded-xl
-p-3
-disabled:bg-gray-100
-"
+                  className="w-full border rounded-xl p-3 disabled:bg-gray-100"
                 />
               </div>
             </div>
@@ -534,17 +341,7 @@ disabled:bg-gray-100
               <button
                 onClick={updateProfile}
                 disabled={loading}
-                className="
-mt-6
-bg-green-600
-text-white
-px-6
-py-3
-rounded-xl
-flex
-items-center
-gap-2
-"
+                className="mt-6 bg-green-600 text-white px-6 py-3 rounded-xl flex items-center gap-2"
               >
                 <FaSave />
 
@@ -556,33 +353,17 @@ gap-2
           {/* PASSWORD */}
 
           <div
-            className="
-bg-white
-rounded-3xl
-shadow-lg
-p-6
-"
+            className="bg-white rounded-3xl shadow-lg p-6"
           >
             <h2
-              className="
-text-xl
-font-bold
-flex
-gap-2
-items-center
-mb-5
-"
+              className="text-xl font-bold flex gap-2 items-center mb-5"
             >
               <FaShieldAlt />
               Security
             </h2>
 
             <div
-              className="
-grid
-md:grid-cols-2
-gap-5
-"
+              className="grid md:grid-cols-2 gap-5"
             >
               <input
                 type="password"
@@ -594,11 +375,7 @@ gap-5
                     currentPassword: e.target.value,
                   })
                 }
-                className="
-border
-rounded-xl
-p-3
-"
+                className="border rounded-xl p-3"
               />
 
               <input
@@ -611,27 +388,13 @@ p-3
                     newPassword: e.target.value,
                   })
                 }
-                className="
-border
-rounded-xl
-p-3
-"
+                className="border rounded-xl p-3"
               />
             </div>
 
             <button
               onClick={updatePassword}
-              className="
-mt-5
-bg-pink-600
-text-white
-px-6
-py-3
-rounded-xl
-flex
-items-center
-gap-2
-"
+              className="mt-5 bg-pink-600 text-white px-6 py-3 rounded-xl flex items-center gap-2"
             >
               <FaLock />
               Update Password

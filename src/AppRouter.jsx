@@ -58,6 +58,7 @@ import EditCMSPage from "./pages/Admin/CMSPages/EditCMSPage";
 import { useAuth } from "./Context/AuthContext";
 import CategoryProducts from "./pages/public/categories/CategoryProduct";
 import ProductDetails from './pages/public/ProductDetails';
+import PreviewPage from "./pages/PreviewPage";
 
 
 const AppRouter = () => {
@@ -86,6 +87,7 @@ const AppRouter = () => {
           <Route path="/page/:slug" element={<StaticPage />} />
           <Route path="/products" element={<AllProduct />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/preview/:slug" element={<PreviewPage />} />
 
           
           {/* ================= USER AREA ================= */}

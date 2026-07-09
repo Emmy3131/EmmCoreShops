@@ -1,8 +1,9 @@
 import { useState } from "react";
-import api from "../../../library/api";
 import { useNavigate } from "react-router-dom";
 
-import { FaFileAlt, FaSave, FaArrowLeft } from "react-icons/fa";
+import api from "../../../library/api";
+
+import { FaFileAlt, FaSave, FaArrowLeft, FaEye } from "react-icons/fa";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 
@@ -15,48 +16,79 @@ const AddPage = () => {
 
   const [formData, setFormData] = useState({
     title: "",
+
     slug: "",
+
     content: "",
+
     metaDescription: "",
+
     section: "company",
+
     status: "draft",
   });
 
-  /* ================= INPUT ================= */
+  /* ================= INPUT HANDLER ================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
 
       [name]: value,
-    });
+    }));
   };
 
-  /* ================= AUTO SLUG ================= */
+  /* ================= SLUG GENERATOR ================= */
 
   const generateSlug = (text) => {
     return text
+
       .toLowerCase()
+
       .trim()
+
       .replace(/[^\w\s-]/g, "")
+
       .replace(/\s+/g, "-");
   };
 
   const handleTitle = (e) => {
     const title = e.target.value;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
 
       title,
 
       slug: generateSlug(title),
-    });
+    }));
   };
 
-  /* ================= SUBMIT ================= */
+  /* ================= PREVIEW PAGE ================= */
+
+  const previewPage = () => {
+    if (!formData.slug) {
+      alert("Please enter page title first");
+
+      return;
+    }
+
+    localStorage.setItem(
+      "cmsPreview",
+
+      JSON.stringify(formData),
+    );
+
+    window.open(
+      `/preview/${formData.slug}`,
+
+      "_blank",
+    );
+  };
+
+  /* ================= CREATE PAGE ================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,7 +96,11 @@ const AddPage = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/pages", formData);
+      const res = await api.post(
+        "/pages",
+
+        formData,
+      );
 
       if (res.data.status === "success") {
         alert("Page created successfully");
@@ -133,7 +169,7 @@ text-white/80
 mt-2
 "
             >
-              Create website pages and manage content.
+              Create and manage website content pages.
             </p>
           </div>
 
@@ -325,11 +361,11 @@ overflow-hidden
               editor={ClassicEditor}
               data={formData.content}
               onChange={(event, editor) => {
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
 
                   content: editor.getData(),
-                });
+                }));
               }}
             />
           </div>
@@ -353,10 +389,10 @@ mb-2
             value={formData.status}
             onChange={handleChange}
             className="
+w-full
 border
 rounded-xl
 p-3
-w-full
 "
           >
             <option value="draft">Draft</option>
@@ -367,10 +403,39 @@ w-full
           </select>
         </div>
 
-        <button
-          disabled={loading}
+        {/* BUTTONS */}
+
+        <div
           className="
-bg-pink-600
+flex
+flex-col
+sm:flex-row
+gap-4
+"
+        >
+          <button
+            type="button"
+            onClick={previewPage}
+            className="
+bg-purple-600
+text-white
+px-8
+py-3
+rounded-xl
+font-semibold
+flex
+items-center
+gap-2
+"
+          >
+            <FaEye />
+            Preview
+          </button>
+
+          <button
+            disabled={loading}
+            className="
+bg-green-600
 text-white
 px-8
 py-3
@@ -381,11 +446,12 @@ items-center
 gap-2
 disabled:opacity-50
 "
-        >
-          <FaSave />
+          >
+            <FaSave />
 
-          {loading ? "Creating..." : "Create Page"}
-        </button>
+            {loading ? "Saving..." : "Save Page"}
+          </button>
+        </div>
       </form>
     </div>
   );

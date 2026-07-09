@@ -14,10 +14,21 @@ import api from "../../library/api";
 
 const Profile = () => {
   const [editMode, setEditMode] = useState(false);
-
   const [loading, setLoading] = useState(false);
+
   const [preview, setPreview] = useState(null);
-  const [profileData, setProfileData] = useState(null);
+
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    country: "",
+    address: "",
+    gender: "",
+    dateOfBirth: "",
+    role: "",
+  });
 
   const [password, setPassword] = useState({
     currentPassword: "",
@@ -31,8 +42,23 @@ const Profile = () => {
       const res = await api.get("/users/me");
 
       if (res.data.status === "success") {
-        setProfileData(res.data.data.user);
-        setPreview(res.data.data.user.image);
+        const user = res.data.data.user;
+
+        setProfileData({
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          country: user.country || "",
+          address: user.address || "",
+          gender: user.gender || "",
+          dateOfBirth: user.dateOfBirth || "",
+          role: user.role || "",
+        });
+
+        if (user.image) {
+          setPreview(user.image);
+        }
       }
     } catch (error) {
       console.error(
@@ -72,25 +98,37 @@ const Profile = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  /* ================= SAVE PROFILE ================= */
+  /* ================= UPDATE PROFILE ================= */
 
   const updateProfile = async () => {
     try {
       setLoading(true);
 
-      await api.patch("/users/updateMe", {
-        firstName: formData.firstName,
+      const payload = {
+        firstName: profileData.firstName,
 
-        lastName: formData.lastName,
+        lastName: profileData.lastName,
 
-        phone: formData.phone,
-      });
+        phone: profileData.phone,
 
-      alert("Profile updated successfully");
+        country: profileData.country,
 
-      setEditMode(false);
+        address: profileData.address,
 
-      fetchProfile();
+        gender: profileData.gender,
+
+        dateOfBirth: profileData.dateOfBirth,
+      };
+
+      const res = await api.patch("/users/updateMe", payload);
+
+      if (res.data.status === "success") {
+        alert("Profile updated successfully");
+
+        setEditMode(false);
+
+        fetchProfile();
+      }
     } catch (error) {
       console.error(error);
 
@@ -104,14 +142,16 @@ const Profile = () => {
 
   const updatePassword = async () => {
     try {
-      await api.patch("/users/updatePassword", password);
+      const res = await api.patch("/users/updatePassword", password);
 
-      alert("Password updated successfully");
+      if (res.data.status === "success") {
+        alert("Password updated successfully");
 
-      setPassword({
-        currentPassword: "",
-        newPassword: "",
-      });
+        setPassword({
+          currentPassword: "",
+          newPassword: "",
+        });
+      }
     } catch (error) {
       console.error(error);
 
@@ -163,7 +203,12 @@ font-bold
               Admin Profile
             </h1>
 
-            <p className="text-white/80 mt-2">
+            <p
+              className="
+text-white/80
+mt-2
+"
+            >
               Manage your administrator account
             </p>
           </div>
@@ -173,13 +218,13 @@ font-bold
             className="
 bg-white
 text-purple-700
-px-5
+px-6
 py-3
 rounded-xl
+font-semibold
 flex
 items-center
 gap-2
-font-semibold
 "
           >
             <FaEdit />
@@ -263,10 +308,16 @@ font-bold
 mt-4
 "
           >
-            {profileData?.firstName} {profileData?.lastName}
+            {profileData.firstName} {profileData.lastName}
           </h2>
 
-          <p className="text-gray-500">{profileData?.email}</p>
+          <p
+            className="
+text-gray-500
+"
+          >
+            {profileData.email}
+          </p>
 
           <span
             className="
@@ -281,18 +332,18 @@ text-sm
 font-semibold
 "
           >
-            {profileData?.role}
+            {profileData.role}
           </span>
 
           <div
             className="
 mt-5
 space-y-3
-text-gray-600
 text-sm
+text-gray-600
 "
           >
-            <p>📞 {profileData?.phone}</p>
+            <p>📞 {profileData.phone}</p>
 
             <p
               className="
@@ -304,8 +355,7 @@ gap-2
             >
               <FaCalendarAlt />
               Joined:
-              {profileData?.createdAt &&
-                new Date(profileData.createdAt).toLocaleDateString()}
+              {profileData.createdAt}
             </p>
           </div>
         </div>
@@ -318,7 +368,7 @@ lg:col-span-2
 space-y-6
 "
         >
-          {/* INFORMATION */}
+          {/* PERSONAL INFORMATION */}
 
           <div
             className="
@@ -332,7 +382,7 @@ p-6
               className="
 text-xl
 font-bold
-mb-5
+mb-6
 "
             >
               Personal Information
@@ -345,56 +395,139 @@ md:grid-cols-2
 gap-5
 "
             >
-              <input
-                name="firstName"
-                value={profileData?.firstName}
-                disabled={!editMode}
-                onChange={handleChange}
-                className="
+              {[
+                ["firstName", "First Name"],
+                ["lastName", "Last Name"],
+                ["phone", "Phone"],
+                ["country", "Country"],
+              ].map(([name, label]) => (
+                <div key={name}>
+                  <label
+                    className="
+block
+text-sm
+font-medium
+text-gray-600
+mb-2
+"
+                  >
+                    {label}
+                  </label>
+
+                  <input
+                    name={name}
+                    value={profileData[name] || ""}
+                    disabled={!editMode}
+                    onChange={handleChange}
+                    className="
+w-full
 border
 rounded-xl
 p-3
 disabled:bg-gray-100
 "
-              />
+                  />
+                </div>
+              ))}
 
-              <input
-                name="lastName"
-                value={profileData?.lastName}
-                disabled={!editMode}
-                onChange={handleChange}
-                className="
+              <div>
+                <label
+                  className="
+block
+text-sm
+font-medium
+mb-2
+"
+                >
+                  Gender
+                </label>
+
+                <select
+                  name="gender"
+                  value={profileData.gender}
+                  disabled={!editMode}
+                  onChange={handleChange}
+                  className="
+w-full
 border
 rounded-xl
 p-3
 disabled:bg-gray-100
 "
-              />
+                >
+                  <option value="">Select Gender</option>
 
-              <input
-                name="email"
-                value={profileData?.email}
-                disabled
-                className="
-border
-rounded-xl
-p-3
-bg-gray-100
+                  <option value="male">Male</option>
+
+                  <option value="female">Female</option>
+
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="
+block
+text-sm
+font-medium
+mb-2
 "
-              />
+                >
+                  Date Of Birth
+                </label>
 
-              <input
-                name="phone"
-                value={profileData?.phone}
-                disabled={!editMode}
-                onChange={handleChange}
-                className="
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={
+                    profileData.dateOfBirth
+                      ? profileData.dateOfBirth.substring(0, 10)
+                      : ""
+                  }
+                  disabled={!editMode}
+                  onChange={handleChange}
+                  className="
+w-full
 border
 rounded-xl
 p-3
 disabled:bg-gray-100
 "
-              />
+                />
+              </div>
+
+              <div
+                className="
+md:col-span-2
+"
+              >
+                <label
+                  className="
+block
+text-sm
+font-medium
+mb-2
+"
+                >
+                  Address
+                </label>
+
+                <textarea
+                  rows="3"
+                  name="address"
+                  value={profileData.address}
+                  disabled={!editMode}
+                  onChange={handleChange}
+                  className="
+w-full
+border
+rounded-xl
+p-3
+disabled:bg-gray-100
+"
+                />
+              </div>
             </div>
 
             {editMode && (
@@ -432,11 +565,11 @@ p-6
           >
             <h2
               className="
-flex
-items-center
-gap-2
-font-bold
 text-xl
+font-bold
+flex
+gap-2
+items-center
 mb-5
 "
             >
@@ -503,40 +636,6 @@ gap-2
               <FaLock />
               Update Password
             </button>
-          </div>
-
-          {/* STATS */}
-
-          <div
-            className="
-grid
-md:grid-cols-3
-gap-4
-"
-          >
-            <div className="bg-white rounded-2xl p-5 shadow">
-              <FaChartLine className="text-purple-600 text-2xl" />
-
-              <p className="text-gray-500 mt-3">Actions</p>
-
-              <h2 className="text-3xl font-bold">245</h2>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow">
-              <FaShieldAlt className="text-green-600 text-2xl" />
-
-              <p className="text-gray-500 mt-3">Security</p>
-
-              <h2 className="font-bold">High</h2>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow">
-              <FaCalendarAlt className="text-blue-600 text-2xl" />
-
-              <p className="text-gray-500 mt-3">Last Login</p>
-
-              <h2 className="font-bold">Today</h2>
-            </div>
           </div>
         </div>
       </div>

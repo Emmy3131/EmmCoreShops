@@ -1,27 +1,37 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import api from "../../../library/api";
-import { FaArrowLeft } from "react-icons/fa";
+
+import { FaSave, FaArrowLeft, FaBox } from "react-icons/fa";
 
 const EditProduct = () => {
   const { id } = useParams();
+
   const navigate = useNavigate();
 
-  /* ================= STATE ================= */
+  const [loading, setLoading] = useState(false);
 
-  const [product, setProduct] = useState({
+  const [categories, setCategories] = useState([]);
+
+  const [formData, setFormData] = useState({
+    image: "",
     name: "",
+    description: "",
     price: "",
     category: "",
     stock: "",
-    image: "",
-    description: "",
-  });
 
-  const [categories, setCategories] = useState([]);
-  const [preview, setPreview] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
+    oldPrice: "",
+
+    isTrending: false,
+
+    isFlashSale: false,
+
+    flashSalePrice: "",
+
+    flashSaleEndAt: "",
+  });
 
   /* ================= FETCH PRODUCT ================= */
 
@@ -29,61 +39,69 @@ const EditProduct = () => {
     try {
       const res = await api.get(`/products/${id}`);
 
-      const data = res.data.data;
+      const product = res.data.data;
 
-      setProduct({
-        name: data.name || "",
-        price: data.price || "",
-        stock: data.stock || "",
-        image: data.image || "",
-        description: data.description || "",
-        category: data.category?._id || "",
+      setFormData({
+        image: product.image || "",
+
+        name: product.name || "",
+
+        description: product.description || "",
+
+        price: product.price || "",
+
+        category: product.category?._id || product.category || "",
+
+        stock: product.stock || "",
+
+        oldPrice: product.oldPrice || "",
+
+        isTrending: product.isTrending || false,
+
+        isFlashSale: product.isFlashSale || false,
+
+        flashSalePrice: product.flashSalePrice || "",
+
+        flashSaleEndAt: product.flashSaleEndAt
+          ? product.flashSaleEndAt.slice(0, 10)
+          : "",
       });
-
-      setPreview(data.image);
-    } catch (err) {
-      console.error("Fetch product error:", err);
+    } catch (error) {
+      console.log("Fetch product error", error);
     }
   };
 
-  /* ================= FETCH CATEGORIES ================= */
+  /* ================= FETCH CATEGORY ================= */
 
   const fetchCategories = async () => {
     try {
       const res = await api.get("/categories");
+
       setCategories(res.data.data || []);
-    } catch (err) {
-      console.error("Fetch categories error:", err);
+    } catch (error) {
+      console.log(error);
     }
   };
-
-  /* ================= INITIAL LOAD ================= */
 
   useEffect(() => {
-    const init = async () => {
-      await Promise.all([fetchProduct(), fetchCategories()]);
-      setPageLoading(false);
-    };
+    fetchProduct();
 
-    init();
-  }, [id]);
+    fetchCategories();
+  }, []);
 
-  /* ================= HANDLE INPUT ================= */
+  /* ================= INPUT ================= */
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
-    setProduct((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({
+      ...formData,
 
-    if (name === "image") {
-      setPreview(value);
-    }
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  /* ================= UPDATE PRODUCT ================= */
+  /* ================= UPDATE ================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,97 +109,178 @@ const EditProduct = () => {
     try {
       setLoading(true);
 
-      // ✅ CLEAN PAYLOAD FOR BACKEND
-      const payload = {
-        name: product.name.trim(),
-        price: Number(product.price),
-        stock: Number(product.stock),
-        category: product.category,
-        image: product.image,
-        description: product.description,
-      };
+      await api.patch(`/products/${id}`, formData);
 
-      const res = await api.patch(`/products/${id}`, payload);
+      alert("Product updated successfully");
 
-      if (res.data.status === "success") {
-        alert("Product updated successfully ✅");
-        navigate("/admin/products");
-      }
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      alert(err.response?.data?.message || "Update failed");
+      navigate("/admin/products");
+    } catch (error) {
+      console.log(error);
+
+      alert(error.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= LOADING ================= */
-
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading product...
-      </div>
-    );
-  }
-
-  /* ================= UI ================= */
-
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6">
-
+    <div
+      className="
+min-h-screen
+bg-gray-50
+p-4
+md:p-8
+"
+    >
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Edit Product</h1>
 
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 bg-gray-200 px-4 py-2 rounded-lg"
+      <div
+        className="
+bg-gradient-to-r
+from-green-600
+via-emerald-600
+to-teal-700
+rounded-3xl
+p-8
+text-white
+shadow-xl
+mb-6
+"
+      >
+        <div
+          className="
+flex
+justify-between
+items-center
+flex-wrap
+gap-4
+"
         >
-          <FaArrowLeft /> Back
-        </button>
+          <div
+            className="
+flex
+items-center
+gap-3
+"
+          >
+            <FaBox className="text-4xl" />
+
+            <h1
+              className="
+text-3xl
+font-bold
+"
+            >
+              Edit Product
+            </h1>
+          </div>
+
+          <button
+            onClick={() => navigate("/admin/products")}
+            className="
+bg-white
+text-green-700
+px-5
+py-3
+rounded-xl
+font-semibold
+flex
+items-center
+gap-2
+"
+          >
+            <FaArrowLeft />
+            Back
+          </button>
+        </div>
       </div>
 
-      {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-xl p-6 grid md:grid-cols-2 gap-5"
+        className="
+bg-white
+rounded-3xl
+shadow-lg
+p-6
+space-y-6
+"
       >
-        {/* NAME */}
+        {/* IMAGE */}
+
         <div>
-          <label className="font-medium">Product Name</label>
+          <label className="font-semibold">Image URL</label>
+
           <input
-            name="name"
-            value={product.name}
+            name="image"
+            value={formData.image}
             onChange={handleChange}
-            required
-            className="border p-3 w-full rounded-lg"
+            className="
+w-full
+border
+rounded-xl
+p-3
+"
           />
         </div>
 
-        {/* PRICE */}
-        <div>
-          <label className="font-medium">Price</label>
-          <input
-            type="number"
-            name="price"
-            value={product.price}
-            onChange={handleChange}
-            required
-            className="border p-3 w-full rounded-lg"
-          />
+        {/* NAME PRICE */}
+
+        <div
+          className="
+grid
+md:grid-cols-2
+gap-5
+"
+        >
+          <div>
+            <label className="font-semibold">Product Name</label>
+
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="
+w-full
+border
+rounded-xl
+p-3
+"
+            />
+          </div>
+
+          <div>
+            <label className="font-semibold">Price</label>
+
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="
+w-full
+border
+rounded-xl
+p-3
+"
+            />
+          </div>
         </div>
 
         {/* CATEGORY */}
+
         <div>
-          <label className="font-medium">Category</label>
+          <label className="font-semibold">Category</label>
 
           <select
             name="category"
-            value={product.category || ""}
+            value={formData.category}
             onChange={handleChange}
-            required
-            className="border p-3 w-full rounded-lg"
+            className="
+w-full
+border
+rounded-xl
+p-3
+"
           >
             <option value="">Select Category</option>
 
@@ -193,63 +292,167 @@ const EditProduct = () => {
           </select>
         </div>
 
-        {/* STOCK */}
+        {/* DESCRIPTION */}
+
         <div>
-          <label className="font-medium">Stock</label>
-          <input
-            type="number"
-            name="stock"
-            value={product.stock}
+          <label className="font-semibold">Description</label>
+
+          <textarea
+            name="description"
+            value={formData.description}
             onChange={handleChange}
-            required
-            className="border p-3 w-full rounded-lg"
+            rows="5"
+            className="
+w-full
+border
+rounded-xl
+p-3
+"
           />
         </div>
 
-        {/* IMAGE URL */}
-        <div className="md:col-span-2">
-          <label className="font-medium">Image URL</label>
-          <input
-            name="image"
-            value={product.image}
-            onChange={handleChange}
-            className="border p-3 w-full rounded-lg"
-          />
+        {/* STOCK OLD PRICE */}
+
+        <div
+          className="
+grid
+md:grid-cols-2
+gap-5
+"
+        >
+          <div>
+            <label>Stock</label>
+
+            <input
+              type="number"
+              name="stock"
+              value={formData.stock}
+              onChange={handleChange}
+              className="
+w-full
+border
+rounded-xl
+p-3
+"
+            />
+          </div>
+
+          <div>
+            <label>Old Price</label>
+
+            <input
+              type="number"
+              name="oldPrice"
+              value={formData.oldPrice}
+              onChange={handleChange}
+              className="
+w-full
+border
+rounded-xl
+p-3
+"
+            />
+          </div>
         </div>
 
-        {/* IMAGE PREVIEW */}
-        {preview && (
-          <div className="md:col-span-2">
-            <p className="font-medium mb-2">Preview</p>
-            <img
-              src={preview}
-              alt="preview"
-              className="w-40 h-40 object-cover rounded-lg border"
+        {/* OPTIONS */}
+
+        <div
+          className="
+flex
+gap-8
+flex-wrap
+"
+        >
+          <label
+            className="
+flex
+gap-2
+items-center
+"
+          >
+            <input
+              type="checkbox"
+              name="isTrending"
+              checked={formData.isTrending}
+              onChange={handleChange}
+            />
+            Trending
+          </label>
+
+          <label
+            className="
+flex
+gap-2
+items-center
+"
+          >
+            <input
+              type="checkbox"
+              name="isFlashSale"
+              checked={formData.isFlashSale}
+              onChange={handleChange}
+            />
+            Flash Sale
+          </label>
+        </div>
+
+        {/* FLASH SALE */}
+
+        {formData.isFlashSale && (
+          <div
+            className="
+grid
+md:grid-cols-2
+gap-5
+"
+          >
+            <input
+              type="number"
+              name="flashSalePrice"
+              value={formData.flashSalePrice}
+              onChange={handleChange}
+              placeholder="Flash Sale Price"
+              className="
+border
+rounded-xl
+p-3
+"
+            />
+
+            <input
+              type="date"
+              name="flashSaleEndAt"
+              value={formData.flashSaleEndAt}
+              onChange={handleChange}
+              className="
+border
+rounded-xl
+p-3
+"
             />
           </div>
         )}
 
-        {/* DESCRIPTION */}
-        <div className="md:col-span-2">
-          <label className="font-medium">Description</label>
-          <textarea
-            rows="4"
-            name="description"
-            value={product.description}
-            onChange={handleChange}
-            className="border p-3 w-full rounded-lg"
-          />
-        </div>
+        <button
+          disabled={loading}
+          className="
+bg-green-600
+text-white
+px-8
+py-3
+rounded-xl
+font-semibold
+flex
+items-center
+gap-2
+disabled:opacity-50
+"
+        >
+          <FaSave />
 
-        {/* BUTTON */}
-        <div className="md:col-span-2 flex justify-end">
-          <button
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
-          >
-            {loading ? "Updating..." : "Update Product"}
-          </button>
-        </div>
+          {loading ? "Updating..." : "Update Product"}
+        </button>
       </form>
     </div>
   );

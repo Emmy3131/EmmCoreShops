@@ -136,11 +136,6 @@ const AdminDashboard = () => {
 
       {/* CHART + ACTIONS */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow">
-          <h2 className="font-semibold mb-4">Sales Overview</h2>
-          <SalesChart />
-        </div>
-
         <div className="bg-white p-5 rounded-xl shadow space-y-3">
           <h2 className="font-semibold mb-4">Quick Actions</h2>
 

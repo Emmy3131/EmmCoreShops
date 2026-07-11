@@ -1,51 +1,125 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaSearch,
-  FaFire,
-  FaBolt,
-} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
 
 import api from "../../../library/api";
+
+import ProductStats from "./ProductStats";
+import ProductFilters from "./ProductFilters";
+import ProductTable from "./ProductTable";
 
 const Products = () => {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
 
+  const [stats, setStats] = useState({});
+
   const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "",
+    trending: "",
+    flashSale: "",
+    sort: "",
+  });
 
-  // ================= FETCH PRODUCTS =================
+  const [page, setPage] = useState(1);
+
+  const [totalPages, setTotalPages] = useState(1);
+
+  /*
+  ==========================
+  FETCH PRODUCTS
+  ==========================
+  */
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
 
-      const res = await api.get("/products");
+      let query = `?page=${page}&limit=12`;
 
-      if (res.data.status === "success") {
-        setProducts(res.data.data || []);
+      if (filters.category) {
+        query += `&category=${filters.category}`;
+      }
+
+      if (filters.sort) {
+        query += `&sort=${filters.sort}`;
+      }
+
+      const res = await api.get(`/products${query}`);
+
+      setProducts(res.data.data || []);
+
+      if (res.data.pagination) {
+        setTotalPages(res.data.pagination.pages);
       }
     } catch (error) {
-      console.error("Products error:", error);
+      console.log("Products error", error);
     } finally {
       setLoading(false);
     }
   };
 
+  /*
+  ==========================
+  FETCH STATS
+  ==========================
+  */
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get("/products/admin/stats");
+
+      setStats(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+  }, [page, filters.category, filters.sort]);
+
+  useEffect(() => {
+    fetchStats();
   }, []);
 
-  // ================= DELETE =================
+  /*
+  ==========================
+  SEARCH
+  ==========================
+  */
 
-  const deleteProduct = async (id) => {
+  const handleSearch = async (value) => {
+    setFilters({
+      ...filters,
+      search: value,
+    });
+
+    if (!value) {
+      fetchProducts();
+      return;
+    }
+
+    try {
+      const res = await api.get(`/products/search?keyword=${value}`);
+
+      setProducts(res.data.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /*
+  ==========================
+  DELETE
+  ==========================
+  */
+
+  const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Delete this product?");
 
     if (!confirmDelete) return;
@@ -53,267 +127,183 @@ const Products = () => {
     try {
       await api.delete(`/products/${id}`);
 
-      setProducts((prev) => prev.filter((item) => item._id !== id));
+      fetchProducts();
+
+      fetchStats();
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
-  // ================= SEARCH =================
+  /*
+  ==========================
+  TOGGLE TRENDING
+  ==========================
+  */
 
-  const filteredProducts = products.filter((product) =>
-    product.name?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const toggleTrending = async (id) => {
+    try {
+      await api.patch(`/products/${id}/toggle-trending`);
+
+      fetchProducts();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /*
+  ==========================
+  TOGGLE FLASH SALE
+  ==========================
+  */
+
+  const toggleFlashSale = async (id) => {
+    try {
+      await api.patch(`/products/${id}/toggle-flash-sale`);
+
+      fetchProducts();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div
       className="
-min-h-screen
-bg-gray-50
-p-4
-md:p-8
-"
+      min-h-screen
+      bg-gray-50
+      p-4
+      md:p-8
+    "
     >
       {/* HEADER */}
 
       <div
         className="
-flex
-justify-between
-items-center
-mb-8
-flex-wrap
-gap-4
-"
+        flex
+        flex-col
+        md:flex-row
+        justify-between
+        gap-5
+        mb-8
+      "
       >
         <div>
           <h1
             className="
-text-3xl
-font-bold
-"
+            text-3xl
+            font-bold
+            text-gray-800
+          "
           >
-            Products
+            Products Management
           </h1>
 
           <p
             className="
-text-gray-500
-"
+            text-gray-500
+            mt-2
+          "
           >
-            Manage your store products
+            Manage inventory, pricing and product visibility.
           </p>
         </div>
 
         <button
           onClick={() => navigate("/admin/products/add")}
           className="
-bg-green-600
-text-white
-px-5
-py-3
-rounded-xl
-flex
-items-center
-gap-2
-font-semibold
-"
+            bg-green-600
+            hover:bg-green-700
+            text-white
+            px-6
+            py-3
+            rounded-xl
+            flex
+            items-center
+            gap-2
+            font-semibold
+            shadow
+          "
         >
           <FaPlus />
           Add Product
         </button>
       </div>
 
-      {/* SEARCH */}
+      {/* STATS */}
+
+      <ProductStats stats={stats} />
+
+      {/* FILTERS */}
+
+      <ProductFilters
+        filters={filters}
+        setFilters={setFilters}
+        onSearch={handleSearch}
+      />
+
+      {/* TABLE */}
+
+      <ProductTable
+        products={products}
+        loading={loading}
+        onDelete={handleDelete}
+        onEdit={(id) => navigate(`/admin/products/edit/${id}`)}
+        onToggleTrending={toggleTrending}
+        onToggleFlashSale={toggleFlashSale}
+      />
+
+      {/* PAGINATION */}
 
       <div
         className="
-bg-white
-rounded-xl
-p-4
-mb-6
-shadow
-"
+        flex
+        justify-center
+        gap-3
+        mt-8
+      "
       >
-        <div
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
           className="
-relative
-max-w-md
-"
+            px-4
+            py-2
+            bg-white
+            rounded-lg
+            shadow
+            disabled:opacity-50
+          "
         >
-          <FaSearch
-            className="
-absolute
-left-4
-top-1/2
--translate-y-1/2
-text-gray-400
-"
-          />
+          Previous
+        </button>
 
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="
-Search products...
-"
-            className="
-w-full
-border
-rounded-xl
-py-3
-pl-12
-"
-          />
-        </div>
-      </div>
+        <span
+          className="
+          px-4
+          py-2
+          bg-purple-600
+          text-white
+          rounded-lg
+        "
+        >
+          {page}
+        </span>
 
-      {/* LOADING */}
-
-      {loading && <p>Loading products...</p>}
-
-      {/* PRODUCTS */}
-
-      <div
-        className="
-grid
-sm:grid-cols-2
-lg:grid-cols-3
-xl:grid-cols-4
-gap-6
-"
-      >
-        {filteredProducts.map((product) => (
-          <div
-            key={product._id}
-            className="
-bg-white
-rounded-3xl
-shadow
-overflow-hidden
-"
-          >
-            {/* IMAGE */}
-
-            <div
-              className="
-h-60
-bg-gray-100
-"
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="
-w-full
-h-full
-object-contain
-"
-              />
-            </div>
-
-            <div
-              className="
-p-5
-space-y-3
-"
-            >
-              <div
-                className="
-flex
-justify-between
-"
-              >
-                <span
-                  className="
-bg-green-100
-text-green-700
-px-3
-py-1
-rounded-full
-text-xs
-"
-                >
-                  {product.category?.name}
-                </span>
-
-                {product.isTrending && (
-                  <FaFire
-                    className="
-text-red-500
-"
-                  />
-                )}
-
-                {product.isFlashSale && (
-                  <FaBolt
-                    className="
-text-yellow-500
-"
-                  />
-                )}
-              </div>
-
-              <h2
-                className="
-font-bold
-text-lg
-"
-              >
-                {product.name}
-              </h2>
-
-              <p
-                className="
-text-green-600
-font-bold
-text-xl
-"
-              >
-                ₦{product.price?.toLocaleString()}
-              </p>
-
-              <p>
-                Stock:
-                <b>{product.stock}</b>
-              </p>
-
-              <div
-                className="
-flex
-justify-between
-pt-4
-"
-              >
-                <Link
-                  to={`/admin/products/edit/${product._id}`}
-                  className="
-text-blue-600
-flex
-items-center
-gap-1
-"
-                >
-                  <FaEdit />
-                  Edit
-                </Link>
-
-                <button
-                  onClick={() => deleteProduct(product._id)}
-                  className="
-text-red-600
-flex
-items-center
-gap-1
-"
-                >
-                  <FaTrash />
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+          className="
+            px-4
+            py-2
+            bg-white
+            rounded-lg
+            shadow
+            disabled:opacity-50
+          "
+        >
+          Next
+        </button>
       </div>
     </div>
   );

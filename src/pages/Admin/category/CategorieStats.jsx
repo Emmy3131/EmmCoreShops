@@ -5,6 +5,7 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import api from "../../../library/api";
+import PageLoader from "../../../component/PageLoader";
 
 const CategoryStats = ({ categories }) => {
 
@@ -55,6 +56,7 @@ const CategoryStats = ({ categories }) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
 
+      
       {stats.map((stat) => (
 
         <div

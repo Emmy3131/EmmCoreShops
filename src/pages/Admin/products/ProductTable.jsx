@@ -4,6 +4,7 @@ import {
   FaFire,
   FaBolt,
 } from "react-icons/fa";
+import PageLoader from "../../../component/PageLoader";
 
 const ProductTable = ({
   products,
@@ -15,9 +16,7 @@ const ProductTable = ({
 }) => {
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-20 text-center">
-        Loading products...
-      </div>
+      <PageLoader text="Loading products..." />
     );
   }
 

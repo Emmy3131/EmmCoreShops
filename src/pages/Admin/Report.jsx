@@ -14,6 +14,7 @@ import ReportSummaryCard from "../../component/Admin/Reports/ReportSummaryCard";
 import ReportTable from "../../component/Admin/Reports/ReportTable";
 import ReportDownloadModal from "../../component/Admin/Reports/ReportDownloadModel";
 import PageHeader from "../../component/Admin/PageHeader";
+import PageLoader from "../../component/PageLoader";
 
 const Report = () => {
   const [stats, setStats] = useState({
@@ -138,16 +139,6 @@ const Report = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading reports...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -161,6 +152,12 @@ const Report = () => {
       />
 
       {/* SUMMARY CARDS */}
+      {loading ? (
+        <PageLoader text="Loading reports..." />
+      ) : cards.length === 0 ? (
+        <div className="p-6 text-gray-500">No report data available</div>
+      ) : (
+        <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {cards.map((card, index) => (
           <ReportSummaryCard
@@ -211,6 +208,9 @@ const Report = () => {
           )}
         </div>
       </div>
+      </>
+      )}
+      
 
       {/* DOWNLOAD MODAL */}
       {showDownload && (

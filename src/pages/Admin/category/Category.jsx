@@ -16,6 +16,7 @@ import api from "../../../library/api";
 import CategoryStats from "./CategorieStats";
 import CategoryModal from "../../../component/Admin/CategorieModel";
 import DeleteCategoryModal from "../../../component/Admin/DeleteCategorieModel";
+import PageLoader from "../../../component/PageLoader";
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -115,8 +116,12 @@ space-y-6
         onButtonClick={() => navigate("/admin/category/add")}
       />
 
-
-      <CategoryStats categories={categories} />
+      {categories.length === 0 ? (
+        <PageLoader text="Loading categories..." />
+      ) : (
+        <CategoryStats categories={categories} />
+      )}
+      {/* <CategoryStats categories={categories} /> */}
 
       {/* ================= FILTER ================= */}
 

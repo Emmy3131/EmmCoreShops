@@ -6,6 +6,7 @@ import OrderTable from "../../component/Admin/OrderTable";
 import OrderCard from "../../component/Admin/OrderCard";
 import OrderDetailsModal from "../../component/Admin/OrderDetailsModels";
 import PageHeader from "../../component/Admin/PageHeader";
+import PageLoader from "../../component/PageLoader";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -109,27 +110,38 @@ const AdminOrders = () => {
 
       {/* ================= DESKTOP TABLE ================= */}
 
-      <OrderTable
-        orders={paginatedOrders}
-        setSelectedOrder={setSelectedOrder}
-        updateOrderStatus={updateOrderStatus}
-      />
+      {/* ================= DESKTOP TABLE ================= */}
 
-     
-      {/* ================= MOBILE CARDS ================= */}
-      {/* MOBILE */}
-      <div className="md:hidden space-y-4">
-        {paginatedOrders.map((order) => (
-          <OrderCard
-            key={order._id}
-            order={order}
+      {loading ? (
+        
+          <PageLoader text="Loading orders..." />
+      ) : filteredOrders.length === 0 ? (
+        <div className="p-6 text-gray-500">No orders found</div>
+      ) : (
+        <>
+          <OrderTable
+            orders={paginatedOrders}
             setSelectedOrder={setSelectedOrder}
             updateOrderStatus={updateOrderStatus}
           />
-        ))}
-      </div>
 
-       <Pagination
+
+          {/* ================= MOBILE CARDS ================= */}
+
+          <div className="md:hidden space-y-4">
+            {paginatedOrders.map((order) => (
+              <OrderCard
+                key={order._id}
+                order={order}
+                setSelectedOrder={setSelectedOrder}
+                updateOrderStatus={updateOrderStatus}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      <Pagination
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}

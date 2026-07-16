@@ -1,143 +1,223 @@
-import { useState } from "react";
-import { FaDownload, FaChartLine, FaMoneyBill, FaUsers } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import {
+  FaDownload,
+  FaMoneyBill,
+  FaUsers,
+  FaBox,
+  FaShoppingCart,
+} from "react-icons/fa";
+
+import api from "../../library/api";
+
+import ReportChart from "../../component/Admin/Reports/ReportChart";
+import ReportSummaryCard from "../../component/Admin/Reports/ReportSummaryCard";
+import ReportTable from "../../component/Admin/Reports/ReportTable";
+import ReportDownloadModal from "../../component/Admin/Reports/ReportDownloadModel";
+import PageHeader from "../../component/Admin/PageHeader";
 
 const Report = () => {
-  const [reports] = useState({
-    totalSales: 245,
-    totalRevenue: 1250000,
-    totalUsers: 820,
-    totalOrders: 312,
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalRevenue: 0,
   });
 
-  const summaryCards = [
-    {
-      title: "Total Sales",
-      value: reports.totalSales,
-      icon: <FaChartLine />,
-      color: "text-blue-600",
-    },
+  const [salesData, setSalesData] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [orderStatus, setOrderStatus] = useState([]);
+  const [showDownload, setShowDownload] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  /*
+  =================================
+  FETCH REPORT DATA
+  =================================
+  */
+
+  const fetchReports = async () => {
+    try {
+      const [productsRes, ordersRes] = await Promise.all([
+        api.get("/reports/top-products"),
+        api.get("/reports/orders"),
+      ]);
+
+      setTopProducts(productsRes.data.data || []);
+      setOrderStatus(ordersRes.data.data || []);
+    } catch (error) {
+      console.error("REPORT ERROR:", error);
+    }
+  };
+
+  /*
+  =================================
+  FETCH DASHBOARD STATS
+  =================================
+  */
+
+  const handleStats = async () => {
+    try {
+      const res = await api.get("/stats/dashboard-stats");
+
+      if (res.data.status === "success") {
+        setStats(res.data.stats);
+      }
+    } catch (error) {
+      console.error("STATS ERROR:", error);
+    }
+  };
+
+  /*
+  =================================
+  FETCH SALES OVERVIEW
+  =================================
+  */
+
+  const handleSalesData = async () => {
+    try {
+      const res = await api.get("/stats/sales-overview");
+
+      if (res.data.status === "success") {
+        setSalesData(res.data.data || []);
+      }
+    } catch (error) {
+      console.error("SALES ERROR:", error);
+    }
+  };
+
+  /*
+  =================================
+  LOAD EVERYTHING
+  =================================
+  */
+
+  const loadReports = async () => {
+    try {
+      setLoading(true);
+
+      await Promise.all([
+        fetchReports(),
+        handleStats(),
+        handleSalesData(),
+      ]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  const cards = [
     {
       title: "Revenue",
-      value: `₦${reports.totalRevenue.toLocaleString()}`,
+      value: `₦${Number(stats.totalRevenue || 0).toLocaleString()}`,
       icon: <FaMoneyBill />,
       color: "text-green-600",
     },
     {
-      title: "Users",
-      value: reports.totalUsers,
+      title: "Orders",
+      value: Number(stats.totalOrders || 0).toLocaleString(),
+      icon: <FaShoppingCart />,
+      color: "text-blue-600",
+    },
+    {
+      title: "Customers",
+      value: Number(stats.totalUsers || 0).toLocaleString(),
       icon: <FaUsers />,
       color: "text-purple-600",
     },
     {
-      title: "Orders",
-      value: reports.totalOrders,
-      icon: <FaChartLine />,
+      title: "Products",
+      value: Number(stats.totalProducts || 0).toLocaleString(),
+      icon: <FaBox />,
       color: "text-pink-600",
     },
   ];
 
-  return (
-    <div className="md:p-6 min-h-screen">
-
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Reports & Analytics
-          </h1>
-          <p className="text-sm text-gray-500">
-            Overview of business performance
-          </p>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading reports...</p>
         </div>
-
-        <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
-          <FaDownload />
-          Download Report
-        </button>
-
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      {/* HEADER */}
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Business performance overview"
+        buttonText="Download Report"
+        buttonIcon={<FaDownload />}
+        onButtonClick={() => setShowDownload(true)}
+      />
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-
-        {summaryCards.map((card, index) => (
-          <div
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        {cards.map((card, index) => (
+          <ReportSummaryCard
             key={index}
-            className="bg-white p-4 rounded-xl shadow hover:shadow-md transition"
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-gray-500">{card.title}</p>
-                <h2 className={`text-xl font-bold ${card.color}`}>
-                  {card.value}
-                </h2>
-              </div>
-
-              <div className="text-2xl text-gray-400">
-                {card.icon}
-              </div>
-            </div>
-          </div>
+            title={card.title}
+            value={card.value}
+            icon={card.icon}
+            color={card.color}
+          />
         ))}
-
       </div>
 
-      {/* CHART PLACEHOLDER */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">
-          Sales Overview
-        </h2>
+      {/* SALES CHART */}
+      <ReportChart data={salesData} />
 
-        <div className="h-64 flex items-center justify-center text-gray-400 border-dashed border-2 rounded-lg">
-          📊 Chart will be displayed here (Recharts / Chart.js)
+      {/* TABLES */}
+      <div className="grid lg:grid-cols-2 gap-6 mt-8">
+        {/* TOP PRODUCTS */}
+        <ReportTable data={topProducts} />
+
+        {/* ORDER STATUS */}
+        <div className="bg-white rounded-2xl shadow p-6">
+          <h2 className="font-bold text-lg mb-5">
+            Order Status
+          </h2>
+
+          {orderStatus.length === 0 ? (
+            <div className="text-gray-500 text-center py-6">
+              No order status available.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {orderStatus.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex justify-between items-center bg-gray-50 rounded-xl p-4"
+                >
+                  <span className="capitalize font-medium">
+                    {item._id}
+                  </span>
+
+                  <span className="font-bold text-purple-600">
+                    {item.count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* REPORT TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto">
-
-        <table className="w-full min-w-[700px] text-sm">
-
-          <thead className="bg-gray-100 text-left text-gray-600">
-            <tr>
-              <th className="p-3">Metric</th>
-              <th className="p-3">Value</th>
-              <th className="p-3">Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr className="border-t">
-              <td className="p-3">Monthly Growth</td>
-              <td className="p-3">+12.5%</td>
-              <td className="p-3 text-green-600">Positive</td>
-            </tr>
-
-            <tr className="border-t">
-              <td className="p-3">Customer Retention</td>
-              <td className="p-3">78%</td>
-              <td className="p-3 text-green-600">Good</td>
-            </tr>
-
-            <tr className="border-t">
-              <td className="p-3">Refund Rate</td>
-              <td className="p-3">2.1%</td>
-              <td className="p-3 text-yellow-600">Average</td>
-            </tr>
-
-            <tr className="border-t">
-              <td className="p-3">Cart Abandonment</td>
-              <td className="p-3">34%</td>
-              <td className="p-3 text-red-600">High</td>
-            </tr>
-
-          </tbody>
-
-        </table>
-      </div>
-
+      {/* DOWNLOAD MODAL */}
+      {showDownload && (
+        <ReportDownloadModal
+          closeModal={() => setShowDownload(false)}
+        />
+      )}
     </div>
   );
 };

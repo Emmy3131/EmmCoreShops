@@ -13,9 +13,9 @@ import {
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
-import SalesChart from "../../component/Admin/SalesChart";
 import { useNavigate } from "react-router-dom";
 import StatCard from "../../component/Admin/StatsCard";
+import PageHeader from "../../component/Admin/PageHeader";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -70,7 +70,10 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6 p-4 bg-gray-50 min-h-screen">
       {/* HEADER */}
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <PageHeader
+        title="Admin Dashboard"
+        subtitle="Overview of your store's performance"
+      />
 
       {/* STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -94,7 +97,7 @@ const AdminDashboard = () => {
         />
         <StatCard
           title="Revenue"
-          value={stats.totalRevenue}
+          value={`₦${stats.totalRevenue.toLocaleString()}`}
           icon={<FaMoneyBillWave />}
           color="bg-pink-500"
         />

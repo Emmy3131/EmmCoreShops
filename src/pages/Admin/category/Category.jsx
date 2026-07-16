@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import PageHeader from "../../../component/Admin/PageHeader";
 
 import {
   FaPlus,
@@ -106,72 +107,14 @@ space-y-6
     >
       {/* ================= HEADER ================= */}
 
-      <div
-        className="
-bg-gradient-to-r
-from-indigo-600
-via-blue-600
-to-cyan-600
-rounded-3xl
-p-6
-md:p-8
-text-white
-shadow-xl
-"
-      >
-        <div
-          className="
-flex
-flex-col
-md:flex-row
-md:justify-between
-md:items-center
-gap-5
-"
-        >
-          <div>
-            <h1
-              className="
-text-3xl
-font-bold
-"
-            >
-              Categories
-            </h1>
+      <PageHeader
+        title="Categories"
+        subtitle="Manage your store categories"
+        buttonText="Add Category"
+        buttonIcon={<FaPlus />}
+        onButtonClick={() => navigate("/admin/category/add")}
+      />
 
-            <p
-              className="
-text-blue-100
-mt-2
-"
-            >
-              Manage your store categories
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/admin/category/add")}
-            className="
-bg-white
-text-indigo-600
-px-5
-py-3
-rounded-xl
-font-semibold
-shadow
-flex
-items-center
-justify-center
-gap-2
-hover:scale-105
-transition
-"
-          >
-            <FaPlus />
-            Add Category
-          </button>
-        </div>
-      </div>
 
       <CategoryStats categories={categories} />
 
@@ -489,11 +432,10 @@ rounded-full
 text-xs
 font-semibold
 
-${
-  cat.status === "inactive"
-    ? "bg-red-100 text-red-600"
-    : "bg-green-100 text-green-600"
-}
+${cat.status === "inactive"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-green-100 text-green-600"
+                      }
 
 `}
                   >

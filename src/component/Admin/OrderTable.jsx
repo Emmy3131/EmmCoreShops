@@ -1,25 +1,17 @@
 import OrderStatusBadge from "./OrderStatuseBadge";
 import PaymentBadge from "./PaymentBadget";
 
-const OrderTable = ({
-  orders,
-  setSelectedOrder,
-  updateOrderStatus,
-}) => {
+const OrderTable = ({ orders, setSelectedOrder, updateOrderStatus }) => {
   return (
     <div className="bg-white rounded-2xl hidden md:block shadow-sm overflow-hidden">
-
       {/* Header */}
       <div className="p-4 shadow-sm bg-gray-50">
-        <h2 className="font-semibold text-gray-700">
-          Orders List
-        </h2>
+        <h2 className="font-semibold text-gray-700">Orders List</h2>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-
           <thead className="text-left bg-white sticky top-0 z-10">
             <tr className="text-gray-500 border-b">
               <th className="p-4">Customer</th>
@@ -32,13 +24,9 @@ const OrderTable = ({
           </thead>
 
           <tbody>
-
             {orders.length === 0 && (
               <tr>
-                <td
-                  colSpan="6"
-                  className="text-center p-10 text-gray-400"
-                >
+                <td colSpan="6" className="text-center p-10 text-gray-400">
                   No orders found
                 </td>
               </tr>
@@ -49,16 +37,12 @@ const OrderTable = ({
                 key={order._id}
                 className=" shadow-sm hover:bg-gray-50 transition"
               >
-
                 {/* Customer */}
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-
                     {/* Avatar */}
                     <div className="w-9 h-9 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
-                      {order.user
-                        ? order.user.firstName?.charAt(0)
-                        : "U"}
+                      {order.user ? order.user.firstName?.charAt(0) : "U"}
                     </div>
 
                     <div>
@@ -72,7 +56,6 @@ const OrderTable = ({
                         {order.user?.email}
                       </p>
                     </div>
-
                   </div>
                 </td>
 
@@ -88,7 +71,36 @@ const OrderTable = ({
 
                 {/* Status */}
                 <td>
-                  <OrderStatusBadge status={order.orderStatus} />
+                  {/* Status */}
+                  <td>
+                    <select
+                      value={order.orderStatus}
+                      onChange={(e) =>
+                        updateOrderStatus(order._id, e.target.value)
+                      }
+                      className="
+      px-3
+      py-2
+      rounded-lg
+      border
+      text-sm
+      bg-white
+      focus:outline-none
+      focus:ring-2
+      focus:ring-blue-500
+    "
+                    >
+                      <option value="pending">Pending</option>
+
+                      <option value="processing">Processing</option>
+
+                      <option value="shipped">Shipping</option>
+
+                      <option value="delivered">Delivered</option>
+
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
                 </td>
 
                 {/* Date */}
@@ -105,14 +117,11 @@ const OrderTable = ({
                     View
                   </button>
                 </td>
-
               </tr>
             ))}
-
           </tbody>
         </table>
       </div>
-
     </div>
   );
 };

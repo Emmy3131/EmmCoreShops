@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa";
 import api from "../../library/api";
 import UserModal from "../../component/Admin/UserModel";
+import PageHeader from "../../component/Admin/PageHeader";
+import PageLoader from "../../component/PageLoader";
 
 const User = () => {
   const [search, setSearch] = useState("");
@@ -73,17 +75,18 @@ const User = () => {
     );
   });
 
-  if (loading) {
-    return <div className="p-6 text-gray-500">Loading users...</div>;
-  }
+  // if (loading) {
+  //   return <div className="p-6 text-gray-500">Loading users...</div>;
+  // }
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold">Users Management</h1>
-        <p className="text-gray-500">Manage all platform users</p>
-      </div>
+      <PageHeader
+        title={"Users Management"}
+        subtitle="Manage all platform users"
+      />
+  
 
       {/* SEARCH */}
       <div className="flex items-center gap-2 bg-white p-3 rounded-xl shadow">
@@ -97,11 +100,16 @@ const User = () => {
       </div>
 
       {/* USERS GRID */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            className="bg-white rounded-2xl shadow p-4 space-y-3 hover:shadow-lg transition"
+      {loading ? (
+        <PageLoader text="Loading users..." />
+      ) : filteredUsers.length === 0 ? (
+        <div className="p-6 text-gray-500">No users found</div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredUsers.map((user) => (
+            <div
+              key={user._id}
+              className="bg-white rounded-2xl shadow p-4 space-y-3 hover:shadow-lg transition"
           >
             {/* HEADER */}
             <div className="flex justify-between items-center">
@@ -157,6 +165,7 @@ const User = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* MODAL */}
       <UserModal user={selectedUser} onClose={() => setSelectedUser(null)} />

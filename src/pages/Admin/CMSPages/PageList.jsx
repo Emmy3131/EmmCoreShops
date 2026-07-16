@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../library/api";
 import { useNavigate } from "react-router-dom";
+import PageHeader from "../../../component/Admin/PageHeader";
 
 import {
   FaPlus,
@@ -122,70 +123,13 @@ space-y-6
     >
       {/* HEADER */}
 
-      <div
-        className="
-bg-gradient-to-r
-from-pink-600
-via-purple-600
-to-indigo-600
-rounded-3xl
-p-8
-text-white
-shadow-xl
-"
-      >
-        <div
-          className="
-flex
-justify-between
-items-center
-flex-wrap
-gap-5
-"
-        >
-          <div>
-            <h1
-              className="
-text-3xl
-font-bold
-flex
-items-center
-gap-3
-"
-            >
-              <FaFileAlt />
-              CMS Page Manager
-            </h1>
-
-            <p
-              className="
-text-white/80
-mt-2
-"
-            >
-              Manage website pages, legal pages and company information.
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/admin/cms-pages/create")}
-            className="
-bg-white
-text-purple-700
-px-6
-py-3
-rounded-xl
-font-semibold
-flex
-gap-2
-items-center
-"
-          >
-            <FaPlus />
-            Create Page
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="CMS Pages"
+        subtitle="Manage your website pages"
+        buttonText="Create Page"
+        buttonIcon={<FaPlus />}
+        onButtonClick={() => navigate("/admin/cms-pages/create")}
+      />
 
       {/* STATS */}
 

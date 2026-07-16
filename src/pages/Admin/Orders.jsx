@@ -5,6 +5,7 @@ import Pagination from "../../component/Admin/Pagination";
 import OrderTable from "../../component/Admin/OrderTable";
 import OrderCard from "../../component/Admin/OrderCard";
 import OrderDetailsModal from "../../component/Admin/OrderDetailsModels";
+import PageHeader from "../../component/Admin/PageHeader";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -48,11 +49,11 @@ const AdminOrders = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-6 text-gray-500 animate-pulse">Loading orders...</div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="p-6 text-gray-500 animate-pulse">Loading orders...</div>
+  //   );
+  // }
 
   const filteredOrders = [...orders]
     .filter((order) => {
@@ -88,10 +89,11 @@ const AdminOrders = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen space-y-6">
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Orders</h1>
-        <p className="text-sm text-gray-500">Manage all customer orders</p>
-      </div>
+      <PageHeader
+        title={"Orders"}
+        subtitle="Manage all customer orders"
+      />
+
 
       <OrderToolbar
         orders={orders}

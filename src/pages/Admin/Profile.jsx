@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 
 import api from "../../library/api";
+import PageHeader from "../../component/Admin/PageHeader";
 
 const Profile = () => {
   const [editMode, setEditMode] = useState(false);
@@ -162,27 +163,14 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 space-y-6">
       {/* HEADER */}
+      <PageHeader
+        title="Admin Profile"
+        subtitle="Manage your administrator account"
+        buttonIcon={<FaEdit/>}
+        buttonText={editMode? "Cancel" : "Edit Profile"}
+        onButtonClick={() => setEditMode(!editMode)}
+      />
 
-      <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-3xl p-6 md:p-8 text-white shadow-xl">
-        <div className="flex flex-col md:flex-row justify-between gap-5">
-          <div>
-            <h1 className="text-3xl font-bold">Admin Profile</h1>
-
-            <p className="text-white/80 mt-2">
-              Manage your administrator account
-            </p>
-          </div>
-
-          <button
-            onClick={() => setEditMode(!editMode)}
-            className="bg-white text-purple-700 px-6 py-3 rounded-xl font-semibold flex items-center gap-2"
-          >
-            <FaEdit />
-
-            {editMode ? "Cancel" : "Edit Profile"}
-          </button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* PROFILE CARD */}

@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 
 import api from "../../../library/api";
+import PageHeader from "../../../component/Admin/PageHeader";
 
 const HeroBanners = () => {
   const navigate = useNavigate();
@@ -145,66 +146,13 @@ space-y-6
     >
       {/* HEADER */}
 
-      <div
-        className="
-bg-gradient-to-r
-from-pink-600
-via-purple-600
-to-indigo-600
-rounded-3xl
-p-8
-text-white
-shadow-xl
-"
-      >
-        <div
-          className="
-flex
-justify-between
-items-center
-flex-col
-md:flex-row
-gap-5
-"
-        >
-          <div>
-            <h1
-              className="
-text-3xl
-font-bold
-flex
-items-center
-gap-3
-"
-            >
-              <FaImages />
-              Hero Banner Manager
-            </h1>
-
-            <p className="mt-2 text-white/80">
-              Manage homepage sliders and promotions
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/admin/hero-banners/add")}
-            className="
-bg-white
-text-purple-700
-px-6
-py-3
-rounded-xl
-font-bold
-flex
-items-center
-gap-2
-"
-          >
-            <FaPlus />
-            Create Banner
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Hero Banners"
+        subtitle="Manage homepage sliders and promotions"
+        buttonText="Create Banner"
+        buttonIcon={<FaPlus />}
+        onButtonClick={() => navigate("/admin/hero-banners/add")}
+      />
 
       {/* STATS */}
 

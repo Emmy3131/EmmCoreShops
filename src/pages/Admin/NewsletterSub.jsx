@@ -9,6 +9,7 @@ import {
   FaUsers,
   FaCalendarAlt,
 } from "react-icons/fa";
+import PageHeader from "../../component/Admin/PageHeader";
 
 const NewsletterSub = () => {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -70,56 +71,18 @@ const NewsletterSub = () => {
     >
       {/* ================= HEADER ================= */}
 
-      <div
-        className="
-        bg-gradient-to-r
-        from-orange-500
-        via-pink-500
-        to-purple-600
-        rounded-3xl
-        p-8
-        text-white
-        shadow-xl
-      "
-      >
-        <div
-          className="
-          flex
-          flex-col
-          md:flex-row
-          md:justify-between
-          gap-6
-        "
-        >
-          <div>
-            <h1
-              className="
-              text-3xl
-              md:text-4xl
-              font-bold
-            "
-            >
-              Newsletter Subscribers
-            </h1>
-
-            <p
-              className="
-              mt-2
-              text-white/80
-            "
-            >
-              Manage your email audience and marketing subscribers
-            </p>
-          </div>
-
+      <PageHeader
+        title="Newsletter Subscribers"
+        subtitle="Manage your email audience and marketing subscribers"
+        rightContent={
           <div
             className="
-            bg-white/20
-            backdrop-blur
-            rounded-2xl
-            p-5
-            min-w-[180px]
-          "
+      bg-white/20
+      backdrop-blur
+      rounded-2xl
+      p-5
+      min-w-[180px]
+    "
           >
             <div className="flex items-center gap-3">
               <FaUsers size={25} />
@@ -127,19 +90,14 @@ const NewsletterSub = () => {
               <div>
                 <p className="text-sm">Total Subscribers</p>
 
-                <h2
-                  className="
-                  text-3xl
-                  font-bold
-                "
-                >
+                <h2 className="text-3xl font-bold">
                   {subscriptions.length}
                 </h2>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* ================= SEARCH ================= */}
 

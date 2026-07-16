@@ -7,6 +7,7 @@ import api from "../../../library/api";
 import ProductStats from "./ProductStats";
 import ProductFilters from "./ProductFilters";
 import ProductTable from "./ProductTable";
+import PageHeader from "../../../component/Admin/PageHeader";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -177,58 +178,13 @@ const Products = () => {
     "
     >
       {/* HEADER */}
-
-      <div
-        className="
-        flex
-        flex-col
-        md:flex-row
-        justify-between
-        gap-5
-        mb-8
-      "
-      >
-        <div>
-          <h1
-            className="
-            text-3xl
-            font-bold
-            text-gray-800
-          "
-          >
-            Products Management
-          </h1>
-
-          <p
-            className="
-            text-gray-500
-            mt-2
-          "
-          >
-            Manage inventory, pricing and product visibility.
-          </p>
-        </div>
-
-        <button
-          onClick={() => navigate("/admin/products/add")}
-          className="
-            bg-green-600
-            hover:bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-xl
-            flex
-            items-center
-            gap-2
-            font-semibold
-            shadow
-          "
-        >
-          <FaPlus />
-          Add Product
-        </button>
-      </div>
+      <PageHeader
+        title="Products Management"
+        subtitle="Manage inventory, pricing and product visibility."
+        buttonText="Add Product"
+        buttonIcon={<FaPlus />}
+        onButtonClick={() => navigate("/admin/products/add")}
+      />
 
       {/* STATS */}
 

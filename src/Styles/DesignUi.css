@@ -1,0 +1,83 @@
+:root {
+  /* =========================================
+     BRAND COLORS
+  ========================================= */
+
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #eff6ff;
+
+  --color-accent: #06b6d4;
+  --color-accent-dark: #0891b2;
+  --color-accent-light: #ecfeff;
+
+  /* =========================================
+     TEXT COLORS
+  ========================================= */
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+
+  /* =========================================
+     BACKGROUND COLORS
+  ========================================= */
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+
+  /* =========================================
+     STATUS COLORS
+  ========================================= */
+
+  --color-success: #10b981;
+  --color-success-light: #ecfdf5;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fffbeb;
+
+  --color-danger: #ef4444;
+  --color-danger-light: #fef2f2;
+
+  /* =========================================
+     BORDERS
+  ========================================= */
+
+  --color-border: #e2e8f0;
+  --color-border-dark: #cbd5e1;
+
+  /* =========================================
+     RADIUS
+  ========================================= */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* =========================================
+     SHADOWS
+  ========================================= */
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+
+  --shadow-md:
+    0 4px 12px rgba(15, 23, 42, 0.08);
+
+  --shadow-lg:
+    0 12px 30px rgba(15, 23, 42, 0.12);
+
+  --shadow-primary:
+    0 8px 20px rgba(37, 99, 235, 0.25);
+
+  /* =========================================
+     TRANSITIONS
+  ========================================= */
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}

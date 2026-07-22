@@ -1,304 +1,731 @@
 import {
   FaStar,
   FaStore,
-  FaMapMarkerAlt,
   FaTag,
   FaChevronRight,
+  FaUser,
+  FaBox,
+  FaHeart,
+  FaWallet,
+  FaSignOutAlt,
+  FaEnvelope,
+  FaPhone,
+  FaWhatsapp,
+  FaTimes,
 } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
-import MenuLink from "./MenuLink";
-import MenuItem from "./MenuItem";
-import api from "../library/api";
-import { useEffect, useState } from "react";
 
-const Sidebar = ({ isOpen, closeSidebar }) => {
-  const { user, logout } = useAuth();
-  const [categories, setCategories] = useState([]);
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import { useAuth } from "../Context/AuthContext";
+import api from "../library/api";
+
+const Sidebar = ({
+  isOpen,
+  closeSidebar,
+}) => {
+  const {
+    user,
+    logout,
+  } = useAuth();
+
   const navigate = useNavigate();
 
-  const handleSettings = () => {
-    navigate("/settings");
-  };
+  const [
+    categories,
+    setCategories,
+  ] = useState([]);
 
- 
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      console.log("CATEGORIES RESPONSE:", res.data);
-
-      if (res.data.status === "success") {
-        console.log("Fetched categories:", res.data.data);
-        setCategories(res.data.data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  /* =========================================
+     FETCH CATEGORIES
+  ========================================= */
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories");
+
+        setCategories(
+          res.data?.data || []
+        );
+
+      } catch (error) {
+        console.error(
+          "Error fetching categories:",
+          error
+        );
+      }
+    };
+
     fetchCategories();
+
   }, []);
+
+  /* =========================================
+     NAVIGATION
+  ========================================= */
+
+  const handleNavigation = (
+    path
+  ) => {
+    closeSidebar();
+
+    navigate(path);
+  };
 
   return (
     <>
-      {/* OVERLAY */}
+
+      {/* =====================================
+          OVERLAY
+      ===================================== */}
+
       <div
         onClick={closeSidebar}
-        className={`fixed inset-0 bg-black/40 z-40 transition-all duration-300
-    ${
-      isOpen
-        ? "opacity-100 visible pointer-events-auto"
-        : "opacity-0 invisible pointer-events-none"
-    }
-  `}
+        className={`
+          fixed
+          inset-0
+          bg-slate-950/60
+          z-[60]
+          transition-opacity
+          duration-300
+          ${
+            isOpen
+              ? "opacity-100 visible"
+              : "opacity-0 invisible pointer-events-none"
+          }
+        `}
       />
 
-      {/* SIDEBAR */}
-      <div
+      {/* =====================================
+          SIDEBAR
+      ===================================== */}
+
+      <aside
         className={`
-          fixed top-[53px] left-0 h-full w-full
-          bg-white shadow-lg
-          transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          z-50 overflow-y-auto
+          fixed
+          top-0
+          left-0
+          h-screen
+          w-full
+          max-w-md
+          bg-slate-50
+          z-[70]
+          overflow-y-auto
+          shadow-2xl
+          transition-transform
+          duration-300
+          ${
+            isOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
         `}
       >
-        {/* LOGIN / SIGNUP */}
-        {/* ================= USER SECTION ================= */}
 
-        <div className="px-4 pt-7 pb-4 border-b">
-          {!user ? (
-            /* ================= GUEST VIEW ================= */
+        {/* =====================================
+            HEADER
+        ===================================== */}
+
+        <div
+          className="
+            sticky
+            top-0
+            z-20
+            bg-gradient-to-r
+            from-blue-700
+            to-cyan-500
+            text-white
+            px-5
+            py-4
+          "
+        >
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <p className="text-xs text-blue-100">
+                Welcome to
+              </p>
+
+              <h1 className="text-xl font-extrabold">
+                EmmCore
+                <span className="text-cyan-200">
+                  Shops
+                </span>
+              </h1>
+
+            </div>
+
+            <button
+              onClick={closeSidebar}
+              className="
+                w-10
+                h-10
+                rounded-xl
+                bg-white/10
+                hover:bg-white/20
+                flex
+                items-center
+                justify-center
+                transition-colors
+              "
+            >
+              <FaTimes size={18} />
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* =====================================
+            ACCOUNT SECTION
+        ===================================== */}
+
+        <section className="bg-white px-5 py-5 border-b border-slate-200">
+
+          {user ? (
+
             <>
-              {/* LOGIN BUTTONS */}
-              <div className="flex gap-3 text-center mb-5">
-                <Link
-                  to="/login"
-                  className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded"
+
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    w-14
+                    h-14
+                    rounded-2xl
+                    bg-gradient-to-br
+                    from-blue-600
+                    to-cyan-500
+                    text-white
+                    flex
+                    items-center
+                    justify-center
+                    text-xl
+                    font-bold
+                    shadow-md
+                  "
+                >
+                  {user.firstName?.charAt(0)}
+                </div>
+
+                <div className="min-w-0">
+
+                  <p className="text-xs text-slate-500">
+                    Welcome back
+                  </p>
+
+                  <h2 className="font-bold text-slate-900 truncate">
+                    {user.firstName}{" "}
+                    {user.lastName}
+                  </h2>
+
+                  <p className="text-xs text-slate-500 truncate">
+                    {user.email}
+                  </p>
+
+                </div>
+
+              </div>
+
+              <button
+                onClick={() =>
+                  handleNavigation(
+                    "/settings"
+                  )
+                }
+                className="
+                  mt-4
+                  w-full
+                  py-2.5
+                  rounded-xl
+                  bg-blue-50
+                  text-blue-600
+                  text-sm
+                  font-semibold
+                  hover:bg-blue-100
+                  transition-colors
+                "
+              >
+                Manage Account
+              </button>
+
+            </>
+
+          ) : (
+
+            <>
+
+              <div className="flex items-center gap-3 mb-4">
+
+                <div
+                  className="
+                    w-12
+                    h-12
+                    rounded-xl
+                    bg-blue-100
+                    text-blue-600
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <FaUser size={20} />
+                </div>
+
+                <div>
+
+                  <h2 className="font-bold text-slate-900">
+                    Welcome to EmmCoreShops
+                  </h2>
+
+                  <p className="text-xs text-slate-500">
+                    Sign in to manage your account
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="flex gap-3">
+
+                <button
+                  onClick={() =>
+                    handleNavigation(
+                      "/login"
+                    )
+                  }
+                  className="
+                    flex-1
+                    py-3
+                    rounded-xl
+                    border
+                    border-blue-600
+                    text-blue-600
+                    text-sm
+                    font-semibold
+                    hover:bg-blue-50
+                    transition-colors
+                  "
                 >
                   Login
-                </Link>
+                </button>
 
-                <Link
-                  to="/signup"
-                  className="flex-1 border border-[#ED017F] text-[#ED017F] py-2 rounded"
+                <button
+                  onClick={() =>
+                    handleNavigation(
+                      "/signup"
+                    )
+                  }
+                  className="
+                    flex-1
+                    py-3
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-blue-600
+                    to-cyan-500
+                    text-white
+                    text-sm
+                    font-semibold
+                    shadow-md
+                    hover:shadow-lg
+                    transition-all
+                  "
                 >
-                  Signup
-                </Link>
+                  Sign Up
+                </button>
+
               </div>
 
-              {/* GUEST ACTIONS */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <MenuItem title="Track Orders" />
-                <MenuItem title="Pending Items" />
-                <MenuItem title="Sell on EmmCore" />
-                <MenuItem title="Physical Stores" />
-              </div>
             </>
-          ) : (
-            /* ================= LOGGED USER ================= */
-            <>
-              <>
-                {/* ================= USER PROFILE ================= */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-12 h-12 bg-[#ED017F] text-white rounded flex items-center justify-center font-bold">
-                    {user.firstName?.charAt(0)}
-                  </div>
 
-                  <div className="flex flex-col">
-                    <p className="font-semibold text-sm">
-                      {user.firstName} {user.lastName}
-                    </p>
-
-                    <p className="text-xs text-gray-500">{user.email}</p>
-
-                    {/* ACCOUNT SETTINGS */}
-                    <button
-                      onClick={handleSettings}
-                      className="text-xs text-[#ED017F] font-medium"
-                    >
-                      Account Settings
-                    </button>
-                  </div>
-                </div>
-
-                {/* ACCOUNT SETTINGS TITLE */}
-                {/* <Link to="/settings" className="text-xs font-bold text-[#ED017F] mb-4">
-                  ACCOUNT SETTINGS
-                </Link> */}
-
-                {/* USER MENU GRID */}
-                <div className="grid grid-cols-2 gap-y-5 gap-x-4 text-sm">
-                  <MenuLink
-                    icon={<FaStore />}
-                    title="My Orders"
-                    desc="0 Items Ordered"
-                    to="user/orders"
-                  />
-
-                  {/* <MenuLink
-                    icon={<FaMapMarkerAlt />}
-                    title="Track Orders"
-                    desc="View order status"
-                    to="user/track"
-                  /> */}
-
-                  {/* <MenuLink
-                    icon={<FaStar />}
-                    title="Pending Items"
-                    to="user/pending"
-                  /> */}
-
-                  <MenuLink
-                    icon={<FaTag />}
-                    title="My Wallet"
-                    desc="Bal: ₦0"
-                    to="user/wallet"
-                  />
-
-                  <MenuLink
-                    icon={<FaStore />}
-                    title="Sell on EmmCore"
-                    desc="Join other merchants"
-                    to="/sell"
-                  />
-
-                  <MenuLink
-                    icon={<FaStar />}
-                    title="My Saved Items"
-                    desc="View liked items"
-                    to="/saved"
-                  />
-
-                  {/* <MenuLink
-                    icon={<FaStore />}
-                    title="Physical Stores"
-                    desc="Stores around you"
-                    to="/stores"
-                  /> */}
-
-                  {/* <MenuLink
-                    icon={<FaMapMarkerAlt />}
-                    title="My Addresses"
-                    desc="View saved addresses"
-                    to="/address"
-                  /> */}
-                </div>
-              </>
-            </>
           )}
-        </div>
-        {/* CATEGORY TITLE */}
-        <h3 className="px-4 py-3 font-bold text-gray-700 bordr">Categories</h3>
 
-        {/* CATEGORY LIST */}
-        <ul className="text-gray-700">
-          {(categories || []).map((item) => (
-            <li
-              key={item._id}
-              className="flex justify-between items-center px-4 py-4 border-b"
-            >
-              <Link
-                to={`/category/${item._id}`}
-                onClick={closeSidebar}
-                className="flex-1"
-              >
-                {item.name}
-              </Link>
+        </section>
 
-              <FaChevronRight size={12} />
-            </li>
-          ))}
-        </ul>
+        {/* =====================================
+            QUICK ACTIONS
+        ===================================== */}
 
-        {user && (
-          <div className="px-4 py-4 border-t">
-            <button
-              onClick={logout}
-              className="block w-full text-left py-2 text-red-500 hover:bg-red-50 rounded"
-            >
-              Logout
-            </button>
+        <section className="px-5 py-5">
 
-            <button className="block w-full text-left py-2 text-red-600 hover:bg-red-50 rounded">
-              Delete Account
-            </button>
-          </div>
-        )}
-
-        {/* CONTACT US */}
-        <div className="px-4 py-6 border-t">
-          <h3 className="font-semibold text-gray-700 mb-4">Contact Us</h3>
-
-          <div className="flex gap-3 mb-4">
-            <div className="bg-gray-200 p-3 rounded-full">📧</div>
-            <div>
-              <p className="text-xs text-gray-500 font-semibold">
-                EMAIL SUPPORT
-              </p>
-              <p className="text-sm">help@emmcOREshops.com</p>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-xs text-gray-500 font-semibold">PHONE SUPPORT</p>
-            <p className="text-sm">07080635700, 02018883435</p>
-          </div>
-
-          <div className="flex gap-3 mb-6">
-            <div className="bg-gray-200 p-3 rounded-full">💬</div>
-            <div>
-              <p className="text-xs text-gray-500 font-semibold">WHATSAPP</p>
-              <p className="text-sm">0907 0038 400, 0809 460 5555</p>
-            </div>
-          </div>
-        </div>
-
-        {/* NEWSLETTER */}
-        <div className="px-4 py-6 border-t">
-          <h3 className="font-semibold text-gray-700 mb-4">GET LATEST DEALS</h3>
-
-          <div className="flex border rounded overflow-hidden">
-            <input
-              type="email"
-              placeholder="Email Address"
-              className="flex-1 px-3 py-2 outline-none text-sm"
-            />
-
-            <button className="bg-[#ED017F] text-white px-4 text-sm">
-              Subscribe
-            </button>
-          </div>
-        </div>
-
-        {/* SOCIAL MEDIA */}
-        <div className="px-4 pb-32 border-t">
-          <h3 className="font-semibold text-gray-700 mb-4">
-            CONNECT US ON SOCIAL MEDIA
+          <h3
+            className="
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              text-slate-500
+              mb-3
+            "
+          >
+            Quick Actions
           </h3>
 
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              f
-            </div>
+          <div className="grid grid-cols-2 gap-3">
 
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              X
-            </div>
+            <QuickAction
+              icon={<FaBox />}
+              title="My Orders"
+              description="View orders"
+              onClick={() =>
+                handleNavigation(
+                  "/user/orders"
+                )
+              }
+            />
 
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              📷
-            </div>
+            <QuickAction
+              icon={<FaWallet />}
+              title="My Wallet"
+              description="Manage balance"
+              onClick={() =>
+                handleNavigation(
+                  "/user/wallet"
+                )
+              }
+            />
 
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              ▶
-            </div>
+            <QuickAction
+              icon={<FaHeart />}
+              title="Saved Items"
+              description="Your wishlist"
+              onClick={() =>
+                handleNavigation(
+                  "/saved"
+                )
+              }
+            />
+
+            <QuickAction
+              icon={<FaStore />}
+              title="Sell With Us"
+              description="Become a seller"
+              onClick={() =>
+                handleNavigation(
+                  "/sell"
+                )
+              }
+            />
+
           </div>
-        </div>
-      </div>
+
+        </section>
+
+        {/* =====================================
+            CATEGORIES
+        ===================================== */}
+
+        <section className="bg-white border-y border-slate-200">
+
+          <div className="px-5 py-4">
+
+            <h3
+              className="
+                text-xs
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-500
+              "
+            >
+              Shop By Category
+            </h3>
+
+          </div>
+
+          <div>
+
+            {categories.map(
+              (category) => (
+
+                <Link
+                  key={category._id}
+                  to={`/category/${category._id}`}
+                  onClick={closeSidebar}
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    px-5
+                    py-4
+                    border-t
+                    border-slate-100
+                    text-slate-700
+                    hover:bg-blue-50
+                    hover:text-blue-600
+                    transition-colors
+                  "
+                >
+
+                  <span className="font-medium">
+                    {category.name}
+                  </span>
+
+                  <FaChevronRight
+                    size={12}
+                    className="text-slate-400"
+                  />
+
+                </Link>
+
+              )
+            )}
+
+          </div>
+
+        </section>
+
+        {/* =====================================
+            SUPPORT
+        ===================================== */}
+
+        <section className="bg-white px-5 py-5 border-b border-slate-200">
+
+          <h3
+            className="
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              text-slate-500
+              mb-4
+            "
+          >
+            Customer Support
+          </h3>
+
+          <div className="space-y-4">
+
+            <SupportItem
+              icon={<FaEnvelope />}
+              title="Email Support"
+              value="help@emmcoreshops.com"
+            />
+
+            <SupportItem
+              icon={<FaPhone />}
+              title="Phone Support"
+              value="07080635700"
+            />
+
+            <SupportItem
+              icon={<FaWhatsapp />}
+              title="WhatsApp"
+              value="09070038400"
+            />
+
+          </div>
+
+        </section>
+
+        {/* =====================================
+            NEWSLETTER
+        ===================================== */}
+
+        <section className="px-5 py-6 bg-gradient-to-br from-blue-50 to-cyan-50">
+
+          <h3 className="font-bold text-slate-900">
+            Get the latest deals
+          </h3>
+
+          <p className="text-sm text-slate-500 mt-1 mb-4">
+            Subscribe for product updates and special offers.
+          </p>
+
+          <div className="flex bg-white rounded-xl overflow-hidden border border-blue-100">
+
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="
+                flex-1
+                min-w-0
+                px-3
+                py-3
+                text-sm
+                outline-none
+              "
+            />
+
+            <button
+              className="
+                px-4
+                bg-blue-600
+                text-white
+                text-sm
+                font-semibold
+                hover:bg-blue-700
+                transition-colors
+              "
+            >
+              Join
+            </button>
+
+          </div>
+
+        </section>
+
+        {/* =====================================
+            LOGOUT
+        ===================================== */}
+
+        {user && (
+
+          <section className="px-5 py-4 bg-white border-t border-slate-200">
+
+            <button
+              onClick={() => {
+                logout();
+                closeSidebar();
+              }}
+              className="
+                w-full
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-xl
+                text-red-500
+                hover:bg-red-50
+                transition-colors
+              "
+            >
+              <FaSignOutAlt />
+
+              <span className="font-medium">
+                Logout
+              </span>
+
+            </button>
+
+          </section>
+
+        )}
+
+        {/* Bottom spacing for mobile footer */}
+
+        <div className="h-24" />
+
+      </aside>
+
     </>
+  );
+};
+
+
+/* =========================================
+   QUICK ACTION COMPONENT
+========================================= */
+
+const QuickAction = ({
+  icon,
+  title,
+  description,
+  onClick,
+}) => {
+
+  return (
+
+    <button
+      onClick={onClick}
+      className="
+        text-left
+        p-4
+        rounded-2xl
+        bg-white
+        border
+        border-slate-200
+        hover:border-blue-400
+        hover:bg-blue-50
+        transition-all
+        duration-200
+      "
+    >
+
+      <div
+        className="
+          w-10
+          h-10
+          rounded-xl
+          bg-blue-100
+          text-blue-600
+          flex
+          items-center
+          justify-center
+          mb-3
+        "
+      >
+        {icon}
+      </div>
+
+      <h4 className="text-sm font-bold text-slate-800">
+        {title}
+      </h4>
+
+      <p className="text-xs text-slate-500 mt-1">
+        {description}
+      </p>
+
+    </button>
+
+  );
+};
+
+
+/* =========================================
+   SUPPORT ITEM COMPONENT
+========================================= */
+
+const SupportItem = ({
+  icon,
+  title,
+  value,
+}) => {
+
+  return (
+
+    <div className="flex items-center gap-3">
+
+      <div
+        className="
+          w-10
+          h-10
+          rounded-xl
+          bg-blue-100
+          text-blue-600
+          flex
+          items-center
+          justify-center
+        "
+      >
+        {icon}
+      </div>
+
+      <div className="min-w-0">
+
+        <p className="text-[10px] font-bold text-slate-400 uppercase">
+          {title}
+        </p>
+
+        <p className="text-sm text-slate-700 truncate">
+          {value}
+        </p>
+
+      </div>
+
+    </div>
+
   );
 };
 

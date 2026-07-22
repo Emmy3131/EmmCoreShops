@@ -6,20 +6,14 @@ import ProductReviews from "../../component/Products/ProductReviews";
 
 import api from "../../library/api";
 
-
 const ProductDetails = () => {
-
   const { id } = useParams();
-
 
   const [product, setProduct] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
   const [cartLoading, setCartLoading] = useState(false);
-
-
-
 
   /*
   ===============================
@@ -28,60 +22,29 @@ const ProductDetails = () => {
   */
 
   const fetchProduct = async () => {
-
     try {
-
       setLoading(true);
 
+      const res = await api.get(`/products/${id}`);
 
-      const res = await api.get(
-        `/products/${id}`
-      );
-
-
-      if(res.data.status === "success"){
-
-        setProduct(
-          res.data.data
-        );
-
+      if (res.data.status === "success") {
+        setProduct(res.data.data);
       }
-
-
-    } catch(error){
-
+    } catch (error) {
       console.log(
         "Fetch product error:",
-        error.response?.data ||
-        error.message
+        error.response?.data || error.message,
       );
-
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
-
-
-
-
-  useEffect(()=>{
-
-    if(id){
+  useEffect(() => {
+    if (id) {
       fetchProduct();
     }
-
-  },[id]);
-
-
-
-
-
-
+  }, [id]);
 
   /*
   ===============================
@@ -89,64 +52,24 @@ const ProductDetails = () => {
   ===============================
   */
 
-
-  const handleAddToCart = async()=>{
-
-
-    try{
-
-
+  const handleAddToCart = async () => {
+    try {
       setCartLoading(true);
 
+      await api.post("/cart", {
+        productId: product._id,
+        quantity: 1,
+      });
 
+      alert("Added to cart 🛒");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
 
-      await api.post(
-        "/cart",
-        {
-          productId: product._id,
-          quantity:1,
-        }
-      );
-
-
-
-      alert(
-        "Added to cart 🛒"
-      );
-
-
-
-    }catch(error){
-
-
-      console.log(
-        error.response?.data ||
-        error.message
-      );
-
-
-      alert(
-        "Failed to add product"
-      );
-
-
-    }finally{
-
-
+      alert("Failed to add product");
+    } finally {
       setCartLoading(false);
-
-
     }
-
   };
-
-
-
-
-
-
-
-
 
   /*
   ===============================
@@ -154,38 +77,19 @@ const ProductDetails = () => {
   ===============================
   */
 
+  const scrollToReviews = () => {
+    const reviewSection = document.getElementById("reviews");
 
-  const scrollToReviews = ()=>{
-
-    const reviewSection =
-      document.getElementById(
-        "reviews"
-      );
-
-
-    if(reviewSection){
-
+    if (reviewSection) {
       reviewSection.scrollIntoView({
-        behavior:"smooth",
-        block:"start",
+        behavior: "smooth",
+        block: "start",
       });
-
     }
-
   };
 
-
-
-
-
-
-
-
-
-  if(loading){
-
+  if (loading) {
     return (
-
       <div
         className="
         min-h-screen
@@ -195,24 +99,13 @@ const ProductDetails = () => {
         text-gray-500
         "
       >
-
         Loading product...
-
       </div>
-
     );
-
   }
 
-
-
-
-
-
-  if(!product){
-
+  if (!product) {
     return (
-
       <div
         className="
         min-h-screen
@@ -221,24 +114,12 @@ const ProductDetails = () => {
         justify-center
         "
       >
-
         Product not found
-
       </div>
-
     );
-
   }
 
-
-
-
-
-
-
-
   return (
-
     <div
       className="
       bg-gray-50
@@ -249,55 +130,20 @@ const ProductDetails = () => {
       space-y-10
       "
     >
-
-
-
       {/* PRODUCT INFORMATION */}
 
-
       <ProductDetailsCard
-
         product={product}
-
         loading={cartLoading}
-
-        onAddToCart={
-          handleAddToCart
-        }
-
-
-        onReviewClick={
-          scrollToReviews
-        }
-
+        onAddToCart={handleAddToCart}
+        onReviewClick={scrollToReviews}
       />
-
-
-
-
-
-
 
       {/* PRODUCT REVIEWS */}
 
-
-      <ProductReviews
-
-        productId={
-          product._id
-        }
-
-      />
-
-
-
-
-
+      <ProductReviews productId={product._id} />
     </div>
-
   );
-
 };
-
 
 export default ProductDetails;

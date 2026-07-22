@@ -1,59 +1,118 @@
-import ProductCard from "../../component/Products/ProductCard";
 import api from "../../library/api";
 import { useState, useEffect } from "react";
+
+import ProductGrid from "../../component/Products/ProductGrid";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const AllProduct = async () => {
+    const fetchProducts = async () => {
       try {
         const res = await api.get("/products");
 
-        setProducts(res.data.data || []);
-      } catch (err) {
-        console.error("Product fetch error:", err);
+        setProducts(
+          res.data?.data || []
+        );
+      } catch (error) {
+        console.error(
+          "Product fetch error:",
+          error
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    AllProduct();
+    fetchProducts();
   }, []);
 
   return (
-    <div className="px-3 md:mt-24 mt-20">
+    <main
+      className="
+        min-h-screen
+        bg-slate-50
+        px-3
+        sm:px-5
+        lg:px-8
+        pt-20
+        md:pt-28
+        pb-10
+      "
+    >
+      {/* =====================================
+          PAGE HEADER
+      ===================================== */}
 
-      {/* HEADER */}
-      <h2 className="font-semibold text-lg mb-3">
-        Featured Categories
-      </h2>
-
-      {/* LOADING STATE */}
-      {loading ? (
-        <p className="text-gray-500">Loading products...</p>
-      ) : products.length === 0 ? (
-        <p className="text-gray-500">No products found</p>
-      ) : (
-        <div className="
-          grid
-          grid-cols-2
-          sm:grid-cols-3
-          md:grid-cols-4
-          lg:grid-cols-5
+      <div
+        className="
+          flex
+          flex-col
+          sm:flex-row
+          sm:items-end
+          sm:justify-between
           gap-3
-        ">
-          {products.map((product) => (
-            <ProductCard
-              key={product._id}
-              product={product}
-            />
-          ))}
-        </div>
-      )}
+          mb-6
+        "
+      >
+        <div>
 
-    </div>
+          <p
+            className="
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              text-blue-600
+              mb-1
+            "
+          >
+            Explore our collection
+          </p>
+
+          <h1
+            className="
+              text-2xl
+              sm:text-3xl
+              font-extrabold
+              text-slate-900
+            "
+          >
+            All Products
+          </h1>
+
+          <p
+            className="
+              mt-1
+              text-sm
+              text-slate-500
+            "
+          >
+            Discover products you'll love.
+          </p>
+
+        </div>
+
+        {!loading && products.length > 0 && (
+          <p className="text-sm text-slate-500">
+            {products.length} products
+          </p>
+        )}
+
+      </div>
+
+      {/* =====================================
+          PRODUCT GRID
+      ===================================== */}
+
+      <ProductGrid
+        products={products}
+        loading={loading}
+        emptyMessage="We couldn't find any products at the moment."
+      />
+
+    </main>
   );
 };
 

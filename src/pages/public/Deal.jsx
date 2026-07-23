@@ -8,7 +8,7 @@ const Deal = () => {
 
   const fetchFlashSales = async () => {
     try {
-      const res = await api.get("/products/isFlashSale");
+      const res = await api.get("/products/flash-sale");
 
       console.log("Flash Sale Response:", res.data);
 
@@ -16,7 +16,10 @@ const Deal = () => {
         setDeals(res.data.data || []);
       }
     } catch (error) {
-      console.error("Error fetching flash sales:", error);
+      console.error(
+        "Error fetching flash sales:",
+        error.response?.data || error.message
+      );
     } finally {
       setLoading(false);
     }
@@ -29,7 +32,9 @@ const Deal = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <h2 className="text-lg font-semibold">Loading Flash Deals...</h2>
+        <h2 className="text-lg font-semibold">
+          Loading Flash Deals...
+        </h2>
       </div>
     );
   }
@@ -86,11 +91,16 @@ const Deal = () => {
                   />
 
                   {/* DISCOUNT BADGE */}
-                  {item.discount && (
+                  {item.discount > 0 && (
                     <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
                       -{item.discount}%
                     </span>
                   )}
+
+                  {/* FLASH SALE BADGE */}
+                  <span className="absolute top-2 right-2 bg-yellow-400 text-red-700 text-xs font-bold px-2 py-1 rounded">
+                    FLASH SALE
+                  </span>
                 </div>
 
                 {/* PRODUCT INFO */}
@@ -99,19 +109,32 @@ const Deal = () => {
                     {item.name}
                   </h2>
 
-                  <p className="text-red-600 font-bold mt-1">
-                    ₦{item.price?.toLocaleString() || "0"}
+                  {/* FLASH SALE PRICE */}
+                  <p className="text-red-600 font-bold text-lg mt-1">
+                    ₦
+                    {item.flashSalePrice?.toLocaleString() || "0"}
                   </p>
 
+                  {/* OLD PRICE */}
                   {item.oldPrice && (
                     <p className="text-gray-400 text-sm line-through">
-                      ₦{item.oldPrice?.toLocaleString()}
+                      ₦{item.oldPrice.toLocaleString()}
+                    </p>
+                  )}
+
+                  {/* SALE END DATE */}
+                  {item.flashSaleEndAt && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Sale ends:{" "}
+                      {new Date(
+                        item.flashSaleEndAt
+                      ).toLocaleDateString()}
                     </p>
                   )}
                 </div>
 
                 {/* ADD TO CART */}
-                <button className="mt-3 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm">
+                <button className="mt-3 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm transition">
                   <FaShoppingCart />
                   Add to Cart
                 </button>

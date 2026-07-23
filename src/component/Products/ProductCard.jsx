@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
     product?.flashSalePrice &&
     product?.flashSaleEndAt &&
     new Date(product.flashSaleEndAt) >
-      new Date();
+    new Date();
 
   /* =========================================
      PRICES
@@ -37,8 +37,8 @@ const ProductCard = ({ product }) => {
   const originalPrice =
     Number(
       product?.oldPrice ||
-        product?.price ||
-        0
+      product?.price ||
+      0
     );
 
   const salePrice = Number(
@@ -56,10 +56,10 @@ const ProductCard = ({ product }) => {
   const discountPercentage =
     isFlashSale && originalPrice > salePrice
       ? Math.round(
-          ((originalPrice - salePrice) /
-            originalPrice) *
-            100
-        )
+        ((originalPrice - salePrice) /
+          originalPrice) *
+        100
+      )
       : 0;
 
   /* =========================================
@@ -118,7 +118,7 @@ const ProductCard = ({ product }) => {
 
       alert(
         error.response?.data?.message ||
-          "Unable to add product to cart"
+        "Unable to add product to cart"
       );
     } finally {
       setLoading(false);
@@ -260,10 +260,9 @@ const ProductCard = ({ product }) => {
               shadow-sm
               transition-all
               duration-200
-              ${
-                isFavorite
-                  ? "bg-blue-600 text-white"
-                  : "bg-white/90 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+              ${isFavorite
+                ? "bg-blue-600 text-white"
+                : "bg-white/90 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
               }
             `}
           >
@@ -445,41 +444,7 @@ const ProductCard = ({ product }) => {
         {/* PRICE */}
 
         <div className="mt-3">
-
-          <div className="flex items-center gap-2">
-
-            <p
-              className={`
-                text-base
-                sm:text-xl
-                font-extrabold
-                ${
-                  isFlashSale
-                    ? "text-blue-600"
-                    : "text-slate-900"
-                }
-              `}
-            >
-              ₦
-              {displayPrice.toLocaleString()}
-            </p>
-
-            {isFlashSale && (
-              <p
-                className="
-                  text-[10px]
-                  sm:text-xs
-                  text-slate-400
-                  line-through
-                "
-              >
-                ₦
-                {originalPrice.toLocaleString()}
-              </p>
-            )}
-
-          </div>
-
+          <ProductPrice product={product} />
         </div>
 
         {/* COUNTDOWN */}
@@ -553,8 +518,8 @@ const ProductCard = ({ product }) => {
             {loading
               ? "Adding..."
               : isOutOfStock
-              ? "Out of Stock"
-              : "Add to Cart"}
+                ? "Out of Stock"
+                : "Add to Cart"}
           </span>
         </button>
       </div>

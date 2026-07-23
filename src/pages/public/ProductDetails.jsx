@@ -10,9 +10,7 @@ const ProductDetails = () => {
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
-
   const [loading, setLoading] = useState(true);
-
   const [cartLoading, setCartLoading] = useState(false);
 
   /*
@@ -25,15 +23,20 @@ const ProductDetails = () => {
     try {
       setLoading(true);
 
-      const res = await api.get(`/products/${id}`);
+      const res = await api.get(
+        `/products/${id}`
+      );
 
-      if (res.data.status === "success") {
+      if (
+        res.data?.status === "success"
+      ) {
         setProduct(res.data.data);
       }
     } catch (error) {
-      console.log(
+      console.error(
         "Fetch product error:",
-        error.response?.data || error.message,
+        error.response?.data ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -52,33 +55,45 @@ const ProductDetails = () => {
   ===============================
   */
 
-  const handleAddToCart = async () => {
-    try {
-      setCartLoading(true);
+ const handleAddToCart = async (
+  quantity = 1
+) => {
+  if (!product?._id) {
+    return;
+  }
 
-      await api.post("/cart", {
-        productId: product._id,
-        quantity: 1,
-      });
+  try {
+    setCartLoading(true);
 
-      alert("Added to cart 🛒");
-    } catch (error) {
-      console.log(error.response?.data || error.message);
+    await api.post("/cart", {
+      productId: product._id,
+      quantity,
+    });
 
-      alert("Failed to add product");
-    } finally {
-      setCartLoading(false);
-    }
-  };
+    alert("Added to cart 🛒");
+  } catch (error) {
+    console.log(
+      error.response?.data ||
+        error.message
+    );
+
+    alert("Failed to add product");
+  } finally {
+    setCartLoading(false);
+  }
+};
 
   /*
   ===============================
-  SCROLL TO REVIEW SECTION
+  SCROLL TO REVIEWS
   ===============================
   */
 
   const scrollToReviews = () => {
-    const reviewSection = document.getElementById("reviews");
+    const reviewSection =
+      document.getElementById(
+        "reviews"
+      );
 
     if (reviewSection) {
       reviewSection.scrollIntoView({
@@ -88,46 +103,92 @@ const ProductDetails = () => {
     }
   };
 
+  /*
+  ===============================
+  LOADING
+  ===============================
+  */
+
   if (loading) {
     return (
       <div
         className="
-        min-h-screen
-        flex
-        items-center
-        justify-center
-        text-gray-500
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          bg-slate-50
         "
       >
-        Loading product...
+        <div className="text-center">
+          <div
+            className="
+              w-10
+              h-10
+              mx-auto
+              mb-3
+              rounded-full
+              border-4
+              border-blue-100
+              border-t-blue-600
+              animate-spin
+            "
+          />
+
+          <p className="text-sm text-slate-500">
+            Loading product...
+          </p>
+        </div>
       </div>
     );
   }
+
+  /*
+  ===============================
+  NOT FOUND
+  ===============================
+  */
 
   if (!product) {
     return (
       <div
         className="
-        min-h-screen
-        flex
-        items-center
-        justify-center
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          bg-slate-50
         "
       >
-        Product not found
+        <div className="text-center">
+          <h2
+            className="
+              text-xl
+              font-bold
+              text-slate-800
+            "
+          >
+            Product not found
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-500">
+            This product may have been removed.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
+    <main
       className="
-      bg-gray-50
-      min-h-screen
-      py-8
-      px-4
-      md:px-8
-      space-y-10
+        min-h-screen
+        bg-slate-50
+        px-3
+        py-6
+        sm:px-5
+        md:px-8
+        lg:px-12
       "
     >
       {/* PRODUCT INFORMATION */}
@@ -139,10 +200,12 @@ const ProductDetails = () => {
         onReviewClick={scrollToReviews}
       />
 
-      {/* PRODUCT REVIEWS */}
+      {/* REVIEWS */}
 
-      <ProductReviews productId={product._id} />
-    </div>
+      <ProductReviews
+        productId={product._id}
+      />
+    </main>
   );
 };
 

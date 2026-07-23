@@ -122,9 +122,9 @@ const Hero = () => {
           CONTENT
       ====================================================== */}
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto">
 
-        <div className="grid lg:grid-cols-2 items-center min-h-[650px] md:min-h-screen gap-10 lg:gap-20 py-20">
+        <div className="grid lg:grid-cols-2 items-center min-h-[650px] md:min-h-screen gap-10 lg:gap-20">
 
           {/* =================================================
               LEFT CONTENT

@@ -3,12 +3,8 @@ import {
   FaSearch,
   FaBars,
   FaChevronDown,
-  FaPhone,
   FaQuestionCircle,
-  FaLifeRing,
-  FaTruck,
   FaStore,
-  FaUndo,
   FaUser,
   FaBox,
   FaHeart,
@@ -20,14 +16,17 @@ import { useNavigate, Link } from "react-router-dom";
 
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
+import { useCart } from "../../Context/CartCountContext";
 import Button from "../UI/Button";
 
 const DesktopHeader = () => {
   const { user, logout } = useAuth();
 
+  // GLOBAL CART COUNT
+  const { cartCount } = useCart();
+
   const navigate = useNavigate();
 
-  const [cartCount, setCartCount] = useState(0);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
@@ -41,44 +40,17 @@ const DesktopHeader = () => {
       try {
         const res = await api.get("/categories");
 
-        setCategories(res.data.data || []);
+        setCategories(res.data?.data || []);
       } catch (error) {
-        console.error("Category fetch error:", error);
+        console.error(
+          "Category fetch error:",
+          error.response?.data || error.message
+        );
       }
     };
 
     fetchCategories();
   }, []);
-
-  /* =========================================
-     FETCH CART COUNT
-  ========================================= */
-
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      if (!user) {
-        setCartCount(0);
-        return;
-      }
-
-      try {
-        const res = await api.get("/cart");
-
-        const items = res.data?.data?.items || [];
-
-        const count = items.reduce(
-          (total, item) => total + (item.quantity || 1),
-          0
-        );
-
-        setCartCount(count);
-      } catch (error) {
-        console.error("Cart count error:", error);
-      }
-    };
-
-    fetchCartCount();
-  }, [user]);
 
   /* =========================================
      SEARCH
@@ -89,7 +61,9 @@ const DesktopHeader = () => {
 
     if (!search.trim()) return;
 
-    navigate(`/search?keyword=${encodeURIComponent(search.trim())}`);
+    navigate(
+      `/search?keyword=${encodeURIComponent(search.trim())}`
+    );
   };
 
   /* =========================================
@@ -108,6 +82,7 @@ const DesktopHeader = () => {
       ========================================= */}
 
       <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 text-white text-center py-2 text-sm font-medium">
+
         <span className="hidden sm:inline">
           🚀 Fast delivery. Secure payments. Shop smarter with EmmCoreShops.
         </span>
@@ -115,7 +90,9 @@ const DesktopHeader = () => {
         <span className="sm:hidden">
           🚀 Shop smarter. Shop securely.
         </span>
+
       </div>
+
 
       {/* =========================================
           MAIN HEADER
@@ -135,17 +112,23 @@ const DesktopHeader = () => {
               to="/"
               className="flex-shrink-0 group"
             >
+
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+
                 EmmCore
+
                 <span className="text-blue-600">
                   Shops
                 </span>
+
               </h1>
 
               <p className="text-xs text-slate-500 font-medium">
                 Shop smart. Shop secure.
               </p>
+
             </Link>
+
 
             {/* =====================================
                 SEARCH
@@ -155,7 +138,23 @@ const DesktopHeader = () => {
               onSubmit={handleSearch}
               className="flex flex-1 max-w-3xl"
             >
-              <div className="flex items-center w-full bg-slate-100 border border-transparent focus-within:border-blue-500 focus-within:bg-white rounded-xl overflow-hidden transition-all duration-300">
+
+              <div
+                className="
+                  flex
+                  items-center
+                  w-full
+                  bg-slate-100
+                  border
+                  border-transparent
+                  focus-within:border-blue-500
+                  focus-within:bg-white
+                  rounded-xl
+                  overflow-hidden
+                  transition-all
+                  duration-300
+                "
+              >
 
                 <FaSearch className="ml-4 text-slate-400" />
 
@@ -192,7 +191,9 @@ const DesktopHeader = () => {
                 </button>
 
               </div>
+
             </form>
+
 
             {/* =====================================
                 RIGHT ACTIONS
@@ -204,24 +205,57 @@ const DesktopHeader = () => {
 
               <Link
                 to="/page/contact-us"
-                className="hidden xl:flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors"
+                className="
+                  hidden
+                  xl:flex
+                  items-center
+                  gap-2
+                  text-slate-600
+                  hover:text-blue-600
+                  transition-colors
+                "
               >
+
                 <FaQuestionCircle />
 
                 <span className="text-sm font-medium">
                   Help
                 </span>
+
               </Link>
 
-              {/* ACCOUNT */}
+
+              {/* =====================================
+                  ACCOUNT
+              ===================================== */}
 
               {user ? (
 
                 <div className="relative group">
 
-                  <button className="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors">
+                  <button
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      text-slate-700
+                      hover:text-blue-600
+                      transition-colors
+                    "
+                  >
 
-                    <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <div
+                      className="
+                        w-9
+                        h-9
+                        rounded-full
+                        bg-blue-100
+                        text-blue-600
+                        flex
+                        items-center
+                        justify-center
+                      "
+                    >
                       <FaUser />
                     </div>
 
@@ -235,6 +269,7 @@ const DesktopHeader = () => {
                     />
 
                   </button>
+
 
                   {/* ACCOUNT DROPDOWN */}
 
@@ -262,7 +297,15 @@ const DesktopHeader = () => {
                     "
                   >
 
-                    <div className="bg-gradient-to-r from-blue-700 to-cyan-500 text-white p-5">
+                    <div
+                      className="
+                        bg-gradient-to-r
+                        from-blue-700
+                        to-cyan-500
+                        text-white
+                        p-5
+                      "
+                    >
 
                       <p className="text-sm text-blue-100">
                         Welcome back
@@ -274,35 +317,80 @@ const DesktopHeader = () => {
 
                     </div>
 
+
                     <div className="p-2">
 
                       <Link
                         to="/profile"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          hover:bg-blue-50
+                          hover:text-blue-600
+                          transition-colors
+                        "
                       >
                         <FaUser />
                         Profile
                       </Link>
 
+
                       <Link
                         to="/orders"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          hover:bg-blue-50
+                          hover:text-blue-600
+                          transition-colors
+                        "
                       >
                         <FaBox />
                         My Orders
                       </Link>
 
+
                       <Link
                         to="/wishlist"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          hover:bg-blue-50
+                          hover:text-blue-600
+                          transition-colors
+                        "
                       >
                         <FaHeart />
                         Wishlist
                       </Link>
 
+
                       <button
                         onClick={logout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+                        className="
+                          w-full
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          text-red-500
+                          hover:bg-red-50
+                          transition-colors
+                        "
                       >
                         <FaSignOutAlt />
                         Logout
@@ -316,11 +404,23 @@ const DesktopHeader = () => {
 
               ) : (
 
+                /* =====================================
+                   AUTH ACTIONS
+                ===================================== */
+
                 <div className="flex items-center gap-2">
 
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+                    className="
+                      px-4
+                      py-2
+                      text-sm
+                      font-semibold
+                      text-slate-600
+                      hover:text-blue-600
+                      transition-colors
+                    "
                   >
                     Login
                   </Link>
@@ -337,7 +437,10 @@ const DesktopHeader = () => {
 
               )}
 
-              {/* CART */}
+
+              {/* =====================================
+                  GLOBAL CART
+              ===================================== */}
 
               <button
                 onClick={handleCart}
@@ -356,11 +459,17 @@ const DesktopHeader = () => {
                 "
               >
 
+                {/* CART ICON */}
+
                 <div className="relative">
 
                   <FaShoppingCart size={21} />
 
+
+                  {/* GLOBAL CART BADGE */}
+
                   {cartCount > 0 && (
+
                     <span
                       className="
                         absolute
@@ -377,13 +486,19 @@ const DesktopHeader = () => {
                         flex
                         items-center
                         justify-center
+                        border-2
+                        border-white
                       "
                     >
                       {cartCount}
                     </span>
+
                   )}
 
                 </div>
+
+
+                {/* CART DETAILS */}
 
                 <div className="hidden xl:block text-left">
 
@@ -392,7 +507,8 @@ const DesktopHeader = () => {
                   </p>
 
                   <p className="font-bold text-sm">
-                    {cartCount} Items
+                    {cartCount}{" "}
+                    {cartCount === 1 ? "Item" : "Items"}
                   </p>
 
                 </div>
@@ -406,6 +522,7 @@ const DesktopHeader = () => {
         </div>
 
       </div>
+
 
       {/* =========================================
           CATEGORY NAVIGATION
@@ -433,6 +550,7 @@ const DesktopHeader = () => {
                   transition-colors
                 "
               >
+
                 <FaBars />
 
                 All Categories
@@ -440,6 +558,7 @@ const DesktopHeader = () => {
               </button>
 
             </li>
+
 
             {categories.slice(0, 8).map((category) => (
 
@@ -471,6 +590,7 @@ const DesktopHeader = () => {
 
       </nav>
 
+
       {/* =========================================
           OVERLAY
       ========================================= */}
@@ -491,6 +611,7 @@ const DesktopHeader = () => {
           }
         `}
       />
+
 
       {/* =========================================
           CATEGORY DRAWER
@@ -520,7 +641,18 @@ const DesktopHeader = () => {
 
         {/* DRAWER HEADER */}
 
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-700 to-cyan-500 text-white p-5">
+        <div
+          className="
+            sticky
+            top-0
+            z-10
+            bg-gradient-to-r
+            from-blue-700
+            to-cyan-500
+            text-white
+            p-5
+          "
+        >
 
           <div className="flex items-center justify-between">
 
@@ -535,6 +667,7 @@ const DesktopHeader = () => {
               </h2>
 
             </div>
+
 
             <button
               onClick={() => setShowCategoryMenu(false)}
@@ -552,6 +685,7 @@ const DesktopHeader = () => {
             </button>
 
           </div>
+
 
           <Link
             to="/products"
@@ -586,6 +720,7 @@ const DesktopHeader = () => {
           </Link>
 
         </div>
+
 
         {/* CATEGORIES */}
 

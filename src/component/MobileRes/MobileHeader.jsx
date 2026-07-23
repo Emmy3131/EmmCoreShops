@@ -8,6 +8,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useCart } from "../../Context/CartCountContext";
 
 const MobileHeader = ({
   openSidebar,
@@ -15,11 +16,22 @@ const MobileHeader = ({
 }) => {
   const navigate = useNavigate();
 
+  // GLOBAL CART COUNT
+  const { cartCount } = useCart();
+
   const [search, setSearch] = useState("");
+
+  /* =========================================
+     CART
+  ========================================= */
 
   const handleCart = () => {
     navigate("/cart");
   };
+
+  /* =========================================
+     SEARCH
+  ========================================= */
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -32,7 +44,6 @@ const MobileHeader = ({
   };
 
   return (
-
     <header className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
 
       {openSidebar ? (
@@ -42,6 +53,8 @@ const MobileHeader = ({
         ===================================== */
 
         <div className="flex items-center justify-between px-4 py-3">
+
+          {/* CLOSE SIDEBAR */}
 
           <button
             onClick={() => setOpenSidebar(false)}
@@ -61,6 +74,9 @@ const MobileHeader = ({
             <FaTimes size={20} />
           </button>
 
+
+          {/* LOGO */}
+
           <button
             onClick={() => navigate("/")}
             className="font-extrabold text-xl text-slate-900"
@@ -70,6 +86,9 @@ const MobileHeader = ({
               Shops
             </span>
           </button>
+
+
+          {/* CART */}
 
           <button
             onClick={handleCart}
@@ -83,9 +102,38 @@ const MobileHeader = ({
               justify-center
               bg-blue-50
               text-blue-600
+              hover:bg-blue-100
+              transition-colors
             "
           >
-            <FaShoppingCart size={19} />
+            <div className="relative">
+
+              <FaShoppingCart size={22} />
+
+              {cartCount > 0 && (
+                <span
+                  className="
+                    absolute
+                    -top-3
+                    -right-3
+                    min-w-5
+                    h-5
+                    px-1
+                    rounded-full
+                    bg-cyan-500
+                    text-white
+                    text-[10px]
+                    font-bold
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  {cartCount}
+                </span>
+              )}
+
+            </div>
           </button>
 
         </div>
@@ -98,15 +146,27 @@ const MobileHeader = ({
 
         <>
 
-          {/* PROMO BAR */}
+          {/* =====================================
+              PROMO BAR
+          ===================================== */}
 
-          <div className="bg-gradient-to-r from-blue-700 to-cyan-500 text-white text-center text-[11px] font-medium py-2">
-
+          <div className="
+            bg-gradient-to-r
+            from-blue-700
+            to-cyan-500
+            text-white
+            text-center
+            text-[11px]
+            font-medium
+            py-2
+          ">
             🚀 Secure shopping. Fast delivery.
-
           </div>
 
-          {/* TOP BAR */}
+
+          {/* =====================================
+              TOP BAR
+          ===================================== */}
 
           <div className="flex items-center justify-between px-4 py-3">
 
@@ -130,6 +190,7 @@ const MobileHeader = ({
               <FaBars size={21} />
             </button>
 
+
             {/* LOGO */}
 
             <button
@@ -142,9 +203,12 @@ const MobileHeader = ({
               </span>
             </button>
 
+
             {/* ACTIONS */}
 
             <div className="flex items-center gap-2">
+
+              {/* HOME / STORE */}
 
               <button
                 onClick={() => navigate("/")}
@@ -164,9 +228,13 @@ const MobileHeader = ({
                 <FaStore size={19} />
               </button>
 
+
+              {/* CART */}
+
               <button
                 onClick={handleCart}
                 className="
+                  relative
                   w-10
                   h-10
                   rounded-xl
@@ -180,14 +248,50 @@ const MobileHeader = ({
                   transition-colors
                 "
               >
-                <FaShoppingCart size={18} />
+
+                <div className="relative">
+
+                  <FaShoppingCart size={18} />
+
+                  {/* GLOBAL CART COUNT */}
+
+                  {cartCount > 0 && (
+                    <span
+                      className="
+                        absolute
+                        -top-3
+                        -right-3
+                        min-w-5
+                        h-5
+                        px-1
+                        rounded-full
+                        bg-cyan-500
+                        text-white
+                        text-[10px]
+                        font-bold
+                        flex
+                        items-center
+                        justify-center
+                        border-2
+                        border-white
+                      "
+                    >
+                      {cartCount}
+                    </span>
+                  )}
+
+                </div>
+
               </button>
 
             </div>
 
           </div>
 
-          {/* SEARCH */}
+
+          {/* =====================================
+              SEARCH
+          ===================================== */}
 
           <form
             onSubmit={handleSearch}
@@ -223,6 +327,8 @@ const MobileHeader = ({
                   bg-transparent
                   outline-none
                   text-sm
+                  text-slate-800
+                  placeholder:text-slate-400
                 "
               />
 
@@ -248,7 +354,6 @@ const MobileHeader = ({
       )}
 
     </header>
-
   );
 };
 

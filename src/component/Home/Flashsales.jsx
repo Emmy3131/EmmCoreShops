@@ -12,8 +12,10 @@ const FlashSales = () => {
       try {
         const res = await api.get("/products/flash-sale");
 
+        console.log("Flash Sales Response:", res.data);
+
         if (res.data.status === "success") {
-          setProducts(res.data?.data?.products || []);
+          setProducts(res.data?.data || []);
         }
       } catch (error) {
         console.error(

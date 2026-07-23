@@ -7,7 +7,7 @@ import NewArrival from "../../component/Home/NewArrival";
 
 const Home = () => {
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen mt-8 lg:mt-0">
 
       {/* CATEGORIES */}
       <Categories />

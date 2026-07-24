@@ -340,7 +340,7 @@ const DesktopHeader = () => {
 
 
                       <Link
-                        to="/orders"
+                        to="/user/orders"
                         className="
                           flex
                           items-center
@@ -374,6 +374,24 @@ const DesktopHeader = () => {
                       >
                         <FaHeart />
                         Wishlist
+                      </Link>
+
+                      <Link
+                        to="/wishlist"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          hover:bg-blue-50
+                          hover:text-blue-600
+                          transition-colors
+                        "
+                      >
+                        <FaStore />
+                        Sell on EmmCoreShops
                       </Link>
 
 

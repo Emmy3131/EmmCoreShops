@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaUser, FaLock, FaEnvelope, FaPhone } from "react-icons/fa";
 
-const Settings = () => {
+const Profile = () => {
   const [form, setForm] = useState({
     name: "John Doe",
     email: "johndoe@gmail.com",
@@ -136,4 +136,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default Profile;

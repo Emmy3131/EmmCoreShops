@@ -254,6 +254,7 @@ const Signup = () => {
               value={formData.dateOfBirth}
               onChange={handleChange}
               className="auth-input"
+              placeholder="DateOfBirth"
             />
 
             <select

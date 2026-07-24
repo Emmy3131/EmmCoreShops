@@ -377,7 +377,7 @@ const DesktopHeader = () => {
                       </Link>
 
                       <Link
-                        to="/wishlist"
+                        to="/sell"
                         className="
                           flex
                           items-center

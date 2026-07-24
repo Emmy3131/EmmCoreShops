@@ -1,16 +1,28 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaLock,
+  FaMapMarkerAlt,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { toast } from "react-toastify";
+
 import api from "../../library/api";
+import Button from "../../component/UI/Button";
 
 const Signup = () => {
+
   const navigate = useNavigate();
 
-  /* ===============================
-        STATES
-  =============================== */
   const [loading, setLoading] = useState(false);
   const [agree, setAgree] = useState(false);
-  const [error, setError] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -25,22 +37,23 @@ const Signup = () => {
     passwordConfirm: "",
   });
 
-  /* ===============================
-        HANDLE INPUT CHANGE
-  =============================== */
+  /* ================= INPUT ================= */
+
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
   };
 
-  /* ===============================
-        FORM VALIDATION
-  =============================== */
+  /* ================= VALIDATION ================= */
+
   const validateForm = () => {
+
     if (!formData.firstName.trim())
       return "First name is required";
 
@@ -49,6 +62,9 @@ const Signup = () => {
 
     if (!formData.email.trim())
       return "Email is required";
+
+    if (!formData.phone.trim())
+      return "Phone number is required";
 
     if (!formData.dateOfBirth)
       return "Date of birth is required";
@@ -62,9 +78,6 @@ const Signup = () => {
     if (!formData.address.trim())
       return "Address is required";
 
-    if (!formData.password)
-      return "Password is required";
-
     if (formData.password.length < 6)
       return "Password must be at least 6 characters";
 
@@ -72,34 +85,32 @@ const Signup = () => {
       return "Passwords do not match";
 
     if (!agree)
-      return "You must agree to Terms & Policy";
+      return "Please agree to the Terms and Privacy Policy";
 
     return null;
+
   };
 
-  /* ===============================
-        SUBMIT HANDLER
-  =============================== */
+  /* ================= SUBMIT ================= */
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
-    setError("");
 
     const validationError = validateForm();
 
     if (validationError) {
-      return setError(validationError);
+      return toast.error(validationError);
     }
 
     try {
+
       setLoading(true);
 
-      /* Normalize Data For Backend */
       const payload = {
         ...formData,
         gender: formData.gender.toLowerCase(),
       };
-
-      console.log("Sending:", payload);
 
       const res = await api.post(
         "/users/signup",
@@ -107,179 +118,310 @@ const Signup = () => {
       );
 
       if (res.data?.status === "success") {
-        alert("Account created successfully ✅");
 
-        navigate("/login");
+        toast.success(
+          "Account created successfully 🎉"
+        );
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 800);
+
       }
-    } catch (err) {
-      console.error(err);
 
-      setError(
+    } catch (err) {
+
+      toast.error(
         err.response?.data?.message ||
-          "Signup failed. Try again."
+        "Signup failed. Try again."
       );
+
     } finally {
       setLoading(false);
     }
+
   };
 
-  /* ===============================
-        UI
-  =============================== */
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
-      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+    <div className="w-full">
 
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Create Account
-        </h2>
+      {/* HEADER */}
 
-        {error && (
-          <p className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm">
-            {error}
-          </p>
-        )}
+      <div className="text-center mb-8">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div
+          className="
+            w-16
+            h-16
+            mx-auto
+            rounded-2xl
+            bg-gradient-to-br
+            from-[var(--color-primary)]
+            to-[var(--color-accent)]
+            flex
+            items-center
+            justify-center
+            text-white
+            text-2xl
+            font-bold
+            shadow-[var(--shadow-primary)]
+            mb-4
+          "
+        >
+          EC
+        </div>
 
-          <input
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            placeholder="First Name"
-            className="input"
-          />
+        <h1 className="text-3xl font-bold">
+          Create Your Account
+        </h1>
 
-          <input
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            placeholder="Last Name"
-            className="input"
-          />
+        <p className="text-[var(--color-text-muted)] mt-2">
+          Join EmmCoreShops and start shopping today.
+        </p>
+
+      </div>
+
+      {/* CARD */}
+
+      <div
+        className="
+          bg-white
+          border
+          border-[var(--color-border)]
+          rounded-[var(--radius-xl)]
+          p-6
+          sm:p-8
+          shadow-[var(--shadow-lg)]
+        "
+      >
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
+
+          {/* NAME */}
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <input
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="First Name"
+              className="auth-input"
+            />
+
+            <input
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Last Name"
+              className="auth-input"
+            />
+
+          </div>
+
+          {/* EMAIL */}
 
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
-            className="input"
+            placeholder="Email Address"
+            className="auth-input"
           />
+
+          {/* PHONE */}
 
           <input
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             placeholder="Phone Number"
-            className="input"
+            className="auth-input"
           />
 
-          <input
-            type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
-            className="input"
-          />
+          {/* DATE + GENDER */}
 
-          {/* GENDER */}
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="input"
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+          <div className="grid grid-cols-2 gap-3">
+
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className="auth-input"
+            />
+
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="auth-input"
+            >
+
+              <option value="">
+                Gender
+              </option>
+
+              <option value="male">
+                Male
+              </option>
+
+              <option value="female">
+                Female
+              </option>
+
+              <option value="other">
+                Other
+              </option>
+
+            </select>
+
+          </div>
+
+          {/* COUNTRY */}
 
           <input
             name="country"
             value={formData.country}
             onChange={handleChange}
             placeholder="Country"
-            className="input"
+            className="auth-input"
           />
 
-          <input
+          {/* ADDRESS */}
+
+          <textarea
             name="address"
             value={formData.address}
             onChange={handleChange}
-            placeholder="Address"
-            className="input"
+            placeholder="Full Address"
+            rows="3"
+            className="auth-input resize-none"
           />
 
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Password"
-            className="input"
-          />
+          {/* PASSWORD */}
 
-          <input
-            type="password"
-            name="passwordConfirm"
-            value={formData.passwordConfirm}
-            onChange={handleChange}
-            placeholder="Confirm Password"
-            className="input"
-          />
+          <div className="relative">
+
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="auth-input pr-12"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+
+          </div>
+
+          {/* CONFIRM PASSWORD */}
+
+          <div className="relative">
+
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="passwordConfirm"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+              placeholder="Confirm Password"
+              className="auth-input pr-12"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword((prev) => !prev)
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+
+          </div>
 
           {/* AGREEMENT */}
-          <div className="flex gap-2 text-sm">
+
+          <label className="flex gap-3 text-sm text-[var(--color-text-secondary)]">
+
             <input
               type="checkbox"
               checked={agree}
-              onChange={(e) =>
-                setAgree(e.target.checked)
-              }
-              className="accent-[#ED017F]"
+              onChange={(e) => setAgree(e.target.checked)}
+              className="mt-1 accent-blue-600"
             />
 
-            <p className="text-gray-600">
-              I agree to{" "}
-              <Link to="/terms" className="text-[#ED017F]">
+            <span>
+
+              I agree to the{" "}
+
+              <Link
+                to="/terms"
+                className="font-semibold text-[var(--color-primary)]"
+              >
                 Terms
               </Link>{" "}
-              &{" "}
-              <Link to="/privacy" className="text-[#ED017F]">
+
+              and{" "}
+
+              <Link
+                to="/privacy"
+                className="font-semibold text-[var(--color-primary)]"
+              >
                 Privacy Policy
               </Link>
-            </p>
-          </div>
 
-          <button
+            </span>
+
+          </label>
+
+          {/* BUTTON */}
+
+          <Button
             type="submit"
             disabled={loading || !agree}
-            className={`w-full text-white py-3 rounded-md font-semibold transition
-            ${
-              agree
-                ? "bg-[#33B27B] hover:opacity-90"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
+            className="w-full"
           >
             {loading
               ? "Creating Account..."
               : "Create Account"}
-          </button>
+          </Button>
 
         </form>
 
-        <Link
-          to="/login"
-          className="block text-center mt-6 bg-[#ED017F] text-white py-3 rounded-md font-semibold"
-        >
-          Login Instead
-        </Link>
+        <div className="text-center mt-7">
+
+          <p className="text-sm text-[var(--color-text-muted)]">
+
+            Already have an account?{" "}
+
+            <Link
+              to="/login"
+              className="font-bold text-[var(--color-primary)]"
+            >
+              Login
+            </Link>
+
+          </p>
+
+        </div>
 
       </div>
+
     </div>
+
   );
 };
 

@@ -1,82 +1,144 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import { toast } from "react-toastify";
+
 import api from "../../library/api";
+import Button from "../../component/UI/Button";
 
 const ResetPassword = () => {
+
   const navigate = useNavigate();
   const { token } = useParams();
 
-  // ================= STATE =================
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  // ================= RESET PASSWORD =================
+  const [loading, setLoading] = useState(false);
+
   const handleResetPassword = async (e) => {
+
     e.preventDefault();
 
-    setError("");
-    setSuccess("");
+    if (password.length < 6) {
+      return toast.error(
+        "Password must be at least 6 characters"
+      );
+    }
 
     if (password !== passwordConfirm) {
-      return setError("Passwords do not match");
+      return toast.error(
+        "Passwords do not match"
+      );
     }
 
     try {
+
       setLoading(true);
 
-      const res = await api.patch(`/users/resetPassword/${token}`, {
-        password,
-        passwordConfirm,
-      });
+      const res = await api.patch(
+        `/users/resetPassword/${token}`,
+        {
+          password,
+          passwordConfirm,
+        }
+      );
 
       if (res.data.status !== "success") {
-        throw new Error(res.data.message || "Password reset failed");
+        throw new Error(
+          res.data.message ||
+          "Password reset failed"
+        );
       }
 
-      setSuccess("Password reset successful ✅ Redirecting...");
+      toast.success(
+        "Password reset successfully 🎉"
+      );
 
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
+      }, 1000);
+
     } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Something went wrong",
+
+      toast.error(
+        err.response?.data?.message ||
+        err.message ||
+        "Something went wrong"
       );
+
     } finally {
       setLoading(false);
     }
+
   };
 
-  // ================= UI =================
   return (
-    <div className=" flex items-center justify-center  px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Reset Password</h2>
 
-        {/* ERROR MESSAGE */}
-        {error && (
-          <p className="bg-red-100 text-red-600 text-sm p-3 rounded mb-4 text-center">
-            {error}
-          </p>
-        )}
+    <div className="w-full">
 
-        {/* SUCCESS MESSAGE */}
-        {success && (
-          <p className="bg-green-100 text-green-600 text-sm p-3 rounded mb-4 text-center">
-            {success}
-          </p>
-        )}
+      {/* HEADER */}
 
-        <form onSubmit={handleResetPassword} className="space-y-5">
-          {/* NEW PASSWORD */}
+      <div className="text-center mb-8">
+
+        <div
+          className="
+            w-16
+            h-16
+            mx-auto
+            rounded-2xl
+            bg-gradient-to-br
+            from-[var(--color-primary)]
+            to-[var(--color-accent)]
+            flex
+            items-center
+            justify-center
+            text-white
+            text-2xl
+            shadow-[var(--shadow-primary)]
+            mb-4
+          "
+        >
+          <FaLock />
+        </div>
+
+        <h1 className="text-3xl font-bold">
+          Create New Password
+        </h1>
+
+        <p className="text-[var(--color-text-muted)] mt-2">
+          Choose a strong password for your account.
+        </p>
+
+      </div>
+
+      {/* CARD */}
+
+      <div
+        className="
+          bg-white
+          border
+          border-[var(--color-border)]
+          rounded-[var(--radius-xl)]
+          p-6
+          sm:p-8
+          shadow-[var(--shadow-lg)]
+        "
+      >
+
+        <form
+          onSubmit={handleResetPassword}
+          className="space-y-5"
+        >
+
+          {/* PASSWORD */}
+
           <div className="relative">
-            <label className="block text-sm font-medium mb-1">
+
+            <label className="block text-sm font-semibold mb-2">
               New Password
             </label>
 
@@ -85,61 +147,95 @@ const ResetPassword = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+              placeholder="Enter new password"
+              className="auth-input pr-12"
             />
 
-            <span
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-4 top-10 cursor-pointer text-gray-500"
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword((prev) => !prev)
+              }
+              className="
+                absolute
+                right-4
+                bottom-4
+                text-[var(--color-text-muted)]
+              "
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
+            </button>
+
           </div>
 
           {/* CONFIRM PASSWORD */}
+
           <div className="relative">
-            <label className="block text-sm font-medium mb-1">
-              Confirm New Password
+
+            <label className="block text-sm font-semibold mb-2">
+              Confirm Password
             </label>
 
             <input
               type={showConfirmPassword ? "text" : "password"}
               value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
+              onChange={(e) =>
+                setPasswordConfirm(e.target.value)
+              }
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+              placeholder="Confirm new password"
+              className="auth-input pr-12"
             />
 
-            <span
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-4 top-10 cursor-pointer text-gray-500"
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword((prev) => !prev)
+              }
+              className="
+                absolute
+                right-4
+                bottom-4
+                text-[var(--color-text-muted)]
+              "
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
+            </button>
+
           </div>
 
-          {/* SUBMIT BUTTON */}
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full"
           >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
+            {loading
+              ? "Resetting Password..."
+              : "Reset Password"}
+          </Button>
+
         </form>
 
-        {/* BACK TO LOGIN */}
-        <p className="text-center text-sm mt-6">
-          Remember password?{" "}
+        <div className="text-center mt-7">
+
           <Link
             to="/login"
-            className="text-blue-600 font-medium hover:underline"
+            className="
+              text-sm
+              font-semibold
+              text-[var(--color-primary)]
+              hover:text-[var(--color-accent-dark)]
+            "
           >
-            Login
+            Back to Login
           </Link>
-        </p>
+
+        </div>
+
       </div>
+
     </div>
+
   );
 };
 

@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { FaEnvelope, FaArrowLeft } from "react-icons/fa";
+import { toast } from "react-toastify";
+
 import api from "../../library/api";
+import Button from "../../component/UI/Button";
 
 const ForgotPassword = () => {
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  /* ================= SEND EMAIL ================= */
   const handleForgotPassword = async (e) => {
+
     e.preventDefault();
 
-    setError("");
-    setSuccess("");
-
     try {
+
       setLoading(true);
 
       const res = await api.post(
@@ -26,19 +27,19 @@ const ForgotPassword = () => {
       if (res.data.status !== "success") {
         throw new Error(
           res.data.message ||
-            "Failed to send reset email"
+          "Failed to send reset email"
         );
       }
 
-      setSuccess(
-        "✅ Password reset instructions sent to your email"
+      toast.success(
+        "Password reset instructions sent to your email 📧"
       );
 
       setEmail("");
 
     } catch (err) {
 
-      setError(
+      toast.error(
         err.response?.data?.message ||
         err.message ||
         "Something went wrong"
@@ -47,76 +48,147 @@ const ForgotPassword = () => {
     } finally {
       setLoading(false);
     }
+
   };
 
-  /* ================= UI ================= */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
 
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+    <div className="w-full">
 
-        <h2 className="text-2xl font-bold text-center mb-4">
-          Forgot Password
-        </h2>
+      {/* HEADER */}
 
-        <p className="text-gray-600 text-center mb-6">
-          Enter your email to receive password reset instructions.
-        </p>
+      <div className="text-center mb-8">
 
-        {error && (
-          <p className="bg-red-100 text-red-600 p-3 rounded mb-4 text-center">
-            {error}
-          </p>
-        )}
-
-        {success && (
-          <p className="bg-green-100 text-green-600 p-3 rounded mb-4 text-center">
-            {success}
-          </p>
-        )}
-
-        <form
-          onSubmit={handleForgotPassword}
-          className="space-y-4"
+        <div
+          className="
+            w-16
+            h-16
+            mx-auto
+            rounded-2xl
+            bg-gradient-to-br
+            from-[var(--color-primary)]
+            to-[var(--color-accent)]
+            flex
+            items-center
+            justify-center
+            text-white
+            text-2xl
+            shadow-[var(--shadow-primary)]
+            mb-4
+          "
         >
+          <FaEnvelope />
+        </div>
 
-          <input
-            type="email"
-            required
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-            className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
+        <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">
+          Forgot Password?
+        </h1>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading
-              ? "Sending..."
-              : "Send Reset Instructions"}
-          </button>
-
-        </form>
-
-        <p className="text-sm text-center mt-6">
-          Remember password?{" "}
-
-          <Link
-            to="/login"
-            className="text-blue-600 font-semibold hover:underline"
-          >
-            Login
-          </Link>
-
+        <p className="text-[var(--color-text-muted)] mt-2">
+          No worries. Enter your email and we'll send you reset instructions.
         </p>
 
       </div>
+
+      {/* CARD */}
+
+      <div
+        className="
+          bg-white
+          border
+          border-[var(--color-border)]
+          rounded-[var(--radius-xl)]
+          p-6
+          sm:p-8
+          shadow-[var(--shadow-lg)]
+        "
+      >
+
+        <form
+          onSubmit={handleForgotPassword}
+          className="space-y-5"
+        >
+
+          <div>
+
+            <label className="block text-sm font-semibold mb-2">
+              Email Address
+            </label>
+
+            <div className="relative">
+
+              <FaEnvelope
+                className="
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-[var(--color-text-light)]
+                "
+              />
+
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="
+                  w-full
+                  pl-11
+                  px-4
+                  py-3
+                  rounded-[var(--radius-md)]
+                  border
+                  border-[var(--color-border)]
+                  bg-[var(--color-background)]
+                  outline-none
+                  focus:border-[var(--color-primary)]
+                  focus:ring-4
+                  focus:ring-blue-100
+                "
+              />
+
+            </div>
+
+          </div>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full"
+          >
+            {loading
+              ? "Sending Instructions..."
+              : "Send Reset Instructions"}
+          </Button>
+
+        </form>
+
+        <div className="text-center mt-7">
+
+          <Link
+            to="/login"
+            className="
+              inline-flex
+              items-center
+              gap-2
+              text-sm
+              font-semibold
+              text-[var(--color-primary)]
+              hover:text-[var(--color-accent-dark)]
+            "
+          >
+            <FaArrowLeft />
+            Back to Login
+          </Link>
+
+        </div>
+
+      </div>
+
     </div>
+
   );
 };
 

@@ -1,27 +1,26 @@
 import { useState } from "react";
-import { FaGoogle, FaApple } from "react-icons/fa";
+import { FaGoogle, FaApple, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
+import Button from "../../component/UI/Button";
 
 const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleForgotPassword = () => {
-    navigate("/forgot-password");
-  };
-
   /* ================= INPUT HANDLER ================= */
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -32,154 +31,318 @@ const Login = () => {
   };
 
   /* ================= SUBMIT ================= */
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await api.post("/users/login", formData);
-    console.log("Login response:", res.data); // Debugging log
+      const res = await api.post("/users/login", formData);
 
-    const token = res.data.token; // ✅ FIXED
-    const user = res.data.data; // ✅ FIXED
-    console.log("Decoded user:", user); // Debugging log
+      const token = res.data.token;
+      const user = res.data.data;
 
-    if (!token || !user) {
-      setError("Login failed");
-      return;
+      if (!token || !user) {
+        toast.error("Login failed. Please try again.");
+        return;
+      }
+
+      login(user, token);
+
+      toast.success("Welcome back 👋");
+
+      setTimeout(() => {
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "vendor") {
+          navigate("/vendor/dashboard");
+        } else {
+          navigate("/");
+        }
+      }, 700);
+
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message ||
+        "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Save to Context + localStorage
-    login(user, token);
-
-    /* ================= REDIRECT ================= */
-
-    if (user.role === "admin") {
-      navigate("/admin/dashboard");
-    } 
-    else if (user.role === "vendor") {
-      navigate("/vendor/dashboard");
-    } 
-    else {
-      navigate("/");
-    }
-
-  } catch (err) {
-    console.error(err);
-
-    setError(
-      err.response?.data?.message ||
-      "Invalid email or password"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-3">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-md">
-        <h2 className="text-center text-2xl font-semibold py-5 border-b">
-          Login
-        </h2>
+    <div className="w-full">
 
-        <div className="p-6">
-          {/* ERROR */}
-          {error && (
-            <p className="bg-red-100 text-red-600 p-2 mb-4 text-sm rounded">
-              {error}
-            </p>
-          )}
+      {/* ================= BRAND HEADER ================= */}
 
-          {/* SOCIAL */}
-          <div className="flex gap-3 mb-6">
-            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2">
-              <FaGoogle className="text-red-500" />
-              Google
-            </button>
+      <div className="text-center mb-8">
 
-            <button className="flex-1 border rounded-md py-2 flex items-center justify-center gap-2">
-              <FaApple />
-              Apple
-            </button>
+        <div
+          className="
+            w-16
+            h-16
+            mx-auto
+            rounded-2xl
+            bg-gradient-to-br
+            from-[var(--color-primary)]
+            to-[var(--color-accent)]
+            flex
+            items-center
+            justify-center
+            text-white
+            text-2xl
+            font-bold
+            shadow-[var(--shadow-primary)]
+            mb-4
+          "
+        >
+          EC
+        </div>
+
+        <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">
+          Welcome Back
+        </h1>
+
+        <p className="mt-2 text-[var(--color-text-muted)]">
+          Login to continue shopping with EmmCoreShops
+        </p>
+
+      </div>
+
+      {/* ================= CARD ================= */}
+
+      <div
+        className="
+          bg-[var(--color-surface)]
+          border
+          border-[var(--color-border)]
+          rounded-[var(--radius-xl)]
+          p-6
+          sm:p-8
+          shadow-[var(--shadow-lg)]
+        "
+      >
+
+        {/* SOCIAL LOGIN */}
+
+        <div className="grid grid-cols-2 gap-3 mb-6">
+
+          <button
+            type="button"
+            className="
+              flex
+              items-center
+              justify-center
+              gap-2
+              border
+              border-[var(--color-border)]
+              rounded-[var(--radius-md)]
+              py-3
+              text-sm
+              font-medium
+              text-[var(--color-text-secondary)]
+              hover:bg-[var(--color-surface-hover)]
+              transition
+            "
+          >
+            <FaGoogle className="text-red-500" />
+            Google
+          </button>
+
+          <button
+            type="button"
+            className="
+              flex
+              items-center
+              justify-center
+              gap-2
+              border
+              border-[var(--color-border)]
+              rounded-[var(--radius-md)]
+              py-3
+              text-sm
+              font-medium
+              text-[var(--color-text-secondary)]
+              hover:bg-[var(--color-surface-hover)]
+              transition
+            "
+          >
+            <FaApple />
+            Apple
+          </button>
+
+        </div>
+
+        {/* DIVIDER */}
+
+        <div className="flex items-center gap-3 mb-6">
+
+          <div className="h-px bg-[var(--color-border)] flex-1" />
+
+          <span className="text-xs text-[var(--color-text-light)]">
+            OR CONTINUE WITH EMAIL
+          </span>
+
+          <div className="h-px bg-[var(--color-border)] flex-1" />
+
+        </div>
+
+        {/* FORM */}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* EMAIL */}
+
+          <div>
+
+            <label className="block text-sm font-semibold text-[var(--color-text-primary)] mb-2">
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              className="
+                w-full
+                px-4
+                py-3
+                rounded-[var(--radius-md)]
+                border
+                border-[var(--color-border)]
+                bg-[var(--color-background)]
+                text-[var(--color-text-primary)]
+                outline-none
+                transition
+                focus:border-[var(--color-primary)]
+                focus:ring-4
+                focus:ring-blue-100
+              "
+            />
+
           </div>
 
-          <div className="flex items-center gap-3 mb-6">
-            <hr className="flex-1" />
-            <span className="text-sm text-gray-400">OR</span>
-            <hr className="flex-1" />
-          </div>
+          {/* PASSWORD */}
 
-          {/* FORM */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* EMAIL */}
-            <div>
-              <label className="text-sm">Email</label>
+          <div>
+
+            <div className="flex items-center justify-between mb-2">
+
+              <label className="text-sm font-semibold text-[var(--color-text-primary)]">
+                Password
+              </label>
+
+              <Link
+                to="/forgot-password"
+                className="
+                  text-sm
+                  font-semibold
+                  text-[var(--color-primary)]
+                  hover:text-[var(--color-accent-dark)]
+                "
+              >
+                Forgot Password?
+              </Link>
+
+            </div>
+
+            <div className="relative">
+
+              <FaLock
+                className="
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-[var(--color-text-light)]
+                "
+              />
 
               <input
-                type="text"
-                name="email"
-                value={formData.email}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+                value={formData.password}
                 onChange={handleChange}
-                placeholder="example@email.com"
-                className="w-full border rounded-md px-3 py-3 mt-1"
+                placeholder="Enter your password"
+                className="
+                  w-full
+                  pl-11
+                  pr-12
+                  py-3
+                  rounded-[var(--radius-md)]
+                  border
+                  border-[var(--color-border)]
+                  bg-[var(--color-background)]
+                  outline-none
+                  transition
+                  focus:border-[var(--color-primary)]
+                  focus:ring-4
+                  focus:ring-blue-100
+                "
               />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="
+                  absolute
+                  right-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-[var(--color-text-muted)]
+                  hover:text-[var(--color-primary)]
+                "
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+
             </div>
 
-            {/* PASSWORD */}
-            <div>
-              <div className="flex justify-between text-sm">
-                <label>Password</label>
-                <button  type="button" className="text-[#ED017F]" onClick={handleForgotPassword}>
-                  Forgot Password?
-                </button>
-              </div>
+          </div>
 
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="********"
-                  className="w-full border rounded-md px-3 py-3 mt-1"
-                />
+          {/* BUTTON */}
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-4 text-sm text-gray-500"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-            </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full"
+          >
+            {loading ? "Logging in..." : "Login to Account"}
+          </Button>
 
-            {/* BUTTON */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-3 rounded-md font-semibold"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-        </div>
+        </form>
 
         {/* FOOTER */}
-        <div className="bg-gray-50 text-center p-6 rounded-b-lg">
-          <p className="text-sm text-gray-500 mb-3">Don't have an Account?</p>
 
-          <Link
-            to="/signup"
-            className="block bg-[#ED017F] text-white py-2 rounded-md font-semibold"
-          >
-            Create Account
-          </Link>
+        <div className="text-center mt-7">
+
+          <p className="text-sm text-[var(--color-text-muted)]">
+
+            Don't have an account?{" "}
+
+            <Link
+              to="/signup"
+              className="
+                font-bold
+                text-[var(--color-primary)]
+                hover:text-[var(--color-accent-dark)]
+              "
+            >
+              Create Account
+            </Link>
+
+          </p>
+
         </div>
+
       </div>
+
     </div>
   );
 };

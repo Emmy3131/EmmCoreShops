@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+
 import {
   FaBoxOpen,
   FaShoppingBag,
+  FaArrowLeft,
+  FaSlidersH,
 } from "react-icons/fa";
+
 import api from "../../../library/api";
 import ProductCard from "../../../component/Products/ProductCard";
 
@@ -11,7 +15,7 @@ const CategoryProducts = () => {
   const { id } = useParams();
 
   const [products, setProducts] = useState([]);
-  const [categoryName, setCategoryName] = useState("");
+  const [categoryName, setCategoryName] = useState("Category");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,102 +25,413 @@ const CategoryProducts = () => {
 
         const res = await api.get(`/products/category/${id}`);
 
-        setProducts(res.data.data || []);
+        const fetchedProducts = res.data.data || [];
 
-        if (res.data.data?.length > 0) {
+        setProducts(fetchedProducts);
+
+        if (fetchedProducts.length > 0) {
           setCategoryName(
-            res.data.data[0]?.category?.name || "Category"
+            fetchedProducts[0]?.category?.name || "Category",
           );
         }
       } catch (error) {
-        console.log(error);
+        console.error(
+          "Failed to fetch category products:",
+          error.response?.data || error.message,
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    if (id) {
+      fetchProducts();
+    }
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-50 mt-20">
-      {/* HERO SECTION */}
-      <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white py-12 px-6 rounded-b-3xl shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <p className="uppercase tracking-widest text-sm opacity-90">
-            Shop By Category
+    <div className="min-h-screen bg-[var(--color-background)]">
+      {/* =====================================================
+          CATEGORY HERO
+      ====================================================== */}
+      <section
+        className="
+          relative
+          overflow-hidden
+          bg-gradient-to-br
+          from-[var(--color-primary)]
+          via-[var(--color-primary-dark)]
+          to-[var(--color-accent-dark)]
+          text-white
+        "
+      >
+        {/* Decorative Background */}
+        <div
+          className="
+            absolute
+            -right-20
+            -top-20
+            h-72
+            w-72
+            rounded-full
+            bg-white/10
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            -bottom-32
+            left-1/3
+            h-72
+            w-72
+            rounded-full
+            bg-cyan-300/10
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            relative
+            mx-auto
+            max-w-7xl
+            px-4
+            py-10
+            md:px-8
+            md:py-16
+          "
+        >
+          {/* BACK LINK */}
+          <Link
+            to="/products"
+            className="
+              mb-6
+              inline-flex
+              items-center
+              gap-2
+              text-sm
+              text-blue-100
+              transition
+              hover:text-white
+            "
+          >
+            <FaArrowLeft size={13} />
+
+            Back to Products
+          </Link>
+
+          {/* LABEL */}
+          <p
+            className="
+              mb-3
+              flex
+              items-center
+              gap-2
+              text-xs
+              font-semibold
+              uppercase
+              tracking-[0.2em]
+              text-cyan-200
+            "
+          >
+            <FaShoppingBag />
+
+            Shop by Category
           </p>
 
-          <h1 className="text-3xl md:text-5xl font-bold mt-2">
+          {/* CATEGORY NAME */}
+          <h1
+            className="
+              max-w-3xl
+              text-3xl
+              font-extrabold
+              tracking-tight
+              md:text-5xl
+            "
+          >
             {categoryName}
           </h1>
 
-          <div className="flex items-center gap-2 mt-4">
-            <FaShoppingBag />
-            <span>
-              {products.length} Products Available
-            </span>
+          {/* PRODUCT COUNT */}
+          <div
+            className="
+              mt-5
+              inline-flex
+              items-center
+              gap-2
+              rounded-full
+              border
+              border-white/20
+              bg-white/10
+              px-4
+              py-2
+              text-sm
+              text-blue-50
+              backdrop-blur-md
+            "
+          >
+            <FaShoppingBag className="text-cyan-300" />
+
+            {loading
+              ? "Loading products..."
+              : `${products.length} Products Available`}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CONTENT */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
+      {/* =====================================================
+          MAIN CONTENT
+      ====================================================== */}
+      <main
+        className="
+          mx-auto
+          max-w-7xl
+          px-4
+          py-8
+          md:px-8
+          md:py-12
+        "
+      >
+        {/* =====================================================
+            LOADING STATE
+        ====================================================== */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {[...Array(8)].map((_, index) => (
+          <div
+            className="
+              grid
+              grid-cols-2
+              gap-3
+              sm:grid-cols-3
+              md:grid-cols-4
+              lg:grid-cols-5
+              md:gap-5
+            "
+          >
+            {[...Array(10)].map((_, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow animate-pulse"
+                className="
+                  overflow-hidden
+                  rounded-[var(--radius-lg)]
+                  border
+                  border-[var(--color-border)]
+                  bg-[var(--color-surface)]
+                  shadow-[var(--shadow-sm)]
+                "
               >
-                <div className="h-48 bg-gray-200 rounded-t-xl"></div>
+                <div
+                  className="
+                    h-44
+                    animate-pulse
+                    bg-slate-200
+                    md:h-60
+                  "
+                />
 
-                <div className="p-4">
-                  <div className="h-4 bg-gray-200 rounded mb-3"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                <div className="space-y-3 p-3">
+                  <div className="h-3 w-1/3 animate-pulse rounded bg-slate-200" />
+
+                  <div className="h-4 animate-pulse rounded bg-slate-200" />
+
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-slate-200" />
+
+                  <div className="h-9 animate-pulse rounded-lg bg-slate-200" />
                 </div>
               </div>
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-            <FaBoxOpen className="text-6xl text-gray-300 mx-auto mb-4" />
+          /* =====================================================
+              EMPTY STATE
+          ====================================================== */
+          <div
+            className="
+              flex
+              min-h-[420px]
+              flex-col
+              items-center
+              justify-center
+              rounded-[var(--radius-xl)]
+              border
+              border-[var(--color-border)]
+              bg-[var(--color-surface)]
+              px-6
+              text-center
+              shadow-[var(--shadow-sm)]
+            "
+          >
+            <div
+              className="
+                mb-5
+                flex
+                h-20
+                w-20
+                items-center
+                justify-center
+                rounded-full
+                bg-[var(--color-primary-light)]
+                text-[var(--color-primary)]
+              "
+            >
+              <FaBoxOpen size={38} />
+            </div>
 
-            <h2 className="text-2xl font-semibold text-gray-700">
+            <h2
+              className="
+                text-xl
+                font-bold
+                text-[var(--color-text-primary)]
+                md:text-2xl
+              "
+            >
               No Products Found
             </h2>
 
-            <p className="text-gray-500 mt-2">
-              This category does not contain any products yet.
+            <p
+              className="
+                mt-2
+                max-w-md
+                text-sm
+                text-[var(--color-text-muted)]
+              "
+            >
+              This category does not contain any products yet. Check back
+              later for new products.
             </p>
+
+            <Link
+              to="/products"
+              className="
+                mt-6
+                inline-flex
+                items-center
+                justify-center
+                rounded-[var(--radius-md)]
+                bg-[var(--color-primary)]
+                px-6
+                py-3
+                text-sm
+                font-semibold
+                text-white
+                shadow-[var(--shadow-primary)]
+                transition
+                hover:bg-[var(--color-primary-dark)]
+              "
+            >
+              Browse All Products
+            </Link>
           </div>
         ) : (
           <>
-            {/* TOP BAR */}
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="font-bold text-xl">
-                Products
-              </h2>
+            {/* =====================================================
+                PRODUCTS HEADER
+            ====================================================== */}
+            <div
+              className="
+                mb-6
+                flex
+                flex-col
+                gap-4
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+              "
+            >
+              <div>
+                <p
+                  className="
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-widest
+                    text-[var(--color-accent-dark)]
+                  "
+                >
+                  Explore Collection
+                </p>
 
-              <span className="bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium">
-                {products.length} Items
-              </span>
+                <h2
+                  className="
+                    mt-1
+                    text-2xl
+                    font-bold
+                    text-[var(--color-text-primary)]
+                    md:text-3xl
+                  "
+                >
+                  {categoryName} Products
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* PRODUCT COUNT */}
+                <div
+                  className="
+                    rounded-full
+                    bg-[var(--color-primary-light)]
+                    px-4
+                    py-2
+                    text-sm
+                    font-semibold
+                    text-[var(--color-primary)]
+                  "
+                >
+                  {products.length} Items
+                </div>
+
+                {/* FILTER BUTTON */}
+                <button
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    rounded-[var(--radius-md)]
+                    border
+                    border-[var(--color-border)]
+                    bg-[var(--color-surface)]
+                    px-4
+                    py-2
+                    text-sm
+                    font-medium
+                    text-[var(--color-text-secondary)]
+                    transition
+                    hover:border-[var(--color-primary)]
+                    hover:text-[var(--color-primary)]
+                  "
+                >
+                  <FaSlidersH size={13} />
+
+                  Filter
+                </button>
+              </div>
             </div>
 
-            {/* PRODUCT GRID */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {/* =====================================================
+                PRODUCT GRID
+            ====================================================== */}
+            <div
+              className="
+                grid
+                grid-cols-2
+                gap-3
+                sm:grid-cols-3
+                md:grid-cols-4
+                lg:grid-cols-5
+                md:gap-5
+              "
+            >
               {products.map((product) => (
-                <div
+                <ProductCard
                   key={product._id}
-                  className="transform transition duration-300 hover:-translate-y-2"
-                >
-                  <ProductCard product={product} />
-                </div>
+                  product={product}
+                />
               ))}
             </div>
           </>
         )}
-      </div>
+      </main>
     </div>
   );
 };

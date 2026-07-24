@@ -1,12 +1,14 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import ProductDetailsCard from "../../component/Products/ProductDetailsCard";
 import ProductReviews from "../../component/Products/ProductReviews";
 
+
 import api from "../../library/api";
 
 const ProductDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
@@ -36,10 +38,21 @@ const ProductDetails = () => {
       console.error(
         "Fetch product error:",
         error.response?.data ||
-          error.message
+        error.message
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+
+
+  const handleBuyNow = async (quantity = 1) => {
+    const success =
+      await handleAddToCart(quantity);
+
+    if (success) {
+      navigate("/checkout");
     }
   };
 
@@ -55,33 +68,40 @@ const ProductDetails = () => {
   ===============================
   */
 
- const handleAddToCart = async (
-  quantity = 1
-) => {
-  if (!product?._id) {
-    return;
-  }
+  const handleAddToCart = async (quantity = 1) => {
+    if (!product?._id) {
+      return false;
+    }
 
-  try {
-    setCartLoading(true);
+    try {
+      setCartLoading(true);
 
-    await api.post("/cart", {
-      productId: product._id,
-      quantity,
-    });
+      const res = await api.post("/cart", {
+        productId: product._id,
+        quantity,
+      });
 
-    alert("Added to cart 🛒");
-  } catch (error) {
-    console.log(
-      error.response?.data ||
-        error.message
-    );
+      if (res.data?.status === "success") {
+        return true;
+      }
 
-    alert("Failed to add product");
-  } finally {
-    setCartLoading(false);
-  }
-};
+      return false;
+    } catch (error) {
+      console.error(
+        "Add to cart error:",
+        error.response?.data || error.message
+      );
+
+      alert(
+        error.response?.data?.message ||
+        "Failed to add product"
+      );
+
+      return false;
+    } finally {
+      setCartLoading(false);
+    }
+  };
 
   /*
   ===============================
@@ -197,6 +217,7 @@ const ProductDetails = () => {
         product={product}
         loading={cartLoading}
         onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
         onReviewClick={scrollToReviews}
       />
 

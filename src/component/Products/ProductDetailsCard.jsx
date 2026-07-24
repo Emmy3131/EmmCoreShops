@@ -19,6 +19,7 @@ const ProductDetailsCard = ({
   product,
   loading,
   onAddToCart,
+  onBuyNow,
   onReviewClick,
 }) => {
   const [quantity, setQuantity] =
@@ -26,6 +27,10 @@ const ProductDetailsCard = ({
 
   const [isFavorite, setIsFavorite] =
     useState(false);
+
+  const handleBuyNow = () => {
+    onBuyNow(quantity);
+  };
 
   /*
   ===============================
@@ -472,43 +477,36 @@ const ProductDetailsCard = ({
 
           <div
             className="
-              mt-6
-              flex
-              flex-col
-              gap-3
-              sm:flex-row
-            "
+    mt-6
+    grid
+    grid-cols-1
+    gap-3
+    sm:grid-cols-2
+  "
           >
+            {/* ADD TO CART */}
 
             <button
-              onClick={
-                handleAddToCart
-              }
-              disabled={
-                loading ||
-                isOutOfStock
-              }
+              onClick={handleAddToCart}
+              disabled={loading || isOutOfStock}
               className="
-                flex
-                flex-1
-                items-center
-                justify-center
-                gap-2
-                rounded-xl
-                bg-gradient-to-r
-                from-blue-600
-                to-cyan-500
-                px-5
-                py-3.5
-                text-sm
-                font-bold
-                text-white
-                transition
-                hover:from-blue-700
-                hover:to-cyan-600
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+      flex
+      items-center
+      justify-center
+      gap-2
+      rounded-xl
+      border
+      border-blue-600
+      px-5
+      py-3.5
+      text-sm
+      font-bold
+      text-blue-600
+      transition
+      hover:bg-blue-50
+      disabled:cursor-not-allowed
+      disabled:opacity-50
+    "
             >
               <FaShoppingCart />
 
@@ -519,28 +517,38 @@ const ProductDetailsCard = ({
                   : "Add to Cart"}
             </button>
 
-            <Link
-              to="/cart"
-              className="
-                flex
-                flex-1
-                items-center
-                justify-center
-                rounded-xl
-                border
-                border-blue-600
-                px-5
-                py-3.5
-                text-sm
-                font-bold
-                text-blue-600
-                transition
-                hover:bg-blue-50
-              "
-            >
-              View Cart
-            </Link>
+            {/* BUY NOW */}
 
+            <button
+              onClick={handleBuyNow}
+              disabled={loading || isOutOfStock}
+              className="
+      flex
+      items-center
+      justify-center
+      gap-2
+      rounded-xl
+      bg-gradient-to-r
+      from-blue-600
+      to-cyan-500
+      px-5
+      py-3.5
+      text-sm
+      font-bold
+      text-white
+      shadow-lg
+      shadow-blue-200
+      transition
+      hover:from-blue-700
+      hover:to-cyan-600
+      disabled:cursor-not-allowed
+      disabled:opacity-50
+    "
+            >
+              <FaBolt />
+
+              Buy Now
+            </button>
           </div>
 
           {/* BENEFITS */}

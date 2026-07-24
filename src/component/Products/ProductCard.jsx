@@ -9,6 +9,7 @@ import {
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import api from "../../library/api";
 
@@ -91,11 +92,12 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async () => {
     if (!product?._id) {
-      alert("Product ID not found");
+      toast.error("Product not found");
       return;
     }
 
     if (isOutOfStock) {
+      toast.error("Product is out of stock");
       return;
     }
 
@@ -108,7 +110,7 @@ const ProductCard = ({ product }) => {
       });
 
       if (res.data.status === "success") {
-        alert("Added to cart 🛒");
+        toast.success("Added to cart 🛒");
       }
     } catch (error) {
       console.error(
@@ -116,7 +118,7 @@ const ProductCard = ({ product }) => {
         error
       );
 
-      alert(
+      toast.error(
         error.response?.data?.message ||
         "Unable to add product to cart"
       );

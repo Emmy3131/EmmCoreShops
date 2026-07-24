@@ -46,15 +46,13 @@ const CheckOut = () => {
 
         setCartItems(items);
 
-        const sum = items.reduce(
-          (acc, item) =>
-            acc +
-            Number(item.price || 0) *
-              Number(item.quantity || 1),
-          0
-        );
+        const cart = res.data.data;
 
-        setTotal(sum);
+        setCartItems(cart.items || []);
+
+        setTotal(
+          Number(cart.totalPrice || 0)
+        );
       } catch (err) {
         console.error("Cart error:", err);
       }
@@ -109,7 +107,7 @@ const CheckOut = () => {
 
       alert(
         err.response?.data?.message ||
-          "Checkout failed"
+        "Checkout failed"
       );
     } finally {
       setLoading(false);
@@ -197,12 +195,20 @@ const CheckOut = () => {
                     {item.name} x {item.quantity}
                   </span>
 
-                  <span>
-                    ₦
-                    {(
-                      item.price * item.quantity
-                    ).toLocaleString()}
-                  </span>
+                  <div className="text-right">
+                    <p className="font-semibold text-blue-600">
+                      ₦
+                      {(
+                        Number(item.price) *
+                        Number(item.quantity)
+                      ).toLocaleString()}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
+                      ₦{Number(item.price).toLocaleString()} ×{" "}
+                      {item.quantity}
+                    </p>
+                  </div>
                 </div>
               ))
             )}

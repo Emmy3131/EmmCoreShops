@@ -240,7 +240,7 @@ const Sidebar = ({
               <button
                 onClick={() =>
                   handleNavigation(
-                    "/user/profile"
+                    "/profile"
                   )
                 }
                 className="

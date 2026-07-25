@@ -1,8 +1,6 @@
 import {
   FaStar,
   FaShoppingCart,
-  FaHeart,
-  FaRegHeart,
   FaEye,
   FaBolt,
 } from "react-icons/fa";
@@ -15,10 +13,10 @@ import api from "../../library/api";
 
 import CountdownTimer from "./CountDownTimer";
 import ProductPrice from "./ProductPrice";
+import WishlistButton from "./WishListButton";
 
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   /* =========================================
      FLASH SALE STATUS
@@ -28,27 +26,19 @@ const ProductCard = ({ product }) => {
     product?.isFlashSale &&
     product?.flashSalePrice &&
     product?.flashSaleEndAt &&
-    new Date(product.flashSaleEndAt) >
-    new Date();
+    new Date(product.flashSaleEndAt) > new Date();
 
   /* =========================================
      PRICES
   ========================================= */
 
-  const originalPrice =
-    Number(
-      product?.oldPrice ||
-      product?.price ||
-      0
-    );
+  const originalPrice = Number(
+    product?.oldPrice || product?.price || 0
+  );
 
   const salePrice = Number(
     product?.flashSalePrice || 0
   );
-
-  const displayPrice = isFlashSale
-    ? salePrice
-    : Number(product?.price || 0);
 
   /* =========================================
      DISCOUNT
@@ -57,18 +47,17 @@ const ProductCard = ({ product }) => {
   const discountPercentage =
     isFlashSale && originalPrice > salePrice
       ? Math.round(
-        ((originalPrice - salePrice) /
-          originalPrice) *
-        100
-      )
+          ((originalPrice - salePrice) /
+            originalPrice) *
+            100
+        )
       : 0;
 
   /* =========================================
      STOCK
   ========================================= */
 
-  const stock =
-    Number(product?.stock) || 0;
+  const stock = Number(product?.stock) || 0;
 
   const isOutOfStock = stock <= 0;
 
@@ -120,7 +109,7 @@ const ProductCard = ({ product }) => {
 
       toast.error(
         error.response?.data?.message ||
-        "Unable to add product to cart"
+          "Unable to add product to cart"
       );
     } finally {
       setLoading(false);
@@ -169,7 +158,9 @@ const ProductCard = ({ product }) => {
               product?.image ||
               "/placeholder-product.png"
             }
-            alt={product?.name || "Product"}
+            alt={
+              product?.name || "Product"
+            }
             loading="lazy"
             className="
               w-full
@@ -184,7 +175,9 @@ const ProductCard = ({ product }) => {
           />
         </Link>
 
-        {/* TOP BADGES */}
+        {/* =================================
+            TOP BADGES
+        ================================= */}
 
         <div
           className="
@@ -200,7 +193,7 @@ const ProductCard = ({ product }) => {
             justify-between
           "
         >
-          {/* FLASH SALE BADGE */}
+          {/* FLASH SALE / NEW BADGE */}
 
           {isFlashSale ? (
             <span
@@ -242,38 +235,13 @@ const ProductCard = ({ product }) => {
             </span>
           )}
 
-          {/* WISHLIST */}
+          {/* =================================
+              REUSABLE WISHLIST BUTTON
+          ================================= */}
 
-          <button
-            onClick={() =>
-              setIsFavorite(!isFavorite)
-            }
-            aria-label="Add to wishlist"
-            className={`
-              w-8
-              h-8
-              sm:w-9
-              sm:h-9
-              rounded-full
-              flex
-              items-center
-              justify-center
-              backdrop-blur-md
-              shadow-sm
-              transition-all
-              duration-200
-              ${isFavorite
-                ? "bg-blue-600 text-white"
-                : "bg-white/90 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-              }
-            `}
-          >
-            {isFavorite ? (
-              <FaHeart size={13} />
-            ) : (
-              <FaRegHeart size={13} />
-            )}
-          </button>
+          <WishlistButton
+            product={product._id}
+          />
         </div>
 
         {/* DISCOUNT BADGE */}
@@ -446,7 +414,9 @@ const ProductCard = ({ product }) => {
         {/* PRICE */}
 
         <div className="mt-3">
-          <ProductPrice product={product} />
+          <ProductPrice
+            product={product}
+          />
         </div>
 
         {/* COUNTDOWN */}
@@ -515,7 +485,9 @@ const ProductCard = ({ product }) => {
               duration-300
             "
           >
-            <FaShoppingCart size={12} />
+            <FaShoppingCart
+              size={12}
+            />
 
             {loading
               ? "Adding..."

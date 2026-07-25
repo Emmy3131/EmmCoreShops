@@ -401,7 +401,7 @@ const Sidebar = ({
               description="Your wishlist"
               onClick={() =>
                 handleNavigation(
-                  "/saved"
+                  "/wishlist"
                 )
               }
             />

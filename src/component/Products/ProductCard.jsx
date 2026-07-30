@@ -239,7 +239,7 @@ const ProductCard = ({ product }) => {
               REUSABLE WISHLIST BUTTON
           ================================= */}
 
-          <div>
+          <div className="relative">
             <WishlistButton
               productId={product._id}
             />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaHeart } from "react-icons/fa";
 import api from "../../library/api";
+import {toast} from 'react-toastify'
 
 const WishlistButton = ({ productId }) => {
   const [isSaved, setIsSaved] = useState(false);
@@ -41,6 +42,7 @@ const WishlistButton = ({ productId }) => {
         setIsSaved(res.data?.data);
 
         console.log("Wishlist:", res.data.data);
+         toast.success("Product liked successfully 👋");
       }
     } catch (error) {
       console.error(

@@ -47,10 +47,10 @@ const ProductCard = ({ product }) => {
   const discountPercentage =
     isFlashSale && originalPrice > salePrice
       ? Math.round(
-          ((originalPrice - salePrice) /
-            originalPrice) *
-            100
-        )
+        ((originalPrice - salePrice) /
+          originalPrice) *
+        100
+      )
       : 0;
 
   /* =========================================
@@ -109,7 +109,7 @@ const ProductCard = ({ product }) => {
 
       toast.error(
         error.response?.data?.message ||
-          "Unable to add product to cart"
+        "Unable to add product to cart"
       );
     } finally {
       setLoading(false);
@@ -239,9 +239,11 @@ const ProductCard = ({ product }) => {
               REUSABLE WISHLIST BUTTON
           ================================= */}
 
-          <WishlistButton
-            product={product._id}
-          />
+          <div className="relative z-50">
+            <WishlistButton
+              productId={product._id}
+            />
+          </div>
         </div>
 
         {/* DISCOUNT BADGE */}

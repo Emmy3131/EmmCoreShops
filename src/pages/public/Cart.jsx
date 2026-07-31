@@ -1,6 +1,7 @@
 import api from "../../library/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   FaShoppingCart,
   FaTrash,
@@ -14,9 +15,21 @@ import {
 
 import Button from "../../component/UI/Button";
 
+import { useAuth } from "../../Context/AuthContext";
+
+import {
+  getGuestCart,
+  getGuestCartTotal,
+  updateGuestQuantity,
+  removeGuestItem,
+  clearGuestCart,
+} from "../../library/guestCart";
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
+  const { user } = useAuth();
+
 
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
@@ -33,6 +46,22 @@ const Cart = () => {
     try {
       setLoading(true);
 
+      // ===========================
+      // GUEST CART
+      // ===========================
+      if (!user) {
+        const guestItems = getGuestCart();
+
+        setCartItems(guestItems);
+
+        setTotal(getGuestCartTotal());
+
+        return;
+      }
+
+      // ===========================
+      // USER CART
+      // ===========================
       const res = await api.get("/cart");
 
       const data = res.data.data;
@@ -69,7 +98,28 @@ const Cart = () => {
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [user]);
+
+
+  useEffect(() => {
+    if (user) return;
+
+    const updateCart = () => {
+      setCartItems(getGuestCart());
+      setTotal(getGuestCartTotal());
+    };
+
+    window.addEventListener(
+      "guest-cart-updated",
+      updateCart
+    );
+
+    return () =>
+      window.removeEventListener(
+        "guest-cart-updated",
+        updateCart
+      );
+  }, [user]);
 
   /* =====================================================
      CHECKOUT
@@ -90,8 +140,45 @@ const Cart = () => {
     try {
       setUpdatingId(productId);
 
+      /* ===============================
+         GUEST CART
+      =============================== */
+
+      if (!user) {
+        const item = cartItems.find(
+          (i) => i.product._id === productId
+        );
+
+        if (!item) return;
+
+        let newQuantity = item.quantity;
+
+        if (type === "increase") {
+          newQuantity += 1;
+        } else {
+          newQuantity -= 1;
+        }
+
+        updateGuestQuantity(
+          productId,
+          newQuantity
+        );
+
+        setCartItems(getGuestCart());
+
+        setTotal(getGuestCartTotal());
+
+        return;
+      }
+
+      /* ===============================
+         USER CART
+      =============================== */
+
       const quantity =
-        type === "increase" ? 1 : -1;
+        type === "increase"
+          ? 1
+          : -1;
 
       const res = await api.patch(
         "/cart/update",
@@ -118,12 +205,30 @@ const Cart = () => {
      REMOVE ITEM
   ===================================================== */
 
-  const handleRemove = async (id) => {
+  const handleRemove = async (productId) => {
     try {
-      setRemovingId(id);
+      setRemovingId(productId);
+
+      /* ===============================
+         GUEST CART
+      =============================== */
+
+      if (!user) {
+        removeGuestItem(productId);
+
+        setCartItems(getGuestCart());
+
+        setTotal(getGuestCartTotal());
+
+        return;
+      }
+
+      /* ===============================
+         USER CART
+      =============================== */
 
       const res = await api.delete(
-        `/cart/${id}`
+        `/cart/${productId}`
       );
 
       if (res.data.status === "success") {
@@ -153,6 +258,24 @@ const Cart = () => {
     try {
       setClearing(true);
 
+      /* ===============================
+         GUEST CART
+      =============================== */
+
+      if (!user) {
+        clearGuestCart();
+
+        setCartItems([]);
+
+        setTotal(0);
+
+        return;
+      }
+
+      /* ===============================
+         USER CART
+      =============================== */
+
       const res = await api.delete("/cart");
 
       if (res.data.status === "success") {
@@ -165,7 +288,7 @@ const Cart = () => {
       );
     } finally {
       setClearing(false);
-    }
+    };
   };
 
   /* =====================================================
@@ -428,18 +551,40 @@ const Cart = () => {
           <div className="lg:col-span-2 space-y-4">
 
             {cartItems.map((item) => {
+              const product =
+                typeof item.product === "object"
+                  ? item.product
+                  : null;
 
               const productId =
+                product?._id ||
                 item.product?._id ||
-                item.product;
+                item.product ||
+                item._id;
 
-              const itemTotal =
-                Number(item.price || 0) *
-                Number(item.quantity || 1);
+              const name =
+                item.name ??
+                product?.name ??
+                "Product";
 
+              const image =
+                item.image ||
+                product?.image?.url ||
+                product?.image ||
+                product?.images?.[0]?.url ||
+                product?.images?.[0] ||
+                "/placeholder.png";
+
+              const price = Number(
+                item.price ||
+                product?.price ||
+                0
+              );
+
+              const itemTotal = price * item.quantity;
               return (
                 <div
-                  key={item._id}
+                  key={productId}
                   className="
                     bg-white
                     border
@@ -480,8 +625,8 @@ const Cart = () => {
                     >
 
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={image}
+                        alt={name}
                         className="
                           w-full
                           h-full
@@ -517,7 +662,7 @@ const Cart = () => {
                               line-clamp-2
                             "
                           >
-                            {item.name}
+                            {name}
                           </h2>
 
                           <p
@@ -538,9 +683,7 @@ const Cart = () => {
                             "
                           >
                             ₦
-                            {Number(
-                              item.price || 0
-                            ).toLocaleString()}
+                            {price.toLocaleString()}
                           </p>
 
                         </div>

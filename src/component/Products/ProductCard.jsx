@@ -14,9 +14,12 @@ import api from "../../library/api";
 import CountdownTimer from "./CountDownTimer";
 import ProductPrice from "./ProductPrice";
 import WishlistButton from "./WishListButton";
+import { addGuestItem } from "../../library/guestCart";
+import { useAuth } from "../../Context/AuthContext";
 
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
+  const {user} = useAuth();
 
   /* =========================================
      FLASH SALE STATUS
@@ -80,41 +83,52 @@ const ProductCard = ({ product }) => {
   ========================================= */
 
   const handleAddToCart = async () => {
-    if (!product?._id) {
-      toast.error("Product not found");
+  if (!product?._id) {
+    toast.error("Product not found");
+    return;
+  }
+
+  if (isOutOfStock) {
+    toast.error("Product is out of stock");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // ============================
+    // GUEST USER
+    // ============================
+    if (!user) {
+      addGuestItem(product, 1);
+
+      toast.success("Added to cart 🛒");
+
       return;
     }
 
-    if (isOutOfStock) {
-      toast.error("Product is out of stock");
-      return;
+    // ============================
+    // LOGGED IN USER
+    // ============================
+    const res = await api.post("/cart", {
+      productId: product._id,
+      quantity: 1,
+    });
+
+    if (res.data.status === "success") {
+      toast.success("Added to cart 🛒");
     }
+  } catch (error) {
+    console.error("Add to cart error:", error);
 
-    try {
-      setLoading(true);
-
-      const res = await api.post("/cart", {
-        productId: product._id,
-        quantity: 1,
-      });
-
-      if (res.data.status === "success") {
-        toast.success("Added to cart 🛒");
-      }
-    } catch (error) {
-      console.error(
-        "Add to cart error:",
-        error
-      );
-
-      toast.error(
-        error.response?.data?.message ||
-        "Unable to add product to cart"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.error(
+      error.response?.data?.message ||
+      "Unable to add product to cart"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <article

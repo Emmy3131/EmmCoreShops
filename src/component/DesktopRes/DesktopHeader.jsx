@@ -16,7 +16,8 @@ import { useNavigate, Link } from "react-router-dom";
 
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
-import { useCart } from "../../Context/CartCountContext";
+import { useCart,  } from "../../Context/CartCountContext";
+import {getGuestCartCount } from "../../library/guestCart";
 import Button from "../UI/Button";
 
 const DesktopHeader = () => {
@@ -24,12 +25,49 @@ const DesktopHeader = () => {
 
   // GLOBAL CART COUNT
   const { cartCount } = useCart();
+  const [guestCount, setGuestCount] = useState(0);
 
   const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+
+
+  const loadGuestCartCount = () => {
+    setGuestCount(getGuestCartCount());
+  };
+
+  useEffect(() => {
+    if (!user) {
+      loadGuestCartCount();
+    } else {
+      setGuestCount(0);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const updateGuestCart = () => {
+      if (!user) {
+        loadGuestCartCount();
+      }
+    };
+
+    window.addEventListener(
+      "guest-cart-updated",
+      updateGuestCart
+    );
+
+    return () =>
+      window.removeEventListener(
+        "guest-cart-updated",
+        updateGuestCart
+      );
+  }, [user]);
+
+  const displayCartCount = user
+    ? cartCount
+    : guestCount;
 
   /* =========================================
      FETCH CATEGORIES
@@ -486,7 +524,7 @@ const DesktopHeader = () => {
 
                   {/* GLOBAL CART BADGE */}
 
-                  {cartCount > 0 && (
+                  {displayCartCount > 0 && (
 
                     <span
                       className="
@@ -508,7 +546,7 @@ const DesktopHeader = () => {
                         border-white
                       "
                     >
-                      {cartCount}
+                      {displayCartCount}
                     </span>
 
                   )}
@@ -622,10 +660,9 @@ const DesktopHeader = () => {
           z-[60]
           transition-opacity
           duration-300
-          ${
-            showCategoryMenu
-              ? "opacity-100 visible"
-              : "opacity-0 invisible"
+          ${showCategoryMenu
+            ? "opacity-100 visible"
+            : "opacity-0 invisible"
           }
         `}
       />
@@ -649,10 +686,9 @@ const DesktopHeader = () => {
           overflow-y-auto
           transition-transform
           duration-300
-          ${
-            showCategoryMenu
-              ? "translate-x-0"
-              : "-translate-x-full"
+          ${showCategoryMenu
+            ? "translate-x-0"
+            : "-translate-x-full"
           }
         `}
       >

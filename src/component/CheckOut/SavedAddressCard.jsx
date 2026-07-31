@@ -5,6 +5,7 @@ import {
   FaPhone,
   FaPlus,
   FaTrash,
+  FaLocationArrow,
 } from "react-icons/fa";
 
 const SavedAddressCard = ({
@@ -13,138 +14,198 @@ const SavedAddressCard = ({
   onSelect,
   onDelete,
   onAddNew,
+  loading = false,
 }) => {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6">
-      {/* Header */}
+    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* ================= Header ================= */}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
         <div>
-          <h2 className="text-xl font-bold text-[var(--color-text-primary)]">
-            Saved Addresses
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900">Saved Addresses</h2>
 
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Choose a delivery address
+          <p className="text-sm text-gray-500 mt-1">
+            Select where you want your order delivered
           </p>
         </div>
 
         <button
+          type="button"
           onClick={onAddNew}
           className="
             flex
             items-center
             gap-2
             rounded-xl
-            bg-blue-600
-            px-4
-            py-2
-            text-sm
-            font-semibold
+            bg-gradient-to-r
+            from-blue-600
+            to-cyan-500
+            px-5
+            py-3
             text-white
-            hover:bg-blue-700
-            transition
+            font-semibold
+            shadow-lg
+            hover:scale-105
+            transition-all
           "
         >
           <FaPlus />
-          Add New
+          Add Address
         </button>
       </div>
 
-      {/* Empty */}
+      {/* ================= Empty ================= */}
 
       {addresses.length === 0 ? (
-        <div
-          className="
-            border-2
-            border-dashed
-            border-gray-300
-            rounded-xl
-            py-12
-            text-center
-          "
-        >
-          <FaMapMarkerAlt className="mx-auto text-4xl text-gray-300 mb-3" />
+        <div className="py-16 text-center">
+          <div
+            className="
+              w-24
+              h-24
+              rounded-full
+              bg-blue-50
+              flex
+              items-center
+              justify-center
+              mx-auto
+              mb-6
+            "
+          >
+            <FaMapMarkerAlt className="text-4xl text-blue-500" />
+          </div>
 
-          <h3 className="font-semibold text-lg">No saved addresses</h3>
+          <h3 className="text-xl font-bold text-gray-800">
+            No Saved Addresses
+          </h3>
 
-          <p className="text-sm text-gray-500 mt-2">
-            Add your first delivery address.
+          <p className="text-gray-500 mt-3 max-w-sm mx-auto">
+            Save delivery addresses to checkout faster on your next purchase.
           </p>
+
+          <button
+            onClick={onAddNew}
+            className="
+              mt-8
+              px-6
+              py-3
+              rounded-xl
+              bg-gradient-to-r
+              from-blue-600
+              to-cyan-500
+              text-white
+              font-semibold
+              hover:scale-105
+              transition
+            "
+          >
+            Add Your First Address
+          </button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="p-6 grid gap-5">
           {addresses.map((item) => {
             const selected = selectedAddress?._id === item._id;
 
             return (
               <div
                 key={item._id}
-                onClick={() => onSelect(item)}
                 className={`
                   relative
-                  cursor-pointer
                   rounded-2xl
                   border-2
-                  p-5
+                  p-6
                   transition-all
+                  duration-300
 
                   ${
                     selected
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-300"
+                      ? "border-blue-600 bg-blue-50 shadow-lg"
+                      : "border-gray-200 hover:border-blue-300 hover:shadow-md"
                   }
                 `}
               >
-                {/* Selected */}
+                {/* Selected Badge */}
 
                 {selected && (
-                  <div className="absolute top-4 right-4 text-blue-600">
-                    <FaCheckCircle />
-                  </div>
-                )}
-
-                {/* Default */}
-
-                {item.isDefault && (
-                  <span
+                  <div
                     className="
-                      inline-flex
+                      absolute
+                      top-5
+                      right-5
+                      flex
                       items-center
-                      gap-1
+                      gap-2
                       rounded-full
-                      bg-green-100
+                      bg-blue-600
+                      text-white
                       px-3
                       py-1
                       text-xs
                       font-semibold
+                    "
+                  >
+                    <FaCheckCircle />
+                    Selected
+                  </div>
+                )}
+
+                {/* Default Badge */}
+
+                {item.isDefault && (
+                  <div
+                    className="
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      bg-green-100
                       text-green-700
-                      mb-4
+                      px-3
+                      py-1
+                      text-xs
+                      font-semibold
+                      mb-5
                     "
                   >
                     <FaHome />
-                    Default
-                  </span>
+                    Default Address
+                  </div>
                 )}
 
                 {/* Name */}
 
-                <h3 className="font-bold text-lg">{item.fullName}</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {item.fullName}
+                </h3>
 
                 {/* Phone */}
 
-                <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                  <FaPhone />
+                <div className="flex items-center gap-3 mt-4 text-gray-600">
+                  <FaPhone className="text-blue-600" />
 
-                  {item.phone}
+                  <span>{item.phone}</span>
                 </div>
 
                 {/* Address */}
 
-                <div className="flex gap-2 mt-3">
-                  <FaMapMarkerAlt className="mt-1 text-blue-600" />
+                <div className="flex gap-3 mt-5">
+                  <div
+                    className="
+                      w-10
+                      h-10
+                      rounded-xl
+                      bg-blue-100
+                      text-blue-600
+                      flex
+                      items-center
+                      justify-center
+                      flex-shrink-0
+                    "
+                  >
+                    <FaMapMarkerAlt />
+                  </div>
 
-                  <div className="text-sm">
+                  <div className="text-gray-700 leading-7">
                     <p>{item.address}</p>
 
                     <p>
@@ -152,14 +213,47 @@ const SavedAddressCard = ({
                     </p>
 
                     <p>{item.country}</p>
+
+                    {item.postalCode && (
+                      <p className="text-gray-500">
+                        Postal Code: {item.postalCode}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Footer */}
 
-                <div className="flex justify-end mt-5">
+                <div className="flex flex-wrap items-center justify-between gap-4 mt-8">
                   <button
                     type="button"
+                    disabled={selected}
+                    onClick={() => onSelect(item)}
+                    className={`
+                      flex
+                      items-center
+                      gap-2
+                      px-6
+                      py-3
+                      rounded-xl
+                      font-semibold
+                      transition
+
+                      ${
+                        selected
+                          ? "bg-blue-600 text-white cursor-default"
+                          : "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white"
+                      }
+                    `}
+                  >
+                    <FaLocationArrow />
+
+                    {selected ? "Delivering Here" : "Deliver Here"}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loading}
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(item._id);
@@ -168,14 +262,16 @@ const SavedAddressCard = ({
                       flex
                       items-center
                       gap-2
-                      rounded-lg
+                      rounded-xl
                       border
                       border-red-200
-                      px-3
-                      py-2
-                      text-sm
+                      bg-red-50
+                      px-5
+                      py-3
                       text-red-600
-                      hover:bg-red-50
+                      font-medium
+                      hover:bg-red-100
+                      transition
                     "
                   >
                     <FaTrash />

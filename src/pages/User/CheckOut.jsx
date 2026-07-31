@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   FaArrowLeft,
   FaCheckCircle,
@@ -20,6 +21,10 @@ const CheckOut = () => {
 
   const { user, loading: authLoading } = useAuth();
 
+  /* ===============================
+     STATES
+  =============================== */
+
   const [cartItems, setCartItems] = useState([]);
 
   const [total, setTotal] = useState(0);
@@ -40,6 +45,7 @@ const CheckOut = () => {
     state: "",
     country: "Nigeria",
     postalCode: "",
+    isDefault: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -48,9 +54,9 @@ const CheckOut = () => {
 
   const [error, setError] = useState("");
 
-  /* ======================================
-  AUTH
-  ====================================== */
+  /* ===============================
+      AUTH CHECK
+  =============================== */
 
   useEffect(() => {
     if (authLoading) return;
@@ -60,42 +66,18 @@ const CheckOut = () => {
     }
   }, [user, authLoading, navigate]);
 
-  /* ======================================
-  LOAD CHECKOUT DATA
-  ====================================== */
+  /* ===============================
+      LOAD CHECKOUT DATA
+  =============================== */
 
   useEffect(() => {
     if (!user) return;
 
-    const loadCheckout = async () => {
+    const initCheckout = async () => {
       try {
         setPageLoading(true);
 
-        const [cartRes, addressRes] = await Promise.all([
-          api.get("/cart"),
-
-          api.get("/users/addresses"),
-        ]);
-
-        // CART
-
-        const cart = cartRes.data?.data;
-
-        setCartItems(cart?.items || []);
-
-        setTotal(Number(cart?.totalPrice || 0));
-
-        // ADDRESSES
-
-        const addresses = addressRes.data?.data?.addresses || [];
-
-        setSavedAddresses(addresses);
-
-        const defaultAddress = addresses.find((item) => item.isDefault);
-
-        if (defaultAddress) {
-          setSelectedAddress(defaultAddress);
-        }
+        await Promise.all([loadCart(), loadAddresses()]);
       } catch (err) {
         console.error(err);
 
@@ -105,33 +87,122 @@ const CheckOut = () => {
       }
     };
 
-    loadCheckout();
+    initCheckout();
   }, [user]);
 
-  /* ======================================
-  FORM CHANGE
-  ====================================== */
+  /* ===============================
+       LOAD CART
+  =============================== */
+
+  const loadCart = async () => {
+    try {
+      const res = await api.get("/cart");
+
+      const cart = res.data.data;
+
+      setCartItems(cart?.items || []);
+
+      setTotal(Number(cart?.totalPrice || 0));
+    } catch (err) {
+      console.error(err);
+
+      throw err;
+    }
+  };
+
+  /* ===============================
+       LOAD ADDRESSES
+  =============================== */
+
+  const loadAddresses = async () => {
+    try {
+      const res = await api.get("/users/addresses");
+
+      const addresses = res.data.data.addresses || [];
+
+      setSavedAddresses(addresses);
+
+      if (addresses.length) {
+        const defaultAddress =
+          addresses.find((item) => item.isDefault) || addresses[0];
+
+        setSelectedAddress(defaultAddress);
+      }
+    } catch (err) {
+      console.error(err);
+
+      throw err;
+    }
+  };
+
+  /* ===============================
+       SAVE NEW ADDRESS
+  =============================== */
+
+  const saveNewAddress = async () => {
+    try {
+      const res = await api.post("/users/addresses", address);
+
+      await loadAddresses();
+
+      setShowForm(false);
+
+      return res.data.data.address;
+    } catch (err) {
+      console.error(err);
+
+      setError(err.response?.data?.message || "Unable to save address");
+
+      throw err;
+    }
+  };
+
+  /* ===============================
+       DELETE ADDRESS
+  =============================== */
+
+  const deleteAddress = async (id) => {
+    const confirmDelete = window.confirm("Delete this address?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/users/addresses/${id}`);
+
+      await loadAddresses();
+    } catch (err) {
+      console.error(err);
+
+      setError(err.response?.data?.message || "Unable to delete address");
+    }
+  };
+
+  /* ===============================
+       FORM CHANGE
+  =============================== */
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     setAddress((prev) => ({
       ...prev,
 
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
 
-    if (error) setError("");
+    if (error) {
+      setError("");
+    }
   };
 
-  /* ======================================
-  VALIDATE ADDRESS
-  ====================================== */
+  /* ===============================
+       VALIDATE ADDRESS
+  =============================== */
 
   const validateAddress = () => {
-    const fields = ["fullName", "phone", "address", "city", "state"];
+    const required = ["fullName", "phone", "address", "city", "state"];
 
-    const valid = fields.every((field) => address[field].trim());
+    const valid = required.every((field) => address[field]?.trim());
 
     if (!valid) {
       setError("Please complete delivery information");
@@ -142,32 +213,36 @@ const CheckOut = () => {
     return true;
   };
 
-  /* ======================================
-  CHECKOUT
-  ====================================== */
+  /* ===============================
+       CHECKOUT
+  =============================== */
 
   const handleCheckout = async () => {
     setError("");
 
-    let shippingAddress;
+    if (!cartItems.length) {
+      setError("Your cart is empty");
 
-    if (selectedAddress) {
-      shippingAddress = selectedAddress;
-    } else {
-      if (!validateAddress()) return;
-
-      shippingAddress = address;
-
-      if (saveAddress) {
-        try {
-          await api.post("/users/addresses", address);
-        } catch (err) {
-          console.error("Saving address failed", err);
-        }
-      }
+      return;
     }
 
+    let shippingAddress;
+
     try {
+      if (selectedAddress) {
+        shippingAddress = selectedAddress;
+      } else {
+        if (!validateAddress()) return;
+
+        if (saveAddress) {
+          const newAddress = await saveNewAddress();
+
+          shippingAddress = newAddress || address;
+        } else {
+          shippingAddress = address;
+        }
+      }
+
       setLoading(true);
 
       const res = await api.post("/orders/checkout", {
@@ -194,28 +269,29 @@ const CheckOut = () => {
     return (
       <div
         className="
-min-h-screen
-flex
-items-center
-justify-center
-"
+        min-h-screen
+        flex
+        items-center
+        justify-center
+        bg-gray-50
+      "
       >
         <div className="text-center">
           <div
             className="
-w-14
-h-14
-border-4
-border-blue-200
-border-t-blue-600
-rounded-full
-animate-spin
-mx-auto
-mb-4
-"
+            w-14
+            h-14
+            border-4
+            border-blue-200
+            border-t-blue-600
+            rounded-full
+            animate-spin
+            mx-auto
+            mb-4
+          "
           />
 
-          <p>Preparing checkout...</p>
+          <p className="text-gray-600">Preparing checkout...</p>
         </div>
       </div>
     );
@@ -224,36 +300,42 @@ mb-4
   return (
     <div
       className="
-min-h-screen
-bg-gray-50
-pb-20
-"
+      min-h-screen
+      bg-gray-50
+      pb-20
+    "
     >
-      {/* HEADER */}
+      {/* ===============================
+          HEADER
+      =============================== */}
 
-      <div
+      <section
         className="
-bg-white
-border-b
-"
+        bg-gradient-to-r
+        from-blue-700
+        via-blue-600
+        to-cyan-500
+        text-white
+      "
       >
         <div
           className="
-max-w-7xl
-mx-auto
-px-4
-py-5
-"
+          max-w-7xl
+          mx-auto
+          px-5
+          py-10
+        "
         >
           <button
             onClick={() => navigate("/cart")}
             className="
-flex
-items-center
-gap-2
-font-semibold
-text-gray-600
-"
+              flex
+              items-center
+              gap-2
+              text-blue-100
+              hover:text-white
+              transition
+            "
           >
             <FaArrowLeft />
             Back to Cart
@@ -261,125 +343,219 @@ text-gray-600
 
           <div
             className="
-flex
-items-center
-gap-3
-mt-5
-"
+            mt-8
+            flex
+            items-center
+            gap-5
+          "
           >
             <div
               className="
-w-12
-h-12
-rounded-xl
-bg-blue-100
-text-blue-600
-flex
-items-center
-justify-center
-"
+              w-20
+              h-20
+              rounded-3xl
+              bg-white/20
+              flex
+              items-center
+              justify-center
+            "
             >
-              <FaShoppingBag />
+              <FaShoppingBag className="text-4xl" />
             </div>
 
             <div>
               <h1
                 className="
-text-3xl
-font-bold
-"
+                text-3xl
+                md:text-4xl
+                font-bold
+              "
               >
-                Checkout
+                Secure Checkout
               </h1>
 
               <p
                 className="
-text-gray-500
-"
+                text-blue-100
+                mt-2
+              "
               >
-                Complete your order securely
+                Complete your order safely with Paystack payment.
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div
+      <main
         className="
-max-w-7xl
-mx-auto
-px-4
-py-8
-"
+        max-w-7xl
+        mx-auto
+        px-5
+        py-8
+      "
       >
+        {/* ERROR MESSAGE */}
+
         {error && (
           <div
             className="
-bg-red-50
-border
-border-red-200
-text-red-600
-rounded-xl
-p-4
-mb-6
-"
+            bg-red-50
+            border
+            border-red-200
+            text-red-600
+            rounded-xl
+            p-4
+            mb-6
+          "
           >
             {error}
           </div>
         )}
 
+        {/* CHECKOUT STEPS */}
+
         <div
           className="
-grid
-grid-cols-1
-lg:grid-cols-[1fr_420px]
-gap-8
-"
+          grid
+          grid-cols-1
+          md:grid-cols-3
+          gap-4
+          mb-8
+        "
         >
-          <div
-            className="
-space-y-6
-"
-          >
+          {[
+            {
+              number: "1",
+              title: "Delivery",
+              text: "Choose address",
+            },
+            {
+              number: "2",
+              title: "Review",
+              text: "Confirm order",
+            },
+            {
+              number: "3",
+              title: "Payment",
+              text: "Pay securely",
+            },
+          ].map((step, index) => (
             <div
+              key={index}
               className="
-bg-white
-rounded-2xl
-border
-p-5
-flex
-items-center
-gap-3
-"
+                bg-white
+                rounded-2xl
+                border
+                p-5
+                flex
+                gap-4
+                items-center
+              "
             >
               <div
                 className="
-w-10
-h-10
-rounded-full
-bg-blue-600
-text-white
-flex
-items-center
-justify-center
-"
+                w-12
+                h-12
+                rounded-full
+                bg-blue-600
+                text-white
+                flex
+                items-center
+                justify-center
+                font-bold
+              "
+              >
+                {step.number}
+              </div>
+
+              <div>
+                <h3
+                  className="
+                  font-bold
+                "
+                >
+                  {step.title}
+                </h3>
+
+                <p
+                  className="
+                  text-sm
+                  text-gray-500
+                "
+                >
+                  {step.text}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className="
+          grid
+          grid-cols-1
+          lg:grid-cols-[1fr_420px]
+          gap-8
+        "
+        >
+          {/* LEFT SIDE */}
+
+          <div
+            className="
+            space-y-6
+          "
+          >
+            <div
+              className="
+              bg-white
+              rounded-2xl
+              border
+              p-5
+              flex
+              items-center
+              gap-3
+            "
+            >
+              <div
+                className="
+                w-10
+                h-10
+                rounded-full
+                bg-blue-600
+                text-white
+                flex
+                items-center
+                justify-center
+              "
               >
                 1
               </div>
 
               <div>
-                <h3 className="font-bold">Delivery Information</h3>
+                <h2
+                  className="
+                  font-bold
+                "
+                >
+                  Delivery Information
+                </h2>
 
-                <p className="text-sm text-gray-500">
-                  Choose your delivery address
+                <p
+                  className="
+                  text-sm
+                  text-gray-500
+                "
+                >
+                  Select where your order will be delivered
                 </p>
               </div>
 
               <FaCheckCircle
                 className="
-ml-auto
-text-blue-600
-"
+                  ml-auto
+                  text-blue-600
+                "
               />
             </div>
 
@@ -391,13 +567,11 @@ text-blue-600
 
                 setShowForm(false);
               }}
+              onDelete={deleteAddress}
               onAddNew={() => {
                 setSelectedAddress(null);
 
                 setShowForm(true);
-              }}
-              onDelete={(id) => {
-                console.log("delete address", id);
               }}
             />
 
@@ -412,21 +586,36 @@ text-blue-600
 
             <div
               className="
-bg-blue-50
-rounded-xl
-p-5
-flex
-gap-3
-"
+              bg-blue-50
+              border
+              border-blue-100
+              rounded-2xl
+              p-5
+              flex
+              gap-3
+              items-start
+            "
             >
-              <FaShieldAlt className="text-blue-600 mt-1" />
+              <FaShieldAlt
+                className="
+                  text-blue-600
+                  mt-1
+                "
+              />
 
-              <p className="text-sm">
-                Your payment is secured by Paystack. We never store your card
-                details.
+              <p
+                className="
+                text-sm
+                text-gray-700
+              "
+              >
+                Your payment is protected by Paystack. Your card information is
+                never stored.
               </p>
             </div>
           </div>
+
+          {/* RIGHT SIDE */}
 
           <OrderSummary
             cartItems={cartItems}
@@ -435,9 +624,8 @@ gap-3
             onCheckout={handleCheckout}
           />
         </div>
-      </div>
+      </main>
     </div>
   );
 };
-
 export default CheckOut;

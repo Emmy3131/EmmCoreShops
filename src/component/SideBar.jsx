@@ -96,10 +96,9 @@ const Sidebar = ({
           z-[60]
           transition-opacity
           duration-300
-          ${
-            isOpen
-              ? "opacity-100 visible"
-              : "opacity-0 invisible pointer-events-none"
+          ${isOpen
+            ? "opacity-100 visible"
+            : "opacity-0 invisible pointer-events-none"
           }
         `}
       />
@@ -122,10 +121,9 @@ const Sidebar = ({
           shadow-2xl
           transition-transform
           duration-300
-          ${
-            isOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
+          ${isOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
           }
         `}
       >
@@ -490,26 +488,31 @@ const Sidebar = ({
         ===================================== */}
 
         <section className="bg-white px-5 py-5 border-b border-slate-200">
-
           <h3
             className="
-              text-xs
-              font-bold
-              uppercase
-              tracking-wider
-              text-slate-500
-              mb-4
-            "
+      text-xs
+      font-bold
+      uppercase
+      tracking-wider
+      text-slate-500
+      mb-4
+    "
           >
             Customer Support
           </h3>
 
           <div className="space-y-4">
-
             <SupportItem
               icon={<FaEnvelope />}
               title="Email Support"
-              value="help@emmcoreshops.com"
+              value={
+                <a
+                  href="mailto:emmcoreglobalnetworks@gmail.com?subject=EmmCore%20Support%20Request"
+                  className="text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  emmcoreglobalnetworks@gmail.com
+                </a>
+              }
             />
 
             <SupportItem
@@ -523,9 +526,7 @@ const Sidebar = ({
               title="WhatsApp"
               value="09070038400"
             />
-
           </div>
-
         </section>
 
         {/* =====================================

@@ -125,9 +125,14 @@ const Cart = () => {
      CHECKOUT
   ===================================================== */
 
-  const handleCheckout = () => {
-    navigate("/checkout");
-  };
+ const handleCheckout = () => {
+  if (!user) {
+    navigate("/login?redirect=/checkout");
+    return;
+  }
+
+  navigate("/checkout");
+};
 
   /* =====================================================
      UPDATE QUANTITY

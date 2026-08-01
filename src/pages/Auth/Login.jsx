@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaGoogle, FaApple, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import api from "../../library/api";
@@ -10,6 +10,7 @@ import Button from "../../component/UI/Button";
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation()
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,9 +38,7 @@ const Login = () => {
 
     try {
       setLoading(true);
-
       const res = await api.post("/users/login", formData);
-
       const token = res.data.token;
       const user = res.data.data;
 
@@ -48,9 +47,14 @@ const Login = () => {
         return;
       }
 
-      login(user, token);
+      await login(user, token);
 
       toast.success("Welcome back 👋");
+
+      const redirect =
+        new URLSearchParams(location.search).get("redirect") || "/";
+
+      navigate(redirect);
 
       setTimeout(() => {
         if (user.role === "admin") {

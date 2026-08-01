@@ -108,3 +108,7 @@ export const getGuestCartTotal = () => {
     0
   );
 };
+
+export const getGuestCartItems = () => {
+  return getGuestCart();
+};

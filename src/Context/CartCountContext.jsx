@@ -7,6 +7,7 @@ import {
 
 import api from "../library/api";
 import { useAuth } from "./AuthContext";
+import { getGuestCartCount } from "../library/guestCart";
 
 const CartContext = createContext();
 
@@ -21,11 +22,17 @@ export const CartProvider = ({ children }) => {
   ========================================= */
 
   const fetchCartCount = async () => {
+    // ===========================
+    // GUEST USER
+    // ===========================
     if (!user) {
-      setCartCount(0);
+      setCartCount(getGuestCartCount());
       return;
     }
 
+    // ===========================
+    // LOGGED IN USER
+    // ===========================
     try {
       setLoading(true);
 
@@ -34,7 +41,7 @@ export const CartProvider = ({ children }) => {
       const items = res.data?.data?.items || [];
 
       const count = items.reduce(
-        (total, item) => total + (item.quantity || 0),
+        (total, item) => total + Number(item.quantity || 0),
         0
       );
 
@@ -52,28 +59,56 @@ export const CartProvider = ({ children }) => {
   };
 
   /* =========================================
-     AUTO FETCH WHEN USER CHANGES
-  ========================================= */
-
-  useEffect(() => {
-    fetchCartCount();
-  }, [user]);
-
-  /* =========================================
-     REFRESH AFTER CART CHANGES
+     REFRESH FUNCTION
   ========================================= */
 
   const refreshCartCount = async () => {
     await fetchCartCount();
   };
 
+  /* =========================================
+     AUTO REFRESH
+  ========================================= */
+
+  useEffect(() => {
+    fetchCartCount();
+
+    const refresh = () => {
+      fetchCartCount();
+    };
+
+    // Logged-in cart updates
+    window.addEventListener(
+      "cart-updated",
+      refresh
+    );
+
+    // Guest cart updates
+    window.addEventListener(
+      "guest-cart-updated",
+      refresh
+    );
+
+    return () => {
+      window.removeEventListener(
+        "cart-updated",
+        refresh
+      );
+
+      window.removeEventListener(
+        "guest-cart-updated",
+        refresh
+      );
+    };
+  }, [user]);
+
   return (
     <CartContext.Provider
       value={{
         cartCount,
-        setCartCount,
-        refreshCartCount,
         loading,
+        refreshCartCount,
+        setCartCount,
       }}
     >
       {children}

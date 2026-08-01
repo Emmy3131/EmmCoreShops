@@ -25,7 +25,7 @@ const DesktopHeader = () => {
 
   // GLOBAL CART COUNT
   const { cartCount } = useCart();
-  const [guestCount, setGuestCount] = useState(0);
+  // const [guestCount, setGuestCount] = useState(0);
 
   const navigate = useNavigate();
 
@@ -34,40 +34,40 @@ const DesktopHeader = () => {
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
 
-  const loadGuestCartCount = () => {
-    setGuestCount(getGuestCartCount());
-  };
+  // const loadGuestCartCount = () => {
+  //   setGuestCount(getGuestCartCount());
+  // };
 
-  useEffect(() => {
-    if (!user) {
-      loadGuestCartCount();
-    } else {
-      setGuestCount(0);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     loadGuestCartCount();
+  //   } else {
+  //     setGuestCount(0);
+  //   }
+  // }, [user]);
 
-  useEffect(() => {
-    const updateGuestCart = () => {
-      if (!user) {
-        loadGuestCartCount();
-      }
-    };
+  // useEffect(() => {
+  //   const updateGuestCart = () => {
+  //     if (!user) {
+  //       loadGuestCartCount();
+  //     }
+  //   };
 
-    window.addEventListener(
-      "guest-cart-updated",
-      updateGuestCart
-    );
+  //   window.addEventListener(
+  //     "guest-cart-updated",
+  //     updateGuestCart
+  //   );
 
-    return () =>
-      window.removeEventListener(
-        "guest-cart-updated",
-        updateGuestCart
-      );
-  }, [user]);
+  //   return () =>
+  //     window.removeEventListener(
+  //       "guest-cart-updated",
+  //       updateGuestCart
+  //     );
+  // }, [user]);
 
-  const displayCartCount = user
-    ? cartCount
-    : guestCount;
+  // const displayCartCount = user
+  //   ? cartCount
+  //   : guestCount;
 
   /* =========================================
      FETCH CATEGORIES
@@ -524,7 +524,7 @@ const DesktopHeader = () => {
 
                   {/* GLOBAL CART BADGE */}
 
-                  {displayCartCount > 0 && (
+                  {cartCount > 0 && (
 
                     <span
                       className="
@@ -546,7 +546,7 @@ const DesktopHeader = () => {
                         border-white
                       "
                     >
-                      {displayCartCount}
+                      {cartCount}
                     </span>
 
                   )}

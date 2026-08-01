@@ -488,16 +488,7 @@ const Sidebar = ({
         ===================================== */}
 
         <section className="bg-white px-5 py-5 border-b border-slate-200">
-          <h3
-            className="
-      text-xs
-      font-bold
-      uppercase
-      tracking-wider
-      text-slate-500
-      mb-4
-    "
-          >
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
             Customer Support
           </h3>
 
@@ -518,13 +509,29 @@ const Sidebar = ({
             <SupportItem
               icon={<FaPhone />}
               title="Phone Support"
-              value="07080635700"
+              value={
+                <a
+                  href="tel:+2348038599808"
+                  className="text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  +234 8038599808
+                </a>
+              }
             />
 
             <SupportItem
               icon={<FaWhatsapp />}
               title="WhatsApp"
-              value="09070038400"
+              value={
+                <a
+                  href="https://wa.me/2348038599808"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-green-600 hover:text-green-700 hover:underline"
+                >
+                  +234 8038599808
+                </a>
+              }
             />
           </div>
         </section>

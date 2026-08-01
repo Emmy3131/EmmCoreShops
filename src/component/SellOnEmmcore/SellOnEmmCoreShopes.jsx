@@ -10,7 +10,7 @@ import {toast} from "react-toastify"
 
 const SellOnEmmCoreShopes = () => {
   const handleSeller = ()=>{
-    toast.success("Hold On We Are Working ON This Page")
+    toast.success("Coming Soon")
   }
   return (
     <div className="bg-slate-50 min-h-screen pb-24">

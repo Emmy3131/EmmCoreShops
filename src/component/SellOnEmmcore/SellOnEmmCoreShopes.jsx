@@ -36,7 +36,7 @@ const SellOnEmmCoreShopes = () => {
           </p>
 
 
-          <button
+          <button onClick={handleSeller}
             className="
               mt-8
               bg-white

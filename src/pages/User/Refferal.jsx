@@ -1,6 +1,6 @@
 import { FaWallet, FaArrowDown, FaArrowUp } from "react-icons/fa";
 
-const MyWallet = () => {
+const Refferal = () => {
 
   // SAMPLE DATA (Replace with API later)
   const walletBalance = 125000;
@@ -124,4 +124,4 @@ const MyWallet = () => {
   );
 };
 
-export default MyWallet;
+export default Refferal;

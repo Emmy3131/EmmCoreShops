@@ -524,10 +524,9 @@ const Sidebar = ({
               title="WhatsApp"
               value={
                 <a
-                  href="https://wa.me/2348038599808"
+                  href="https://wa.me/2349070038400?text=Hello%20EmmCore%20Support,%20I%20need%20assistance."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-green-600 hover:text-green-700 hover:underline"
                 >
                   +234 8038599808
                 </a>

@@ -22,7 +22,7 @@ import ResetPassword from "./pages/Auth/ResetPassword";
 
 /* USER */
 import MyOrder from "./pages/User/MyOrder";
-import MyWallet from "./pages/User/MyWallet";
+import Refferal from "./pages/User/Refferal";
 import MySavedItems from "./pages/User/MySavedItems";
 import SellOnEmmCoreShopes from "./component/SellOnEmmcore/SellOnEmmCoreShopes";
 import UserProfile from "./pages/User/Profile";
@@ -95,7 +95,7 @@ const AppRouter = () => {
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLayout />}>
               <Route path="user/orders" element={<MyOrder />} />
-              <Route path="/user/wallet" element={<MyWallet />} />
+              <Route path="/user/refferal" element={<Refferal/>} />
               <Route path="/wishlist" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />
               <Route path="/profile" element={<UserProfile />} />

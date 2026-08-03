@@ -384,11 +384,11 @@ const Sidebar = ({
 
             <QuickAction
               icon={<FaWallet />}
-              title="My Wallet"
+              title="Referal"
               description="Manage balance"
               onClick={() =>
                 handleNavigation(
-                  "/user/wallet"
+                  "/user/refferal"
                 )
               }
             />

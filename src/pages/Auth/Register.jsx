@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaUser,
   FaEnvelope,
@@ -13,10 +13,13 @@ import { toast } from "react-toastify";
 
 import api from "../../library/api";
 import Button from "../../component/UI/Button";
+import { useSearchParams } from "react-router-dom"
 
 const Signup = () => {
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get("ref");
 
   const [loading, setLoading] = useState(false);
   const [agree, setAgree] = useState(false);
@@ -35,7 +38,22 @@ const Signup = () => {
     address: "",
     password: "",
     passwordConfirm: "",
+    referralCode: referralCode || "",
   });
+
+
+  useEffect(() => {
+
+    if (referralCode) {
+
+      setFormData((prev) => ({
+        ...prev,
+        referralCode,
+      }));
+
+    }
+
+  }, [referralCode]);
 
   /* ================= INPUT ================= */
 
@@ -304,6 +322,30 @@ const Signup = () => {
             rows="3"
             className="auth-input resize-none"
           />
+
+          {/*referral section */}
+          {/* REFERRAL CODE */}
+
+          {formData.referralCode && (
+            <div
+              className="
+      bg-blue-50
+      border
+      border-blue-200
+      rounded-xl
+      p-3
+      text-sm
+      text-blue-700
+    "
+            >
+              🎁 You were invited with referral code:
+
+              <span className="font-bold ml-1">
+                {formData.referralCode}
+              </span>
+
+            </div>
+          )}
 
           {/* PASSWORD */}
 

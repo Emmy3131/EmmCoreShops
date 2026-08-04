@@ -1,278 +1,389 @@
+import { useEffect, useState } from "react";
 import {
+  FaUsers,
   FaGift,
   FaCopy,
-  FaShareAlt,
-  FaUsers,
-  FaMoneyBillWave,
-  FaClock,
+  FaWhatsapp,
   FaCheckCircle,
-  FaUserFriends,
+  FaClock,
+  FaWallet,
 } from "react-icons/fa";
 
-import { useState } from "react";
+import { toast } from "react-toastify";
+
+import api from "../../library/api";
 
 const Referral = () => {
-  // Replace with API data later
-  const referralCode = "EMM-8XQ72";
-  const referralLink = `https://emmcoreshops.com/register?ref=${referralCode}`;
+  const [loading, setLoading] = useState(true);
 
-  const stats = {
-    totalReferrals: 18,
-    successful: 12,
-    pending: 6,
-    bonus: 45000,
-  };
+  const [data, setData] = useState(null);
 
-  const history = [
-    {
-      id: 1,
-      name: "John D.",
-      date: "2 Aug 2026",
-      status: "Reward Paid",
-      amount: "₦5,000",
-    },
-    {
-      id: 2,
-      name: "Sarah M.",
-      date: "28 Jul 2026",
-      status: "Pending",
-      amount: "₦0",
-    },
-  ];
+  /*
+  =====================================
+  FETCH REFERRAL DATA
+  =====================================
+  */
 
-  const [copied, setCopied] = useState(false);
+  const getReferralData = async () => {
+    try {
+      setLoading(true);
 
-  const copyLink = async () => {
-    await navigator.clipboard.writeText(referralLink);
-    setCopied(true);
+      const res = await api.get("/referrals/me");
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
-
-  const shareReferral = async () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "Join EmmCore Shops",
-        text: "Use my referral link to join EmmCore Shops.",
-        url: referralLink,
-      });
-    } else {
-      copyLink();
+      setData(res.data.data);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to load referral data",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+  useEffect(() => {
+    getReferralData();
+  }, []);
 
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-5 py-5">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Referral Program
+  /*
+  =====================================
+  COPY LINK
+  =====================================
+  */
+
+  const copyReferral = () => {
+    navigator.clipboard.writeText(data.referralLink);
+
+    toast.success("Referral link copied");
+  };
+
+  /*
+  =====================================
+  WHATSAPP SHARE
+  =====================================
+  */
+
+  const shareWhatsapp = () => {
+    const message = `Join EmmCoreShops using my referral link and get started:\n\n${data.referralLink}`;
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(message)}`,
+
+      "_blank",
+    );
+  };
+
+  if (loading) {
+    return (
+      <div
+        className="
+      min-h-screen
+      flex
+      items-center
+      justify-center
+      bg-gray-50
+      "
+      >
+        <p>Loading referral...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="
+min-h-screen
+bg-gray-50
+pb-24
+"
+    >
+      {/* HEADER */}
+
+      <div
+        className="
+bg-white
+p-5
+shadow-sm
+"
+      >
+        <h1
+          className="
+text-xl
+font-bold
+"
+        >
+          My Referral
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Invite friends and earn referral rewards.
+
+        <p
+          className="
+text-sm
+text-gray-500
+"
+        >
+          Invite friends and earn rewards
         </p>
       </div>
 
-      {/* Hero */}
+      {/* BONUS CARD */}
+
       <div className="p-5">
+        <div
+          className="
+bg-gradient-to-r
+from-blue-600
+to-cyan-500
+text-white
+rounded-2xl
+p-6
+shadow-lg
+"
+        >
+          <div className="flex items-center gap-3">
+            <FaWallet size={25} />
 
-        <div className="rounded-3xl bg-gradient-to-r from-blue-700 to-cyan-500 text-white p-6 shadow-lg">
-
-          <FaGift className="text-4xl mb-4"/>
-
-          <h2 className="text-xl font-bold">
-            Earn ₦5,000 for every successful referral
-          </h2>
-
-          <p className="mt-2 text-blue-100 text-sm">
-            Share your link. Once your friend signs up and completes
-            their first qualifying purchase, you'll receive your reward.
-          </p>
-
-          <div className="mt-6 bg-white/15 rounded-xl p-4">
-
-            <p className="text-xs uppercase opacity-80">
-              Referral Code
-            </p>
-
-            <h3 className="text-2xl font-bold tracking-widest">
-              {referralCode}
-            </h3>
-
-            <div className="mt-4 bg-white rounded-lg text-slate-700 px-3 py-3 text-sm break-all">
-              {referralLink}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-4">
-
-              <button
-                onClick={copyLink}
-                className="bg-white text-blue-700 rounded-xl py-3 font-semibold flex justify-center items-center gap-2"
-              >
-                <FaCopy />
-                {copied ? "Copied!" : "Copy Link"}
-              </button>
-
-              <button
-                onClick={shareReferral}
-                className="border border-white rounded-xl py-3 font-semibold flex justify-center items-center gap-2"
-              >
-                <FaShareAlt />
-                Share
-              </button>
-
-            </div>
-
+            <p>Referral Bonus</p>
           </div>
 
+          <h2
+            className="
+text-3xl
+font-bold
+mt-3
+"
+          >
+            ₦{data.totalBonus.toLocaleString()}
+          </h2>
         </div>
-
       </div>
 
-      {/* Stats */}
+      {/* STATS */}
+
+      <div
+        className="
+grid
+grid-cols-3
+gap-3
+px-5
+"
+      >
+        <div
+          className="
+bg-white
+rounded-xl
+p-4
+text-center
+shadow-sm
+"
+        >
+          <FaUsers
+            className="
+mx-auto
+text-blue-600
+"
+          />
+
+          <h3
+            className="
+font-bold
+mt-2
+"
+          >
+            {data.totalReferrals}
+          </h3>
+
+          <p className="text-xs text-gray-500">Total</p>
+        </div>
+
+        <div
+          className="
+bg-white
+rounded-xl
+p-4
+text-center
+shadow-sm
+"
+        >
+          <FaCheckCircle
+            className="
+mx-auto
+text-green-500
+"
+          />
+
+          <h3 className="font-bold mt-2">{data.successfulReferrals}</h3>
+
+          <p className="text-xs text-gray-500">Completed</p>
+        </div>
+
+        <div
+          className="
+bg-white
+rounded-xl
+p-4
+text-center
+shadow-sm
+"
+        >
+          <FaClock
+            className="
+mx-auto
+text-orange-500
+"
+          />
+
+          <h3 className="font-bold mt-2">{data.pendingReferrals}</h3>
+
+          <p className="text-xs text-gray-500">Pending</p>
+        </div>
+      </div>
+
+      {/* REFERRAL LINK */}
+
+      <div className="p-5">
+        <div
+          className="
+bg-white
+rounded-xl
+p-5
+shadow-sm
+"
+        >
+          <h3
+            className="
+font-semibold
+mb-3
+"
+          >
+            Your Referral Link
+          </h3>
+
+          <div
+            className="
+bg-gray-100
+rounded-lg
+p-3
+text-sm
+break-all
+"
+          >
+            {data.referralLink}
+          </div>
+
+          <div
+            className="
+flex
+gap-3
+mt-4
+"
+          >
+            <button
+              onClick={copyReferral}
+              className="
+flex-1
+bg-blue-600
+text-white
+py-3
+rounded-lg
+flex
+items-center
+justify-center
+gap-2
+"
+            >
+              <FaCopy />
+              Copy
+            </button>
+
+            <button
+              onClick={shareWhatsapp}
+              className="
+flex-1
+bg-green-500
+text-white
+py-3
+rounded-lg
+flex
+items-center
+justify-center
+gap-2
+"
+            >
+              <FaWhatsapp />
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* HISTORY */}
+
       <div className="px-5">
-
-        <div className="grid grid-cols-2 gap-4">
-
-          <StatCard
-            icon={<FaUsers />}
-            title="Total Referrals"
-            value={stats.totalReferrals}
-          />
-
-          <StatCard
-            icon={<FaCheckCircle />}
-            title="Successful"
-            value={stats.successful}
-          />
-
-          <StatCard
-            icon={<FaClock />}
-            title="Pending"
-            value={stats.pending}
-          />
-
-          <StatCard
-            icon={<FaMoneyBillWave />}
-            title="Bonus Earned"
-            value={`₦${stats.bonus.toLocaleString()}`}
-          />
-
-        </div>
-
-      </div>
-
-      {/* How it Works */}
-
-      <div className="mt-6 px-5">
-
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-
-          <h2 className="font-bold text-lg mb-4">
-            How it Works
-          </h2>
-
-          <div className="space-y-4">
-
-            {[
-              "Share your referral link.",
-              "Your friend signs up.",
-              "Friend completes first purchase.",
-              "You receive your referral bonus.",
-            ].map((step, index) => (
-              <div key={index} className="flex gap-4">
-
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
-                  {index + 1}
-                </div>
-
-                <p>{step}</p>
-
-              </div>
-            ))}
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* History */}
-
-      <div className="mt-6 px-5">
-
-        <h2 className="font-bold text-lg mb-4">
+        <h2
+          className="
+font-bold
+text-lg
+mb-3
+"
+        >
           Referral History
         </h2>
 
-        <div className="space-y-3">
-
-          {history.map((item) => (
-
+        {data.referrals.length === 0 ? (
+          <p
+            className="
+text-center
+text-gray-400
+"
+          >
+            No referrals yet
+          </p>
+        ) : (
+          data.referrals.map((item) => (
             <div
-              key={item.id}
-              className="bg-white rounded-xl p-4 shadow-sm flex justify-between"
+              key={item._id}
+              className="
+bg-white
+p-4
+rounded-xl
+mb-3
+shadow-sm
+flex
+justify-between
+"
             >
-
               <div>
-
-                <h4 className="font-semibold">
-                  {item.name}
-                </h4>
-
-                <p className="text-xs text-slate-500">
-                  {item.date}
+                <p
+                  className="
+font-semibold
+"
+                >
+                  {item.referredUser?.firstName} {item.referredUser?.lastName}
                 </p>
 
-              </div>
-
-              <div className="text-right">
-
-                <span
-                  className={`text-xs px-3 py-1 rounded-full ${
-                    item.status === "Reward Paid"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
+                <p
+                  className="
+text-xs
+text-gray-500
+"
                 >
                   {item.status}
-                </span>
-
-                <p className="mt-2 font-bold text-blue-700">
-                  {item.amount}
                 </p>
-
               </div>
 
+              <div
+                className="
+font-bold
+text-green-600
+"
+              >
+                ₦{item.rewardAmount.toLocaleString()}
+              </div>
             </div>
-
-          ))}
-
-        </div>
-
+          ))
+        )}
       </div>
-
     </div>
   );
 };
-
-const StatCard = ({ icon, title, value }) => (
-  <div className="bg-white rounded-2xl p-5 shadow-sm">
-    <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3">
-      {icon}
-    </div>
-
-    <p className="text-sm text-slate-500">
-      {title}
-    </p>
-
-    <h3 className="text-2xl font-bold text-slate-800 mt-1">
-      {value}
-    </h3>
-  </div>
-);
 
 export default Referral;

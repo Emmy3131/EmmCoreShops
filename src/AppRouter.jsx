@@ -54,6 +54,8 @@ import EditHeroBanner from "./pages/Admin/HeroBanners/EditHeroBanner";
 import PageList from "./pages/Admin/CMSPages/PageList";
 import CreateCMSPage from "./pages/Admin/CMSPages/CreateCMSPage";
 import EditCMSPage from "./pages/Admin/CMSPages/EditCMSPage";
+import ReferralManagement from "./pages/Admin/ReferralManagement";
+import WithdrawalManagement from "./pages/Admin/WithdrawalManagement";
 
 import { useAuth } from "./Context/AuthContext";
 import CategoryProducts from "./pages/public/categories/CategoryProduct";
@@ -130,6 +132,7 @@ const AppRouter = () => {
             <Route path="/admin/category/add" element={<AddCategory />} />
             <Route path="/admin/category/edit/:id" element={<EditCategory />} />
             <Route path="/admin/reviews" element={<Reviews />} />
+            <Route path="/admin/referral" element={<ReferralManagement />} />
             <Route path="/admin/report" element={<Report />} />
             <Route path="/admin/vendors" element={<Vendors />} />
             <Route path="/admin/profile" element={<Profile />} />
@@ -138,6 +141,7 @@ const AppRouter = () => {
             <Route path="/admin/cms-pages" element={<PageList />} />
             <Route path="/admin/cms-pages/create" element={<CreateCMSPage />} />
             <Route path="/admin/cms-pages/edit/:id" element={<EditCMSPage />} />
+             <Route path="/admin/withdral" element={<WithdrawalManagement />} />
           </Route>
         </Route>
 

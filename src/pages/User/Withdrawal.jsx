@@ -120,7 +120,7 @@ const Withdrawal = () => {
             setSavingBank(true);
 
             const res = await api.post(
-                "/withdrawals/bank-account",
+                "/withdrawal/bank-account",
                 bankForm,
             );
 
@@ -176,7 +176,7 @@ const Withdrawal = () => {
         try {
             setRequesting(true);
 
-            const res = await api.post("/withdrawals", {
+            const res = await api.post("/withdrawal", {
                 amount: withdrawalAmount,
             });
 

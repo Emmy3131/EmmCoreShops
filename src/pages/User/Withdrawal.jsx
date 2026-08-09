@@ -42,8 +42,8 @@ const Withdrawal = () => {
 
             const [bankRes, withdrawalRes, userRes] =
                 await Promise.all([
-                    api.get("/withdrawals/bank-account"),
-                    api.get("/withdrawals"),
+                    api.get("/withdrawal/bank-account"),
+                    api.get("/withdrawal"),
                     api.get("/users/me"),
                 ]);
 

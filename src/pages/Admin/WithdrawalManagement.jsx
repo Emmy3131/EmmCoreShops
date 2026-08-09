@@ -246,7 +246,7 @@ const WithdrawalManagement = () => {
       setProcessing(true);
 
       await api.patch(
-        `/withdrawals/${withdrawal._id}`,
+        `/withdrawals/${withdrawal._id}/aprove`,
         {
           status: "paid",
           adminNote:

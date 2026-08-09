@@ -104,7 +104,7 @@ const AppRouter = () => {
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
-              <Route path="/withdraw" element={<Withdrawal />} />
+              <Route path="/withdrawal" element={<Withdrawal />} />
             </Route>
           </Route>
         </Route>

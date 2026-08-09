@@ -87,11 +87,10 @@ const MainLayout = () => {
 
         {/* DESKTOP FOOTER */}
 
-        <div className="hidden md:block mt-10">
+    
 
           <DesktopFooter />
 
-        </div>
 
       </main>
 

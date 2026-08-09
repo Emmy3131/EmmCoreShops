@@ -29,6 +29,7 @@ import UserProfile from "./pages/User/Profile";
 import Checkout from "./pages/User/CheckOut";
 import PaymentSuccess from "./pages/User/PaymentSuccess";
 import SearchProducts from "./pages/public/SearchProducts";
+import Withdrawal from "./pages/User/Withdrawal"
 
 /* VENDOR */
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
@@ -103,6 +104,7 @@ const AppRouter = () => {
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/withdraw" element={<Withdrawal />} />
             </Route>
           </Route>
         </Route>

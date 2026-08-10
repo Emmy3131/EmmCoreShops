@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   FaWallet,
   FaCheckCircle,
@@ -9,34 +10,40 @@ import {
   FaUniversity,
   FaUser,
   FaEnvelope,
+  FaPhone,
+  FaArrowRight,
   FaCreditCard,
   FaTimes,
-  FaEye,
+  FaCheck,
 } from "react-icons/fa";
 
 import { toast } from "react-toastify";
 
 import PageHeader from "../../component/Admin/PageHeader";
 import PageLoader from "../../component/PageLoader";
+
 import api from "../../library/api";
 
 const WithdrawalManagement = () => {
   const [loading, setLoading] = useState(true);
+
   const [processing, setProcessing] = useState(false);
 
   const [withdrawals, setWithdrawals] = useState([]);
 
   const [search, setSearch] = useState("");
+
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [selected, setSelected] = useState(null);
 
-  const [status, setStatus] = useState("approved");
   const [adminNote, setAdminNote] = useState("");
 
-  /* =====================================================
-     FETCH WITHDRAWALS
-  ===================================================== */
+  /*
+    =====================================================
+    FETCH WITHDRAWALS
+    =====================================================
+    */
 
   const fetchWithdrawals = async () => {
     try {
@@ -45,12 +52,11 @@ const WithdrawalManagement = () => {
       const res = await api.get("/admin/withdrawals");
 
       setWithdrawals(res.data?.data || []);
-    } catch (err) {
-      console.error("Fetch withdrawals error:", err);
+    } catch (error) {
+      console.error("Fetch withdrawals error:", error);
 
       toast.error(
-        err.response?.data?.message ||
-          "Failed to load withdrawals"
+        error.response?.data?.message || "Failed to load withdrawals",
       );
     } finally {
       setLoading(false);
@@ -61,238 +67,228 @@ const WithdrawalManagement = () => {
     fetchWithdrawals();
   }, []);
 
-  /* =====================================================
-     FILTER WITHDRAWALS
-  ===================================================== */
+  /*
+    =====================================================
+    FILTER
+    =====================================================
+    */
 
-  const filtered = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+  const filteredWithdrawals = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
 
     return withdrawals.filter((item) => {
-      const firstName =
-        item.user?.firstName?.toLowerCase() || "";
+      const fullName = `${item.user?.firstName || ""} ${
+        item.user?.lastName || ""
+      }`.toLowerCase();
 
-      const lastName =
-        item.user?.lastName?.toLowerCase() || "";
+      const email = item.user?.email?.toLowerCase() || "";
 
-      const email =
-        item.user?.email?.toLowerCase() || "";
+      const accountNumber = item.bankDetails?.accountNumber || "";
 
-      const accountNumber =
-        item.bankDetails?.accountNumber
-          ?.toLowerCase() || "";
-
-      const bankName =
-        item.bankDetails?.bankName
-          ?.toLowerCase() || "";
+      const bankName = item.bankDetails?.bankName?.toLowerCase() || "";
 
       const matchesSearch =
         !keyword ||
-        firstName.includes(keyword) ||
-        lastName.includes(keyword) ||
+        fullName.includes(keyword) ||
         email.includes(keyword) ||
         accountNumber.includes(keyword) ||
         bankName.includes(keyword);
 
       const matchesStatus =
-        statusFilter === "all" ||
-        item.status === statusFilter;
+        statusFilter === "all" || item.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [withdrawals, search, statusFilter]);
 
-  /* =====================================================
-     STATISTICS
-  ===================================================== */
+  /*
+    =====================================================
+    STATISTICS
+    =====================================================
+    */
 
   const stats = useMemo(() => {
-    const total = withdrawals.length;
-
-    const pending = withdrawals.filter(
-      (item) => item.status === "pending"
-    ).length;
-
-    const approved = withdrawals.filter(
-      (item) => item.status === "approved"
-    ).length;
-
-    const paid = withdrawals.filter(
-      (item) => item.status === "paid"
-    ).length;
-
-    const rejected = withdrawals.filter(
-      (item) => item.status === "rejected"
-    ).length;
-
     const totalAmount = withdrawals.reduce(
       (sum, item) => sum + Number(item.amount || 0),
-      0
+      0,
     );
 
-    const pendingAmount = withdrawals
-      .filter((item) => item.status === "pending")
-      .reduce(
-        (sum, item) => sum + Number(item.amount || 0),
-        0
-      );
+    const pending = withdrawals.filter((item) => item.status === "pending");
+
+    const approved = withdrawals.filter((item) => item.status === "approved");
+
+    const paid = withdrawals.filter((item) => item.status === "paid");
+
+    const rejected = withdrawals.filter((item) => item.status === "rejected");
 
     return {
-      total,
-      pending,
-      approved,
-      paid,
-      rejected,
+      total: withdrawals.length,
+
+      pending: pending.length,
+
+      approved: approved.length,
+
+      paid: paid.length,
+
+      rejected: rejected.length,
+
       totalAmount,
-      pendingAmount,
     };
   }, [withdrawals]);
 
-  /* =====================================================
-     OPEN REVIEW
-  ===================================================== */
+  /*
+    =====================================================
+    OPEN REVIEW
+    =====================================================
+    */
 
   const openReview = (withdrawal) => {
     setSelected(withdrawal);
 
-    setStatus(
-      withdrawal.status === "pending"
-        ? "approved"
-        : withdrawal.status
-    );
-
     setAdminNote(withdrawal.adminNote || "");
   };
 
-  /* =====================================================
-     CLOSE REVIEW
-  ===================================================== */
+  /*
+    =====================================================
+    CLOSE MODAL
+    =====================================================
+    */
 
-  const closeReview = () => {
+  const closeModal = () => {
     if (processing) return;
 
     setSelected(null);
+
     setAdminNote("");
-    setStatus("approved");
   };
 
-  /* =====================================================
-     UPDATE WITHDRAWAL
-  ===================================================== */
+  /*
+    =====================================================
+    APPROVE
+    =====================================================
+    */
 
-  const submitDecision = async () => {
+  const approveWithdrawal = async () => {
     if (!selected) return;
 
-    if (
-      !["approved", "rejected", "paid"].includes(status)
-    ) {
-      toast.error("Invalid withdrawal status");
+    try {
+      setProcessing(true);
+
+      const res = await api.patch(`/admin/withdrawals/${selected._id}/approve`);
+
+      toast.success(res.data?.message || "Withdrawal approved successfully");
+
+      closeModal();
+
+      await fetchWithdrawals();
+    } catch (error) {
+      console.error("Approve withdrawal error:", error);
+
+      toast.error(
+        error.response?.data?.message || "Unable to approve withdrawal",
+      );
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  /*
+    =====================================================
+    REJECT
+    =====================================================
+    */
+
+  const rejectWithdrawal = async () => {
+    if (!selected) return;
+
+    if (!adminNote.trim()) {
+      toast.error("Please provide a reason for rejection");
+
       return;
     }
 
     try {
       setProcessing(true);
 
-      await api.patch(
-        `/withdrawals/${selected._id}`,
-        {
-          status,
-          adminNote: adminNote.trim(),
-        }
-      );
+      const res = await api.patch(`/admin/withdrawals/${selected._id}/reject`, {
+        adminNote: adminNote.trim(),
+      });
 
-      toast.success(
-        status === "approved"
-          ? "Withdrawal approved successfully"
-          : status === "paid"
-          ? "Withdrawal marked as paid"
-          : "Withdrawal rejected successfully"
-      );
+      toast.success(res.data?.message || "Withdrawal rejected successfully");
 
-      closeReview();
+      closeModal();
 
       await fetchWithdrawals();
-    } catch (err) {
-      console.error(
-        "Update withdrawal error:",
-        err
-      );
+    } catch (error) {
+      console.error("Reject withdrawal error:", error);
 
       toast.error(
-        err.response?.data?.message ||
-          "Unable to update withdrawal"
+        error.response?.data?.message || "Unable to reject withdrawal",
       );
     } finally {
       setProcessing(false);
     }
   };
 
-  /* =====================================================
-     MARK AS PAID
-  ===================================================== */
+  /*
+    =====================================================
+    MARK AS PAID
+    =====================================================
+    */
 
-  const markAsPaid = async (withdrawal) => {
-    if (!withdrawal) return;
-
-    const confirmed = window.confirm(
-      `Mark ₦${Number(
-        withdrawal.amount
-      ).toLocaleString()} withdrawal as paid?`
-    );
-
-    if (!confirmed) return;
+  const markAsPaid = async () => {
+    if (!selected) return;
 
     try {
       setProcessing(true);
 
-      await api.patch(
-        `/admin/withdrawals/${withdrawal._id}/aprove`,
-        {
-          status: "paid",
-          adminNote:
-            withdrawal.adminNote ||
-            "Withdrawal payment completed.",
-        }
-      );
+      const res = await api.patch(`/admin/withdrawals/${selected._id}/paid`);
 
-      toast.success(
-        "Withdrawal marked as paid"
-      );
+      toast.success(res.data?.message || "Withdrawal marked as paid");
+
+      closeModal();
 
       await fetchWithdrawals();
-    } catch (err) {
-      console.error(
-        "Mark paid error:",
-        err
-      );
+    } catch (error) {
+      console.error("Mark withdrawal paid error:", error);
 
       toast.error(
-        err.response?.data?.message ||
-          "Unable to mark withdrawal as paid"
+        error.response?.data?.message || "Unable to mark withdrawal as paid",
       );
     } finally {
       setProcessing(false);
     }
   };
 
-  /* =====================================================
-     LOADING
-  ===================================================== */
+  /*
+    =====================================================
+    FORMAT MONEY
+    =====================================================
+    */
+
+  const formatMoney = (amount) => {
+    return `₦${Number(amount || 0).toLocaleString()}`;
+  };
+
+  /*
+    =====================================================
+    LOADING
+    =====================================================
+    */
 
   if (loading) {
     return <PageLoader />;
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6 bg-slate-50 min-h-screen">
-
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6 space-y-6">
       {/* =================================================
           HEADER
       ================================================= */}
 
       <PageHeader
         title="Withdrawal Management"
-        subtitle="Review, approve and manage customer referral withdrawals"
+        subtitle="Review, approve, reject and process user wallet withdrawals"
       />
 
       {/* =================================================
@@ -300,9 +296,8 @@ const WithdrawalManagement = () => {
       ================================================= */}
 
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-
         <StatCard
-          title="Total Requests"
+          title="Total"
           value={stats.total}
           icon={<FaWallet />}
           color="blue"
@@ -326,7 +321,7 @@ const WithdrawalManagement = () => {
           title="Paid"
           value={stats.paid}
           icon={<FaMoneyBillWave />}
-          color="purple"
+          color="green"
         />
 
         <StatCard
@@ -337,223 +332,159 @@ const WithdrawalManagement = () => {
         />
 
         <StatCard
-          title="Pending Amount"
-          value={`₦${stats.pendingAmount.toLocaleString()}`}
-          icon={<FaWallet />}
+          title="Requested"
+          value={formatMoney(stats.totalAmount)}
+          icon={<FaMoneyBillWave />}
           color="blue"
         />
-
       </div>
 
       {/* =================================================
-          SEARCH + FILTER
+          FILTER BAR
       ================================================= */}
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-
-        <div className="flex flex-col lg:flex-row gap-4">
-
+      <div className="bg-white rounded-2xl border border-slate-200 p-4">
+        <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
           {/* SEARCH */}
 
-          <div className="relative flex-1">
-
-            <FaSearch
-              className="
-                absolute
-                left-4
-                top-1/2
-                -translate-y-1/2
-                text-slate-400
-              "
-            />
+          <div className="relative w-full lg:max-w-md">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
 
             <input
               type="text"
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              placeholder="Search customer, email, bank or account number..."
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search customer, email, bank..."
               className="
                 w-full
                 pl-11
                 pr-4
                 py-3
+                rounded-xl
                 border
                 border-slate-200
-                rounded-xl
-                outline-none
                 focus:border-blue-500
                 focus:ring-2
                 focus:ring-blue-100
-                transition
+                outline-none
               "
             />
-
           </div>
 
-          {/* STATUS FILTER */}
+          {/* STATUS */}
 
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value)
-            }
-            className="
-              px-4
-              py-3
-              border
-              border-slate-200
-              rounded-xl
-              bg-white
-              outline-none
-              focus:border-blue-500
-              min-w-[180px]
-            "
-          >
-            <option value="all">
-              All Withdrawals
-            </option>
-
-            <option value="pending">
-              Pending
-            </option>
-
-            <option value="approved">
-              Approved
-            </option>
-
-            <option value="paid">
-              Paid
-            </option>
-
-            <option value="rejected">
-              Rejected
-            </option>
-          </select>
-
+          <div className="flex gap-2 overflow-x-auto">
+            {[
+              ["all", "All"],
+              ["pending", "Pending"],
+              ["approved", "Approved"],
+              ["paid", "Paid"],
+              ["rejected", "Rejected"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setStatusFilter(value)}
+                className={`
+                  px-4
+                  py-2
+                  rounded-lg
+                  text-sm
+                  font-medium
+                  whitespace-nowrap
+                  transition
+                  ${
+                    statusFilter === value
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }
+                `}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-
       </div>
 
       {/* =================================================
           TABLE
       ================================================= */}
 
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b">
           <div>
-            <h2 className="font-bold text-slate-800">
+            <h2 className="font-bold text-lg text-slate-800">
               Withdrawal Requests
             </h2>
 
-            <p className="text-xs text-slate-500 mt-1">
-              {filtered.length} request
-              {filtered.length !== 1 ? "s" : ""}
+            <p className="text-sm text-slate-500">
+              {filteredWithdrawals.length} request
+              {filteredWithdrawals.length !== 1 ? "s" : ""}
             </p>
           </div>
 
+          <button
+            onClick={fetchWithdrawals}
+            className="text-sm text-blue-600 font-medium hover:underline"
+          >
+            Refresh
+          </button>
         </div>
 
         <div className="overflow-x-auto">
-
           <table className="w-full text-sm">
-
-            <thead className="bg-slate-50 uppercase text-[11px] tracking-wide text-slate-500">
-
+            <thead className="bg-slate-50">
               <tr>
-
-                <th className="text-left px-6 py-4">
+                <th className="text-left px-5 py-4 text-xs uppercase text-slate-500">
                   Customer
                 </th>
 
-                <th className="text-left px-6 py-4">
+                <th className="text-left px-5 py-4 text-xs uppercase text-slate-500">
                   Bank Details
                 </th>
 
-                <th className="text-left px-6 py-4">
+                <th className="text-left px-5 py-4 text-xs uppercase text-slate-500">
                   Amount
                 </th>
 
-                <th className="text-left px-6 py-4">
+                <th className="text-left px-5 py-4 text-xs uppercase text-slate-500">
                   Status
                 </th>
 
-                <th className="text-left px-6 py-4">
+                <th className="text-left px-5 py-4 text-xs uppercase text-slate-500">
                   Date
                 </th>
 
-                <th className="text-right px-6 py-4">
+                <th className="text-right px-5 py-4 text-xs uppercase text-slate-500">
                   Action
                 </th>
-
               </tr>
-
             </thead>
 
             <tbody>
-
-              {filtered.length === 0 ? (
-
+              {filteredWithdrawals.length === 0 ? (
                 <tr>
+                  <td colSpan={6} className="text-center py-16 text-slate-400">
+                    <FaWallet className="mx-auto text-4xl mb-3 opacity-30" />
 
-                  <td
-                    colSpan={6}
-                    className="text-center py-16"
-                  >
-
-                    <FaWallet className="mx-auto text-4xl text-slate-300 mb-3" />
-
-                    <p className="font-medium text-slate-600">
-                      No withdrawal requests found
-                    </p>
-
-                    <p className="text-sm text-slate-400 mt-1">
-                      Try changing your search or filter.
-                    </p>
-
+                    <p className="font-medium">No withdrawal requests found</p>
                   </td>
-
                 </tr>
-
               ) : (
-
-                filtered.map((item) => (
-
+                filteredWithdrawals.map((item) => (
                   <tr
                     key={item._id}
-                    className="
-                      border-t
-                      border-slate-100
-                      hover:bg-slate-50
-                      transition
-                    "
+                    className="border-t hover:bg-slate-50 transition"
                   >
-
                     {/* CUSTOMER */}
 
-                    <td className="px-6 py-4">
-
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-
-                        <div className="
-                          w-10
-                          h-10
-                          rounded-full
-                          bg-blue-50
-                          text-blue-600
-                          flex
-                          items-center
-                          justify-center
-                          shrink-0
-                        ">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
                           <FaUser />
                         </div>
 
                         <div>
-
                           <p className="font-semibold text-slate-800">
                             {item.user?.firstName || "Unknown"}{" "}
                             {item.user?.lastName || ""}
@@ -562,188 +493,81 @@ const WithdrawalManagement = () => {
                           <p className="text-xs text-slate-500">
                             {item.user?.email || "No email"}
                           </p>
-
                         </div>
-
                       </div>
-
                     </td>
 
                     {/* BANK */}
 
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-slate-700">
+                        {item.bankDetails?.bankName}
+                      </p>
 
-                      <div className="flex items-start gap-3">
+                      <p className="text-xs text-slate-500">
+                        {item.bankDetails?.accountName}
+                      </p>
 
-                        <FaUniversity className="text-slate-400 mt-1" />
-
-                        <div>
-
-                          <p className="font-medium text-slate-700">
-                            {item.bankDetails?.bankName ||
-                              "N/A"}
-                          </p>
-
-                          <p className="text-xs text-slate-500">
-                            {item.bankDetails?.accountName ||
-                              "N/A"}
-                          </p>
-
-                          <p className="text-xs font-mono text-slate-600 mt-1">
-                            {item.bankDetails?.accountNumber ||
-                              "N/A"}
-                          </p>
-
-                        </div>
-
-                      </div>
-
+                      <p className="text-xs font-mono text-slate-600">
+                        {item.bankDetails?.accountNumber}
+                      </p>
                     </td>
 
                     {/* AMOUNT */}
 
-                    <td className="px-6 py-4">
-
+                    <td className="px-5 py-4">
                       <p className="font-bold text-blue-600">
-                        ₦
-                        {Number(
-                          item.amount || 0
-                        ).toLocaleString()}
+                        {formatMoney(item.amount)}
                       </p>
-
                     </td>
 
                     {/* STATUS */}
 
-                    <td className="px-6 py-4">
-
-                      <StatusBadge
-                        status={item.status}
-                      />
-
+                    <td className="px-5 py-4">
+                      <StatusBadge status={item.status} />
                     </td>
 
                     {/* DATE */}
 
-                    <td className="px-6 py-4 text-slate-500">
+                    <td className="px-5 py-4 text-slate-500">
+                      <p>{new Date(item.createdAt).toLocaleDateString()}</p>
 
-                      <p>
-                        {item.createdAt
-                          ? new Date(
-                              item.createdAt
-                            ).toLocaleDateString()
-                          : "N/A"}
+                      <p className="text-xs">
+                        {new Date(item.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
-
-                      <p className="text-xs mt-1">
-                        {item.createdAt
-                          ? new Date(
-                              item.createdAt
-                            ).toLocaleTimeString(
-                              [],
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )
-                          : ""}
-                      </p>
-
                     </td>
 
                     {/* ACTION */}
 
-                    <td className="px-6 py-4">
-
-                      <div className="flex justify-end gap-2">
-
-                        <button
-                          onClick={() =>
-                            openReview(item)
-                          }
-                          className="
+                    <td className="px-5 py-4 text-right">
+                      <button
+                        onClick={() => openReview(item)}
+                        className="
                             inline-flex
                             items-center
                             gap-2
-                            px-3
+                            px-4
                             py-2
                             rounded-lg
-                            bg-slate-100
-                            text-slate-700
-                            hover:bg-slate-200
+                            bg-blue-600
+                            text-white
+                            hover:bg-blue-700
                             transition
-                            font-medium
                           "
-                        >
-                          <FaEye />
-
-                          View
-                        </button>
-
-                        {item.status ===
-                          "pending" && (
-
-                          <button
-                            onClick={() =>
-                              openReview(item)
-                            }
-                            className="
-                              px-3
-                              py-2
-                              rounded-lg
-                              bg-blue-600
-                              hover:bg-blue-700
-                              text-white
-                              font-medium
-                              transition
-                            "
-                          >
-                            Review
-                          </button>
-
-                        )}
-
-                        {item.status ===
-                          "approved" && (
-
-                          <button
-                            disabled={processing}
-                            onClick={() =>
-                              markAsPaid(item)
-                            }
-                            className="
-                              px-3
-                              py-2
-                              rounded-lg
-                              bg-green-600
-                              hover:bg-green-700
-                              disabled:opacity-50
-                              text-white
-                              font-medium
-                              transition
-                            "
-                          >
-                            Mark Paid
-                          </button>
-
-                        )}
-
-                      </div>
-
+                      >
+                        Review
+                        <FaArrowRight className="text-xs" />
+                      </button>
                     </td>
-
                   </tr>
-
                 ))
-
               )}
-
             </tbody>
-
           </table>
-
         </div>
-
       </div>
 
       {/* =================================================
@@ -751,558 +575,341 @@ const WithdrawalManagement = () => {
       ================================================= */}
 
       {selected && (
-
-        <div className="
-          fixed
-          inset-0
-          bg-black/50
-          backdrop-blur-sm
-          flex
-          items-center
-          justify-center
-          z-50
-          p-4
-        ">
-
-          <div className="
-            bg-white
-            rounded-2xl
-            w-full
-            max-w-xl
-            max-h-[90vh]
-            overflow-y-auto
-            shadow-2xl
-          ">
-
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* MODAL HEADER */}
 
-            <div className="
-              px-6
-              py-5
-              border-b
-              border-slate-200
-              flex
-              items-center
-              justify-between
-            ">
-
+            <div className="flex items-center justify-between px-6 py-5 border-b">
               <div>
-
                 <h2 className="text-xl font-bold text-slate-800">
-                  Withdrawal Details
+                  Withdrawal Review
                 </h2>
 
-                <p className="text-sm text-slate-500 mt-1">
-                  Review this withdrawal request
+                <p className="text-sm text-slate-500">
+                  Request #{selected._id?.slice(-8)}
                 </p>
-
               </div>
 
               <button
-                onClick={closeReview}
+                onClick={closeModal}
                 disabled={processing}
-                className="
-                  w-9
-                  h-9
-                  rounded-full
-                  bg-slate-100
-                  text-slate-500
-                  flex
-                  items-center
-                  justify-center
-                  hover:bg-slate-200
-                "
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center"
               >
                 <FaTimes />
               </button>
-
             </div>
 
-            {/* MODAL BODY */}
-
-            <div className="p-6 space-y-5">
-
-              {/* USER */}
-
-              <div className="
-                bg-slate-50
-                rounded-xl
-                p-4
-              ">
-
-                <div className="flex items-center gap-3">
-
-                  <div className="
-                    w-11
-                    h-11
-                    rounded-full
-                    bg-blue-100
-                    text-blue-600
-                    flex
-                    items-center
-                    justify-center
-                  ">
-                    <FaUser />
-                  </div>
-
-                  <div>
-
-                    <p className="font-bold text-slate-800">
-                      {selected.user?.firstName}{" "}
-                      {selected.user?.lastName}
-                    </p>
-
-                    <p className="text-sm text-slate-500 flex items-center gap-2">
-                      <FaEnvelope className="text-xs" />
-
-                      {selected.user?.email}
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
+            <div className="p-6 space-y-6">
               {/* AMOUNT */}
 
-              <div className="
-                bg-blue-50
-                border
-                border-blue-100
-                rounded-xl
-                p-5
-                text-center
-              ">
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl p-6 text-white">
+                <p className="text-sm opacity-80">Withdrawal Amount</p>
 
-                <p className="text-sm text-blue-600">
-                  Withdrawal Amount
-                </p>
-
-                <p className="
-                  text-3xl
-                  font-bold
-                  text-blue-700
-                  mt-1
-                ">
-                  ₦
-                  {Number(
-                    selected.amount || 0
-                  ).toLocaleString()}
-                </p>
-
-              </div>
-
-              {/* BANK DETAILS */}
-
-              <div>
-
-                <h3 className="
-                  font-bold
-                  text-slate-800
-                  mb-3
-                  flex
-                  items-center
-                  gap-2
-                ">
-                  <FaUniversity className="text-blue-600" />
-
-                  Bank Details
+                <h3 className="text-3xl font-bold mt-1">
+                  {formatMoney(selected.amount)}
                 </h3>
 
-                <div className="
-                  border
-                  border-slate-200
-                  rounded-xl
-                  divide-y
-                  divide-slate-100
-                ">
+                <div className="mt-4 flex items-center gap-2 text-sm">
+                  <StatusBadge status={selected.status} light />
+                </div>
+              </div>
 
-                  <DetailRow
+              {/* CUSTOMER */}
+
+              <div className="border rounded-xl p-5">
+                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <FaUser className="text-blue-600" />
+                  Customer Information
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InfoItem
+                    icon={<FaUser />}
+                    label="Name"
+                    value={`${selected.user?.firstName || ""} ${
+                      selected.user?.lastName || ""
+                    }`}
+                  />
+
+                  <InfoItem
+                    icon={<FaEnvelope />}
+                    label="Email"
+                    value={selected.user?.email || "N/A"}
+                  />
+
+                  <InfoItem
+                    icon={<FaPhone />}
+                    label="Phone"
+                    value={selected.user?.phone || "N/A"}
+                  />
+
+                  <InfoItem
+                    icon={<FaWallet />}
+                    label="Current Wallet"
+                    value={formatMoney(selected.user?.walletBalance)}
+                  />
+                </div>
+              </div>
+
+              {/* BANK */}
+
+              <div className="border rounded-xl p-5">
+                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <FaUniversity className="text-blue-600" />
+                  Withdrawal Bank Account
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InfoItem
                     label="Bank"
-                    value={
-                      selected.bankDetails?.bankName ||
-                      "N/A"
-                    }
+                    value={selected.bankDetails?.bankName}
                   />
 
-                  <DetailRow
+                  <InfoItem
                     label="Account Name"
-                    value={
-                      selected.bankDetails?.accountName ||
-                      "N/A"
-                    }
+                    value={selected.bankDetails?.accountName}
                   />
 
-                  <DetailRow
+                  <InfoItem
                     label="Account Number"
-                    value={
-                      selected.bankDetails?.accountNumber ||
-                      "N/A"
-                    }
+                    value={selected.bankDetails?.accountNumber}
                     mono
                   />
-
                 </div>
-
               </div>
 
-              {/* CURRENT STATUS */}
-
-              <div>
-
-                <p className="text-sm font-semibold text-slate-700 mb-2">
-                  Current Status
-                </p>
-
-                <StatusBadge
-                  status={selected.status}
-                />
-
-              </div>
-
-              {/* DECISION */}
+              {/* ADMIN NOTE */}
 
               {selected.status === "pending" && (
-
                 <div>
-
-                  <label className="
-                    block
-                    text-sm
-                    font-semibold
-                    text-slate-700
-                    mb-2
-                  ">
-                    Decision
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Admin Note
                   </label>
 
-                  <select
-                    value={status}
-                    onChange={(e) =>
-                      setStatus(e.target.value)
-                    }
+                  <textarea
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    rows={4}
+                    placeholder="Add a note. A rejection requires a reason."
                     className="
                       w-full
                       border
                       border-slate-200
                       rounded-xl
-                      p-3
+                      p-4
                       outline-none
                       focus:border-blue-500
+                      focus:ring-2
+                      focus:ring-blue-100
+                      resize-none
                     "
-                  >
-
-                    <option value="approved">
-                      Approve Withdrawal
-                    </option>
-
-                    <option value="rejected">
-                      Reject Withdrawal
-                    </option>
-
-                  </select>
-
+                  />
                 </div>
-
               )}
 
-              {/* ADMIN NOTE */}
+              {/* EXISTING NOTE */}
 
-              <div>
+              {selected.adminNote && selected.status !== "pending" && (
+                <div className="bg-slate-50 rounded-xl p-4">
+                  <p className="text-xs uppercase text-slate-400 font-semibold mb-1">
+                    Admin Note
+                  </p>
 
-                <label className="
-                  block
-                  text-sm
-                  font-semibold
-                  text-slate-700
-                  mb-2
-                ">
-                  Admin Note
-                </label>
+                  <p className="text-sm text-slate-700">{selected.adminNote}</p>
+                </div>
+              )}
 
-                <textarea
-                  rows={4}
-                  placeholder="Add a note for this withdrawal..."
-                  value={adminNote}
-                  onChange={(e) =>
-                    setAdminNote(e.target.value)
-                  }
-                  disabled={
-                    selected.status !== "pending"
-                  }
+              {/* ACTIONS */}
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
+                <button
+                  onClick={closeModal}
+                  disabled={processing}
                   className="
-                    w-full
+                    px-5
+                    py-3
+                    rounded-xl
                     border
                     border-slate-200
-                    rounded-xl
-                    p-3
-                    resize-none
-                    outline-none
-                    focus:border-blue-500
-                    disabled:bg-slate-50
+                    text-slate-700
+                    hover:bg-slate-50
                   "
-                />
+                >
+                  Close
+                </button>
 
+                {/* PENDING */}
+
+                {selected.status === "pending" && (
+                  <>
+                    <button
+                      onClick={rejectWithdrawal}
+                      disabled={processing}
+                      className="
+                        px-5
+                        py-3
+                        rounded-xl
+                        bg-red-600
+                        hover:bg-red-700
+                        text-white
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                      "
+                    >
+                      <FaTimesCircle />
+
+                      {processing ? "Processing..." : "Reject"}
+                    </button>
+
+                    <button
+                      onClick={approveWithdrawal}
+                      disabled={processing}
+                      className="
+                        px-5
+                        py-3
+                        rounded-xl
+                        bg-green-600
+                        hover:bg-green-700
+                        text-white
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                      "
+                    >
+                      <FaCheck />
+
+                      {processing ? "Processing..." : "Approve"}
+                    </button>
+                  </>
+                )}
+
+                {/* APPROVED */}
+
+                {selected.status === "approved" && (
+                  <button
+                    onClick={markAsPaid}
+                    disabled={processing}
+                    className="
+                      px-5
+                      py-3
+                      rounded-xl
+                      bg-blue-600
+                      hover:bg-blue-700
+                      text-white
+                      flex
+                      items-center
+                      justify-center
+                      gap-2
+                    "
+                  >
+                    <FaMoneyBillWave />
+
+                    {processing ? "Processing..." : "Mark as Paid"}
+                  </button>
+                )}
+
+                {/* PAID */}
+
+                {selected.status === "paid" && (
+                  <div className="px-5 py-3 rounded-xl bg-green-50 text-green-700 font-semibold flex items-center gap-2">
+                    <FaCheckCircle />
+                    Payment Completed
+                  </div>
+                )}
+
+                {/* REJECTED */}
+
+                {selected.status === "rejected" && (
+                  <div className="px-5 py-3 rounded-xl bg-red-50 text-red-700 font-semibold flex items-center gap-2">
+                    <FaTimesCircle />
+                    Withdrawal Rejected
+                  </div>
+                )}
               </div>
-
-              {/* EXISTING ADMIN NOTE */}
-
-              {selected.adminNote && (
-
-                <div className="
-                  bg-yellow-50
-                  border
-                  border-yellow-100
-                  rounded-xl
-                  p-4
-                ">
-
-                  <p className="
-                    text-xs
-                    uppercase
-                    font-bold
-                    text-yellow-700
-                    mb-1
-                  ">
-                    Previous Admin Note
-                  </p>
-
-                  <p className="text-sm text-yellow-800">
-                    {selected.adminNote}
-                  </p>
-
-                </div>
-
-              )}
-
             </div>
-
-            {/* MODAL FOOTER */}
-
-            <div className="
-              px-6
-              py-5
-              border-t
-              border-slate-200
-              flex
-              flex-col-reverse
-              sm:flex-row
-              justify-end
-              gap-3
-            ">
-
-              <button
-                onClick={closeReview}
-                disabled={processing}
-                className="
-                  px-5
-                  py-3
-                  border
-                  border-slate-200
-                  rounded-xl
-                  font-semibold
-                  text-slate-600
-                  hover:bg-slate-50
-                "
-              >
-                Close
-              </button>
-
-              {selected.status === "pending" && (
-
-                <button
-                  disabled={processing}
-                  onClick={submitDecision}
-                  className={`
-                    px-5
-                    py-3
-                    rounded-xl
-                    text-white
-                    font-semibold
-                    transition
-                    ${
-                      status === "rejected"
-                        ? "bg-red-600 hover:bg-red-700"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }
-                    disabled:opacity-50
-                  `}
-                >
-                  {processing
-                    ? "Processing..."
-                    : status === "rejected"
-                    ? "Reject Withdrawal"
-                    : "Approve Withdrawal"}
-                </button>
-
-              )}
-
-              {selected.status === "approved" && (
-
-                <button
-                  disabled={processing}
-                  onClick={() =>
-                    markAsPaid(selected)
-                  }
-                  className="
-                    px-5
-                    py-3
-                    rounded-xl
-                    bg-green-600
-                    hover:bg-green-700
-                    disabled:opacity-50
-                    text-white
-                    font-semibold
-                  "
-                >
-                  {processing
-                    ? "Processing..."
-                    : "Mark as Paid"}
-                </button>
-
-              )}
-
-            </div>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 };
 
-/* =====================================================
-   STAT CARD
-===================================================== */
+/*
+=====================================================
+STAT CARD
+=====================================================
+*/
 
-const StatCard = ({
-  title,
-  value,
-  icon,
-  color = "blue",
-}) => {
-
+const StatCard = ({ title, value, icon, color = "blue" }) => {
   const colors = {
     blue: "bg-blue-50 text-blue-600",
+
     green: "bg-green-50 text-green-600",
+
     orange: "bg-orange-50 text-orange-600",
+
     red: "bg-red-50 text-red-600",
-    purple: "bg-purple-50 text-purple-600",
   };
 
   return (
-    <div className="
-      bg-white
-      rounded-2xl
-      border
-      border-slate-200
-      p-5
-      shadow-sm
-      flex
-      items-center
-      justify-between
-    ">
-
+    <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between">
       <div>
+        <p className="text-sm text-slate-500">{title}</p>
 
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          {title}
-        </p>
-
-        <h3 className="
-          text-xl
-          md:text-2xl
-          font-bold
-          text-slate-800
-          mt-1
-        ">
+        <h3 className="text-xl md:text-2xl font-bold text-slate-800 mt-1">
           {value}
         </h3>
-
       </div>
 
       <div
-        className={`
-          w-11
-          h-11
-          rounded-xl
-          flex
-          items-center
-          justify-center
-          ${colors[color]}
-        `}
+        className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg ${colors[color]}`}
       >
         {icon}
       </div>
-
     </div>
   );
 };
 
-/* =====================================================
-   DETAIL ROW
-===================================================== */
+/*
+=====================================================
+INFO ITEM
+=====================================================
+*/
 
-const DetailRow = ({
-  label,
-  value,
-  mono = false,
-}) => {
+const InfoItem = ({ icon, label, value, mono = false }) => {
   return (
-    <div className="
-      px-4
-      py-3
-      flex
-      justify-between
-      gap-4
-    ">
+    <div>
+      <p className="text-xs text-slate-400 mb-1">
+        {icon && <span className="inline-block mr-1">{icon}</span>}
 
-      <span className="text-sm text-slate-500">
         {label}
-      </span>
+      </p>
 
-      <span
-        className={`
-          text-sm
-          font-semibold
-          text-slate-800
-          text-right
-          ${mono ? "font-mono" : ""}
-        `}
-      >
-        {value}
-      </span>
-
+      <p className={`font-medium text-slate-700 ${mono ? "font-mono" : ""}`}>
+        {value || "N/A"}
+      </p>
     </div>
   );
 };
 
-/* =====================================================
-   STATUS BADGE
-===================================================== */
+/*
+=====================================================
+STATUS BADGE
+=====================================================
+*/
 
-const StatusBadge = ({ status }) => {
-
+const StatusBadge = ({ status, light = false }) => {
   const styles = {
-    pending:
-      "bg-orange-100 text-orange-700",
-    approved:
-      "bg-blue-100 text-blue-700",
-    paid:
-      "bg-green-100 text-green-700",
-    rejected:
-      "bg-red-100 text-red-700",
-  };
+    pending: "bg-orange-100 text-orange-700",
 
-  const labels = {
-    pending: "Pending",
-    approved: "Approved",
-    paid: "Paid",
-    rejected: "Rejected",
+    approved: "bg-green-100 text-green-700",
+
+    paid: "bg-blue-100 text-blue-700",
+
+    rejected: "bg-red-100 text-red-700",
   };
 
   return (
@@ -1311,14 +918,15 @@ const StatusBadge = ({ status }) => {
         inline-flex
         items-center
         px-3
-        py-1.5
+        py-1
         rounded-full
         text-xs
-        font-bold
+        font-semibold
         ${styles[status] || "bg-slate-100 text-slate-600"}
+        ${light ? "shadow-sm" : ""}
       `}
     >
-      {labels[status] || status}
+      {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown"}
     </span>
   );
 };

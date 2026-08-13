@@ -63,6 +63,8 @@ import CategoryProducts from "./pages/public/categories/CategoryProduct";
 import ProductDetails from './pages/public/ProductDetails';
 import PreviewPage from "./pages/PreviewPage";
 
+import ScrollToTop from "./Context/ScrollToTop";
+
 
 const AppRouter = () => {
   const { loading } = useAuth();
@@ -78,6 +80,7 @@ const AppRouter = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* ================= MAIN WEBSITE ================= */}
         <Route element={<MainLayout />}>
@@ -92,13 +95,13 @@ const AppRouter = () => {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/preview/:slug" element={<PreviewPage />} />
 
-          
+
           {/* ================= USER AREA ================= */}
 
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLayout />}>
               <Route path="user/orders" element={<MyOrder />} />
-              <Route path="/user/refferal" element={<Refferal/>} />
+              <Route path="/user/refferal" element={<Refferal />} />
               <Route path="/wishlist" element={<MySavedItems />} />
               <Route path="/sell" element={<SellOnEmmCoreShopes />} />
               <Route path="/profile" element={<UserProfile />} />
@@ -143,7 +146,7 @@ const AppRouter = () => {
             <Route path="/admin/cms-pages" element={<PageList />} />
             <Route path="/admin/cms-pages/create" element={<CreateCMSPage />} />
             <Route path="/admin/cms-pages/edit/:id" element={<EditCMSPage />} />
-             <Route path="/admin/withdral" element={<WithdrawalManagement />} />
+            <Route path="/admin/withdral" element={<WithdrawalManagement />} />
           </Route>
         </Route>
 

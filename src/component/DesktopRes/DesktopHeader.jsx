@@ -16,8 +16,8 @@ import { useNavigate, Link } from "react-router-dom";
 
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
-import { useCart,  } from "../../Context/CartCountContext";
-import {getGuestCartCount } from "../../library/guestCart";
+import { useCart, } from "../../Context/CartCountContext";
+import { getGuestCartCount } from "../../library/guestCart";
 import Button from "../UI/Button";
 
 const DesktopHeader = () => {
@@ -412,6 +412,24 @@ const DesktopHeader = () => {
                       >
                         <FaHeart />
                         Wishlist
+                      </Link>
+
+                      <Link
+                        to="/user/refferal"
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          px-4
+                          py-3
+                          rounded-xl
+                          hover:bg-blue-50
+                          hover:text-blue-600
+                          transition-colors
+                        "
+                      >
+                        <FaHeart />
+                        Referral Bonus
                       </Link>
 
                       <Link

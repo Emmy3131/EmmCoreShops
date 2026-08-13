@@ -384,7 +384,7 @@ const Sidebar = ({
 
             <QuickAction
               icon={<FaWallet />}
-              title="Referal"
+              title="Referral Bonus"
               description="Manage balance"
               onClick={() =>
                 handleNavigation(

@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, NavLink } from "react-router-dom";
 
 import api from "../../library/api";
 import { useAuth } from "../../Context/AuthContext";
@@ -604,65 +604,65 @@ const DesktopHeader = () => {
       ========================================= */}
 
       <nav className="bg-slate-900 text-white">
-
         <div className="max-w-7xl mx-auto px-6">
+          <ul className="flex items-center gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
 
-          <ul className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-
+            {/* ALL CATEGORIES */}
             <li>
-
-              <button
-                onClick={() => setShowCategoryMenu(true)}
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  px-5
-                  py-3
-                  bg-blue-600
-                  hover:bg-blue-700
-                  font-semibold
-                  transition-colors
-                "
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `
+            flex
+            items-center
+            gap-2
+            px-5
+            py-3
+            text-sm
+            font-semibold
+            transition-all
+            duration-200
+            ${isActive
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }
+            `
+                }
               >
-
                 <FaBars />
-
                 All Categories
-
-              </button>
-
+              </NavLink>
             </li>
 
-
+            {/* CATEGORIES */}
             {categories.slice(0, 8).map((category) => (
-
               <li key={category._id}>
-
-                <Link
+                <NavLink
                   to={`/category/${category._id}`}
-                  className="
-                    inline-block
-                    px-4
-                    py-3
-                    text-sm
-                    text-slate-300
-                    hover:text-white
-                    hover:bg-slate-800
-                    transition-colors
-                  "
+                  className={({ isActive }) =>
+                    `
+              inline-flex
+              items-center
+              px-4
+              py-3
+              text-sm
+              font-medium
+              transition-all
+              duration-200
+              ${isActive
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }
+              `
+                  }
                 >
                   {category.name}
-                </Link>
-
+                </NavLink>
               </li>
-
             ))}
 
           </ul>
-
         </div>
-
       </nav>
 
 

@@ -4,6 +4,7 @@ import {
   FaBars,
   FaChevronDown,
   FaQuestionCircle,
+  FaWallet,
   FaStore,
   FaUser,
   FaBox,
@@ -428,7 +429,7 @@ const DesktopHeader = () => {
                           transition-colors
                         "
                       >
-                        <FaHeart />
+                        <FaWallet />
                         Referral Bonus
                       </Link>
 

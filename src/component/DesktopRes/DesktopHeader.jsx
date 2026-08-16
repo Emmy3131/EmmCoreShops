@@ -33,42 +33,10 @@ const DesktopHeader = () => {
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [pages, setPages] = useState([]);
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
 
 
-  // const loadGuestCartCount = () => {
-  //   setGuestCount(getGuestCartCount());
-  // };
-
-  // useEffect(() => {
-  //   if (!user) {
-  //     loadGuestCartCount();
-  //   } else {
-  //     setGuestCount(0);
-  //   }
-  // }, [user]);
-
-  // useEffect(() => {
-  //   const updateGuestCart = () => {
-  //     if (!user) {
-  //       loadGuestCartCount();
-  //     }
-  //   };
-
-  //   window.addEventListener(
-  //     "guest-cart-updated",
-  //     updateGuestCart
-  //   );
-
-  //   return () =>
-  //     window.removeEventListener(
-  //       "guest-cart-updated",
-  //       updateGuestCart
-  //     );
-  // }, [user]);
-
-  // const displayCartCount = user
-  //   ? cartCount
-  //   : guestCount;
 
   /* =========================================
      FETCH CATEGORIES
@@ -112,6 +80,26 @@ const DesktopHeader = () => {
   const handleCart = () => {
     navigate("/cart");
   };
+
+
+  useEffect(() => {
+    const fetchHelpPages = async () => {
+      try {
+        const res = await api.get("/pages/published");
+        if (res.data.status === 'success') {
+          setPages(res.data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to load Help CMS pages:", error);
+      }
+    };
+    fetchHelpPages();
+  }, []);
+
+  // Only show pages belonging to the Help section
+  const helpPages = pages.filter(
+    (page) => page.section === "help",
+  );
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -240,28 +228,199 @@ const DesktopHeader = () => {
 
             <div className="flex items-center gap-5">
 
-              {/* HELP */}
+              {/* ================= HELP ================= */}
+              <div className="relative group">
+                {/* ================= HELP BUTTON ================= */}
+                <button
+                  type="button"
+                  className="
+      flex
+      items-center
+      gap-2
+      text-sm
+      font-medium
+      text-gray-700
+      hover:text-blue-600
+      transition-colors
+      duration-200
+    "
+                >
+                  <FaQuestionCircle className="text-lg" />
 
-              <Link
-                to="/page/contact-us"
-                className="
-                  hidden
-                  xl:flex
+                  <span>Help</span>
+
+                  <FaChevronDown
+                    className="
+        text-xs
+        transition-transform
+        duration-200
+        group-hover:rotate-180
+      "
+                  />
+                </button>
+
+                {/* ================= HELP DROPDOWN ================= */}
+                <div
+                  className="
+      absolute
+      right-0
+      top-full
+      mt-3
+      w-72
+      bg-white
+      rounded-2xl
+      shadow-2xl
+      border
+      border-gray-100
+      overflow-hidden
+      z-50
+
+      opacity-0
+      invisible
+      translate-y-2
+
+      group-hover:opacity-100
+      group-hover:visible
+      group-hover:translate-y-0
+
+      transition-all
+      duration-200
+    "
+                >
+                  {/* ================= HEADER ================= */}
+                  <div
+                    className="
+        px-5
+        py-4
+        bg-gradient-to-r
+        from-blue-600
+        to-cyan-500
+        text-white
+      "
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="
+            w-9
+            h-9
+            rounded-full
+            bg-white/20
+            flex
+            items-center
+            justify-center
+          "
+                      >
+                        <FaQuestionCircle />
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-sm">
+                          Help Center
+                        </h3>
+
+                        <p className="text-xs text-white/80 mt-0.5">
+                          How can we help you?
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ================= CMS LINKS ================= */}
+                  <div className="py-2 max-h-[420px] overflow-y-auto">
+                    {helpPages?.length > 0 ? (
+                      helpPages.map((page) => (
+                        <Link
+                          key={page._id || page.slug}
+                          to={`/page/${page.slug}`}
+                          onClick={() => {
+                            window.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                            });
+                          }}
+                          className="
+              group/item
+              flex
+              items-center
+              justify-between
+              gap-3
+              px-5
+              py-3
+              text-sm
+              text-gray-700
+              hover:bg-blue-50
+              hover:text-blue-600
+              transition-colors
+              duration-200
+            "
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {/* ICON */}
+                            <div
+                              className="
+                  w-8
+                  h-8
+                  rounded-lg
+                  bg-gray-100
+                  group-hover/item:bg-blue-100
+                  flex
                   items-center
-                  gap-2
-                  text-slate-600
-                  hover:text-blue-600
+                  justify-center
+                  flex-shrink-0
                   transition-colors
+                  duration-200
                 "
-              >
+                            >
+                              <FaQuestionCircle
+                                className="
+                    text-gray-400
+                    group-hover/item:text-blue-600
+                    text-sm
+                    transition-colors
+                  "
+                              />
+                            </div>
 
-                <FaQuestionCircle />
+                            {/* TITLE */}
+                            <span className="truncate font-medium">
+                              {page.title}
+                            </span>
+                          </div>
 
-                <span className="text-sm font-medium">
-                  Help
-                </span>
+                          {/* ARROW */}
+                          <FaChevronDown
+                            className="
+                -rotate-90
+                text-[10px]
+                text-gray-400
+                group-hover/item:text-blue-600
+                flex-shrink-0
+                transition-colors
+              "
+                          />
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="px-5 py-6 text-center">
+                        <FaQuestionCircle className="mx-auto text-2xl text-gray-300 mb-2" />
 
-              </Link>
+                        <p className="text-sm text-gray-500">
+                          Help pages are currently unavailable.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ================= FOOTER ================= */}
+                  {helpPages?.length > 0 && (
+                    <div className="border-t border-gray-100 px-5 py-3 bg-gray-50">
+                      <p className="text-[11px] text-gray-400 text-center">
+                        Need more help? Select an option above.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
 
 
               {/* =====================================

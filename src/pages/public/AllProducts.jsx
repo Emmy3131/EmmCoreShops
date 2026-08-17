@@ -174,62 +174,6 @@ const Products = () => {
         </div>
       </section>
 
-      {/* <div
-        className="
-          flex
-          flex-col
-          sm:flex-row
-          sm:items-end
-          sm:justify-between
-          gap-3
-          mb-6
-        "
-      >
-        <div>
-
-          <p
-            className="
-              text-xs
-              font-bold
-              uppercase
-              tracking-wider
-              text-blue-600
-              mb-1
-            "
-          >
-            Explore our collection
-          </p>
-
-          <h1
-            className="
-              text-2xl
-              sm:text-3xl
-              font-extrabold
-              text-slate-900
-            "
-          >
-            All Products
-          </h1>
-
-          <p
-            className="
-              mt-1
-              text-sm
-              text-slate-500
-            "
-          >
-            Discover products you'll love.
-          </p>
-
-        </div>
-
-        {!loading && products.length > 0 && (
-          <p className="text-sm text-slate-500">
-            {products.length} products
-          </p>
-        )}
-
-      </div> */}
 
       {/* =====================================
           PRODUCT GRID

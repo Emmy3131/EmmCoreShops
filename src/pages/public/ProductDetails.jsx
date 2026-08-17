@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import ProductDetailsCard from "../../component/Products/ProductDetailsCard";
 import ProductReviews from "../../component/Products/ProductReviews";
+import RelatedProduct from "../../component/Products/RelatedProduct";
 
 
 import api from "../../library/api";
@@ -224,6 +225,10 @@ const ProductDetails = () => {
       {/* REVIEWS */}
 
       <ProductReviews
+        productId={product._id}
+      />
+
+      <RelatedProduct 
         productId={product._id}
       />
     </main>

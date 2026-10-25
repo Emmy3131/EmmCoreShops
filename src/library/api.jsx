@@ -3,12 +3,12 @@ import axios from "axios";
 const api = axios.create({
   baseURL:
     import.meta.env.VITE_API_URL ||
-    "https://emm-core-global-networks-updated.vercel.app/api/v1",
+    "https://emmcore-shops-api.vercel.app/.app/api/v1",
 
   withCredentials: true,
 
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json",  
   },
 });
 

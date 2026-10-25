@@ -1,133 +1,212 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+
 import api from "../library/api";
+
 import {
   getGuestCartItems,
   clearGuestCart,
 } from "../library/guestCart";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
- const mergeGuestCart = async () => {
+/* =====================================================
+   MERGE GUEST CART AFTER LOGIN
+===================================================== */
+
+const mergeGuestCart = async () => {
   try {
     const guestItems = getGuestCartItems();
 
-    if (!guestItems.length) return;
+    if (!Array.isArray(guestItems) || guestItems.length === 0) {
+      return;
+    }
 
     for (const item of guestItems) {
+      const productId = item.product?._id;
+
+      if (!productId || !item.quantity) {
+        console.warn("Skipping invalid guest cart item:", item);
+        continue;
+      }
+
       await api.post("/cart", {
-        productId: item.product._id,
+        productId,
         quantity: item.quantity,
       });
     }
 
     clearGuestCart();
 
-    window.dispatchEvent(
-      new Event("cart-updated")
-    );
-
-  } catch (err) {
+    window.dispatchEvent(new Event("cart-updated"));
+  } catch (error) {
     console.error(
-      "Merge cart error:",
-      err
+      "Guest cart merge failed:",
+      error.response?.data?.message || error.message
     );
   }
 };
+
+/* =====================================================
+   AUTH PROVIDER
+===================================================== */
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* ================= INIT AUTH ================= */
-  const initAuth = async () => {
+  /* =====================================================
+     INITIALIZE AUTHENTICATION
+  ===================================================== */
+
+  const initAuth = useCallback(async () => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
-    // 🚨 If no token, stop immediately
     if (!token) {
       setUser(null);
       setLoading(false);
       return;
     }
 
-    // ⚡ STEP 1: show cached user immediately (prevents flicker)
+    // Display cached user while the backend verifies the token.
     if (storedUser) {
       try {
         setUser({
           ...JSON.parse(storedUser),
           token,
         });
-      } catch (e) {
-        console.log("Invalid cached user");
+      } catch {
+        localStorage.removeItem("user");
       }
     }
 
-    // ⚡ STEP 2: verify with backend
     try {
-      const res = await api.get("/users/me");
+      const response = await api.get("/users/me");
 
-      if (res.data.status === "success") {
-        const freshUser = {
-          ...res.data.data.user,
+      if (response.data?.status === "success") {
+        const responseData = response.data.data;
+
+        // Support either { data: { user } } or { data: user }.
+        const freshUser = responseData?.user || responseData;
+
+        if (!freshUser || typeof freshUser !== "object") {
+          throw new Error("The authentication response contains no user.");
+        }
+
+        const authenticatedUser = {
+          ...freshUser,
           token,
         };
 
-        setUser(freshUser);
-        localStorage.setItem("user", JSON.stringify(freshUser));
+        setUser(authenticatedUser);
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(authenticatedUser)
+        );
       } else {
         setUser(null);
       }
-    } catch (err) {
-      console.log("Auth failed:", err);
-      setUser(null);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+    } catch (error) {
+      const statusCode = error.response?.status;
+
+      if (statusCode === 401 || statusCode === 403) {
+        // The backend rejected the token.
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setUser(null);
+      } else {
+        // Network errors and server failures should not automatically
+        // erase an otherwise valid cached login.
+        console.error(
+          "Could not verify authentication:",
+          error.response?.data?.message || error.message
+        );
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  /* ================= RUN ON START ================= */
-  useEffect(() => {
-    initAuth();
   }, []);
 
-  /* ================= LOGIN ================= */
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  /* =====================================================
+     LOGIN
+  ===================================================== */
+
   const login = async (userData, token) => {
+    if (!userData || !token) {
+      throw new Error("Login requires both user data and a token.");
+    }
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(userData)
-    );
-
-    localStorage.setItem(
-      "token",
-      token
-    );
-
-
-    setUser({
+    const authenticatedUser = {
       ...userData,
       token,
-    });
+    };
 
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(authenticatedUser));
 
+    setUser(authenticatedUser);
+
+    // A cart merge failure should not undo a successful login.
     await mergeGuestCart();
-
   };
 
-  /* ================= LOGOUT ================= */
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+
   const logout = () => {
-    localStorage.removeItem("user");
+    // Send the logout request before removing the saved token.
+    // The client still logs out if the backend is unavailable.
+    api.post("/users/logout").catch((error) => {
+      console.warn(
+        "Backend logout request failed:",
+        error.response?.data?.message || error.message
+      );
+    });
+
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+/* =====================================================
+   AUTH HOOK
+===================================================== */
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside an AuthProvider."
+    );
+  }
+
+  return context;
+};

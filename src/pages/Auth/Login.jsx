@@ -33,48 +33,61 @@ const Login = () => {
 
   /* ================= SUBMIT ================= */
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ 
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      setLoading(true);
-      const res = await api.post("/users/login", formData);
-      const token = res.data.token;
-      const user = res.data.data;
+  try {
+    setLoading(true);
 
-      if (!token || !user) {
-        toast.error("Login failed. Please try again.");
-        return;
-      }
+    const res = await api.post("/users/login", formData);
 
-      await login(user, token);
+    const token = res.data?.token;
+    const responseData = res.data?.data;
 
-      toast.success("Welcome back 👋");
+    // Support both { data: user } and { data: { user } }
+    const user = responseData?.user || responseData;
 
-      const redirect =
-        new URLSearchParams(location.search).get("redirect") || "/";
-
-      navigate(redirect);
-
-      setTimeout(() => {
-        if (user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else if (user.role === "vendor") {
-          navigate("/vendor/dashboard");
-        } else {
-          navigate("/");
-        }
-      }, 700);
-
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-        "Invalid email or password"
-      );
-    } finally {
-      setLoading(false);
+    if (!token || !user) {
+      toast.error("Login failed: invalid response from server.");
+      return;
     }
-  };
+
+    await login(user, token);
+
+    toast.success("Welcome back!");
+
+    // Normalize the role in case the API returns different casing.
+    const role = String(user.role || "").toLowerCase();
+
+    // Send each role to its appropriate destination.
+    if (role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+      return;
+    }
+
+    if (role === "vendor") {
+      navigate("/vendor/dashboard", { replace: true });
+      return;
+    }
+
+    if (role === "user") {
+      const redirect = new URLSearchParams(location.search).get("redirect");
+
+      navigate(redirect || "/", { replace: true });
+      return;
+    }
+
+    toast.error(`Unrecognized account role: ${role || "missing"}`);
+  } catch (err) {
+    toast.error(
+      err.response?.data?.message || "Invalid email or password"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="w-full">

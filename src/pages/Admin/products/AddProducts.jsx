@@ -31,7 +31,7 @@ const inputClass =
 const labelClass = "mb-2 block text-sm font-bold text-slate-700";
 const cardClass = "rounded-3xl border border-slate-100 bg-white p-5 shadow-sm md:p-7";
 
-const AddProduct = () => {
+const AddProducts = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -347,4 +347,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default AddProducts;

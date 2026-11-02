@@ -115,7 +115,7 @@ const Hero = () => {
 
           <aside className="hidden xl:flex flex-col gap-3">
 
-            <Link
+            {/* <Link
               to="/shop"
               className="relative flex-1 min-h-[175px] overflow-hidden rounded-xl bg-gradient-to-br from-blue-700 to-cyan-500 p-4 flex flex-col justify-between group"
             >
@@ -133,9 +133,9 @@ const Hero = () => {
               </div>
 
               <FaArrowRight className="absolute bottom-4 right-4 text-white group-hover:translate-x-1 transition" />
-            </Link>
+            </Link> */}
 
-            <Link
+            {/* <Link
               to="/shop"
               className="relative flex-1 min-h-[175px] overflow-hidden rounded-xl bg-gradient-to-br from-fuchsia-700 to-purple-950 p-4 flex flex-col justify-between group"
             >
@@ -155,7 +155,7 @@ const Hero = () => {
               <span className="text-xs font-bold text-white/80">
                 SHOP NOW →
               </span>
-            </Link>
+            </Link> */}
 
           </aside>
 
@@ -212,7 +212,7 @@ const Hero = () => {
                     </p>
 
                     <Link
-                      to={banner.link || "/shop"}
+                      to={banner.link}
                       className="mt-6 inline-flex items-center gap-3 rounded-lg bg-cyan-400 px-6 py-3.5 text-sm font-extrabold text-slate-950 transition hover:bg-white hover:-translate-y-0.5"
                     >
                       {banner.buttonText || "Shop Now"}
@@ -338,7 +338,7 @@ const Hero = () => {
 
           <aside className="hidden xl:flex flex-col gap-3">
 
-            <Link
+            {/* <Link
               to="/shop"
               className="flex-1 min-h-[175px] rounded-xl border border-white/10 bg-gradient-to-br from-[#122D4D] to-[#081321] p-4 flex flex-col justify-between"
             >
@@ -358,9 +358,9 @@ const Hero = () => {
               <span className="text-xs font-bold text-cyan-300">
                 DISCOVER MORE →
               </span>
-            </Link>
+            </Link> */}
 
-            <Link
+            {/* <Link
               to="/shop"
               className="flex-1 min-h-[175px] rounded-xl bg-gradient-to-br from-cyan-500 to-blue-700 p-4 flex flex-col justify-between"
             >
@@ -378,7 +378,7 @@ const Hero = () => {
               <span className="text-xs font-bold text-white">
                 SHOP NOW →
               </span>
-            </Link>
+            </Link> */}
 
           </aside>
 

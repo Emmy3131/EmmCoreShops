@@ -14,7 +14,6 @@ import {
 import { toast } from "react-toastify";
 
 import api from "../../library/api";
-
 import PageHeader from "../../component/Admin/PageHeader";
 import PageLoader from "../../component/PageLoader";
 
@@ -25,12 +24,7 @@ const Reviews = () => {
   const [selectedReview, setSelectedReview] = useState(null);
   const [processingId, setProcessingId] = useState(null);
 
-  /*
-  =========================================
-  FETCH ALL REVIEWS
-  =========================================
-  */
-
+  // FETCH REVIEWS
   const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,7 +32,6 @@ const Reviews = () => {
       const res = await api.get("/reviews");
 
       if (res.data.status === "success") {
-        // Supports either an array or a nested reviews array.
         const reviewData =
           res.data.data?.reviews ||
           res.data.data ||
@@ -63,25 +56,28 @@ const Reviews = () => {
     fetchReviews();
   }, [fetchReviews]);
 
-  /*
-  =========================================
-  APPROVE REVIEW
-  =========================================
-  */
-
+  // APPROVE REVIEW
   const approveReview = async (id) => {
     if (!id || processingId) return;
 
     try {
       setProcessingId(id);
 
-      // IMPORTANT: This URL matches the backend route.
+      // Matches backend: PATCH /:id/approve
       const res = await api.patch(`/reviews/${id}/approve`);
 
       if (res.data.status === "success") {
-        toast.success(res.data.message || "Review approved successfully");
+        toast.success(
+          res.data.message || "Review approved successfully"
+        );
 
-        await fetchReviews();
+        setReviews((previous) =>
+          previous.map((review) =>
+            review._id === id
+              ? { ...review, status: "approved" }
+              : review
+          )
+        );
 
         setSelectedReview((current) =>
           current?._id === id
@@ -102,25 +98,28 @@ const Reviews = () => {
     }
   };
 
-  /*
-  =========================================
-  REJECT REVIEW
-  =========================================
-  */
-
+  // REJECT REVIEW
   const rejectReview = async (id) => {
     if (!id || processingId) return;
 
     try {
       setProcessingId(id);
 
-      // IMPORTANT: This URL matches the backend route.
+      // Matches backend: PATCH /:id/reject
       const res = await api.patch(`/reviews/${id}/reject`);
 
       if (res.data.status === "success") {
-        toast.success(res.data.message || "Review rejected successfully");
+        toast.success(
+          res.data.message || "Review rejected successfully"
+        );
 
-        await fetchReviews();
+        setReviews((previous) =>
+          previous.map((review) =>
+            review._id === id
+              ? { ...review, status: "rejected" }
+              : review
+          )
+        );
 
         setSelectedReview((current) =>
           current?._id === id
@@ -141,12 +140,7 @@ const Reviews = () => {
     }
   };
 
-  /*
-  =========================================
-  DELETE REVIEW
-  =========================================
-  */
-
+  // DELETE REVIEW
   const deleteReview = async (id) => {
     if (!id || processingId) return;
 
@@ -162,7 +156,9 @@ const Reviews = () => {
       const res = await api.delete(`/reviews/${id}`);
 
       if (res.data.status === "success") {
-        toast.success(res.data.message || "Review deleted successfully");
+        toast.success(
+          res.data.message || "Review deleted successfully"
+        );
 
         setReviews((previous) =>
           previous.filter((review) => review._id !== id)
@@ -185,12 +181,7 @@ const Reviews = () => {
     }
   };
 
-  /*
-  =========================================
-  SEARCH REVIEWS
-  =========================================
-  */
-
+  // SEARCH REVIEWS
   const filteredReviews = reviews.filter((review) => {
     const user = [
       review.user?.firstName || "",
@@ -213,33 +204,19 @@ const Reviews = () => {
     );
   });
 
-  /*
-  =========================================
-  STATUS STYLES
-  =========================================
-  */
-
+  // STATUS STYLES
   const getStatusStyle = (status) => {
     switch (status) {
       case "approved":
         return "bg-green-100 text-green-700";
-
       case "pending":
         return "bg-yellow-100 text-yellow-700";
-
       case "rejected":
         return "bg-red-100 text-red-700";
-
       default:
         return "bg-gray-100 text-gray-600";
     }
   };
-
-  /*
-  =========================================
-  RENDER
-  =========================================
-  */
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 space-y-6">
@@ -250,12 +227,10 @@ const Reviews = () => {
       />
 
       {/* REVIEW SUMMARY */}
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         <div className="bg-white rounded-xl shadow-sm p-5">
           <p className="text-sm text-gray-500">Total Reviews</p>
-
           <h2 className="text-2xl font-bold text-gray-800 mt-2">
             {reviews.length}
           </h2>
@@ -263,28 +238,24 @@ const Reviews = () => {
 
         <div className="bg-white rounded-xl shadow-sm p-5">
           <p className="text-sm text-gray-500">Pending Reviews</p>
-
           <h2 className="text-2xl font-bold text-yellow-600 mt-2">
-            {reviews.filter((review) => review.status === "pending").length}
+            {reviews.filter((r) => r.status === "pending").length}
           </h2>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-5">
           <p className="text-sm text-gray-500">Approved Reviews</p>
-
           <h2 className="text-2xl font-bold text-green-600 mt-2">
-            {reviews.filter((review) => review.status === "approved").length}
+            {reviews.filter((r) => r.status === "approved").length}
           </h2>
         </div>
 
       </div>
 
       {/* SEARCH */}
-
       <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
 
         <div className="relative w-full md:w-96">
-
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
           <input
@@ -294,7 +265,6 @@ const Reviews = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         <button
@@ -308,8 +278,7 @@ const Reviews = () => {
 
       </div>
 
-      {/* CONTENT */}
-
+      {/* REVIEWS */}
       {loading ? (
         <div className="bg-white rounded-xl p-6">
           <PageLoader text="Loading reviews..." />
@@ -317,9 +286,7 @@ const Reviews = () => {
       ) : filteredReviews.length === 0 ? (
         <div className="bg-white rounded-xl p-10 text-center text-gray-500">
           <FaStar className="text-3xl mx-auto mb-3 text-gray-300" />
-
           <p className="font-medium">No reviews found</p>
-
           <p className="text-sm mt-1">
             Try changing your search or check back later.
           </p>
@@ -337,11 +304,9 @@ const Reviews = () => {
               >
 
                 {/* HEADER */}
-
                 <div className="flex justify-between items-start gap-3">
 
                   <div className="min-w-0">
-
                     <h2 className="font-semibold text-gray-800">
                       {review.user?.firstName || "Unknown"}{" "}
                       {review.user?.lastName || ""}
@@ -356,23 +321,18 @@ const Reviews = () => {
                         ? new Date(review.createdAt).toLocaleDateString()
                         : "Date unavailable"}
                     </p>
-
                   </div>
 
                   <span
-                    className={`text-xs px-3 py-1 rounded-full capitalize whitespace-nowrap ${getStatusStyle(
-                      review.status
-                    )}`}
+                    className={`text-xs px-3 py-1 rounded-full capitalize whitespace-nowrap ${getStatusStyle(review.status)}`}
                   >
                     {review.status || "unknown"}
                   </span>
 
                 </div>
 
-                {/* STARS */}
-
-                <div className="flex mt-3 gap-1">
-
+                {/* RATING */}
+                <div className="flex mt-3 gap-1 items-center">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <FaStar
                       key={star}
@@ -387,17 +347,14 @@ const Reviews = () => {
                   <span className="text-xs text-gray-500 ml-2">
                     ({review.rating || 0}/5)
                   </span>
-
                 </div>
 
                 {/* COMMENT */}
-
                 <p className="text-gray-600 text-sm mt-3 whitespace-pre-wrap break-words">
                   {review.comment || "No comment provided"}
                 </p>
 
                 {/* ACTIONS */}
-
                 <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-100">
 
                   <button
@@ -422,7 +379,6 @@ const Reviews = () => {
                         ) : (
                           <FaCheck />
                         )}
-
                         <span className="hidden sm:inline">Approve</span>
                       </button>
                     )}
@@ -450,9 +406,7 @@ const Reviews = () => {
                     </button>
 
                   </div>
-
                 </div>
-
               </div>
             );
           })}
@@ -460,21 +414,18 @@ const Reviews = () => {
         </div>
       )}
 
-      {/* VIEW MODAL */}
-
+      {/* REVIEW DETAILS MODAL */}
       {selectedReview && (
         <div
           onClick={() => setSelectedReview(null)}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
         >
-
           <div
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl"
           >
 
             <div className="flex items-center justify-between mb-5">
-
               <h2 className="font-bold text-xl text-gray-800">
                 Review Details
               </h2>
@@ -485,7 +436,6 @@ const Reviews = () => {
               >
                 <FaTimes />
               </button>
-
             </div>
 
             <div className="space-y-3 text-sm">
@@ -514,7 +464,6 @@ const Reviews = () => {
 
               <div>
                 <b>Comment:</b>
-
                 <p className="mt-2 text-gray-600 whitespace-pre-wrap break-words">
                   {selectedReview.comment || "No comment provided"}
                 </p>
@@ -530,7 +479,6 @@ const Reviews = () => {
             </button>
 
           </div>
-
         </div>
       )}
 

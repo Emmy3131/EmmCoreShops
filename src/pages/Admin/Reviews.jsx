@@ -11,7 +11,7 @@ import {
   FaSyncAlt,
 } from "react-icons/fa";
 
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import api from "../../library/api";
 

@@ -19,7 +19,7 @@ const Home = () => {
       <NewArrival />
 
       {/* FLASH SALES */}
-      <FlashSales />
+      {/* <FlashSales /> */}
 
       {/* TRENDING */}
       <TrendingProducts />

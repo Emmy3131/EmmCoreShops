@@ -138,8 +138,6 @@ const ProductDetailsCard = ({
             items-center
             justify-center
             bg-slate-50
-            p-6
-            md:p-10
           "
         >
 

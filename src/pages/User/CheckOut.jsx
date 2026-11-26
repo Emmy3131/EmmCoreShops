@@ -403,15 +403,6 @@ const CheckOut = () => {
                 </div>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => navigate("/cart")}
-              className="inline-flex items-center gap-2 px-1 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
-            >
-              <FaArrowLeft className="text-xs" />
-              Return to cart
-            </button>
           </section>
 
           {/* Order summary */}

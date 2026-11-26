@@ -18,41 +18,6 @@ const SavedAddressCard = ({
 }) => {
   return (
     <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-      {/* ================= Header ================= */}
-
-      <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Saved Addresses</h2>
-
-          <p className="text-sm text-gray-500 mt-1">
-            Select where you want your order delivered
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onAddNew}
-          className="
-            flex
-            items-center
-            gap-2
-            rounded-xl
-            bg-gradient-to-r
-            from-blue-600
-            to-cyan-500
-            px-5
-            py-3
-            text-white
-            font-semibold
-            shadow-lg
-            hover:scale-105
-            transition-all
-          "
-        >
-          <FaPlus />
-          Add Address
-        </button>
-      </div>
 
       {/* ================= Empty ================= */}
 

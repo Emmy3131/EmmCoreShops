@@ -44,7 +44,7 @@ const SearchPage = () => {
       ) : products.length === 0 ? (
         <p>No products found.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
           {products.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

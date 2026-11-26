@@ -107,7 +107,8 @@ const ProductDetailsCard = ({
         max-w-7xl
         mx-auto
         overflow-hidden
-        rounded-3xl
+        mt-2
+        md:mt-0
         bg-white
         border
         border-slate-200
@@ -118,6 +119,7 @@ const ProductDetailsCard = ({
         className="
           grid
           grid-cols-1
+          gap-6
           lg:grid-cols-2
         "
       >
@@ -131,12 +133,13 @@ const ProductDetailsCard = ({
             relative
             min-h-[360px]
             sm:min-h-[500px]
+            md:min-h-[600px]
             flex
             items-center
             justify-center
             bg-slate-50
             p-6
-            sm:p-10
+            md:p-10
           "
         >
 
@@ -518,154 +521,11 @@ const ProductDetailsCard = ({
             </button>
 
             {/* BUY NOW */}
-
-            <button
-              onClick={handleBuyNow}
-              disabled={loading || isOutOfStock}
-              className="
-      flex
-      items-center
-      justify-center
-      gap-2
-      rounded-xl
-      bg-gradient-to-r
-      from-blue-600
-      to-cyan-500
-      px-5
-      py-3.5
-      text-sm
-      font-bold
-      text-white
-      shadow-lg
-      shadow-blue-200
-      transition
-      hover:from-blue-700
-      hover:to-cyan-600
-      disabled:cursor-not-allowed
-      disabled:opacity-50
-    "
-            >
-              <FaBolt />
-
-              Buy Now
-            </button>
           </div>
 
           {/* BENEFITS */}
 
-          <div
-            className="
-              mt-8
-              grid
-              grid-cols-1
-              gap-4
-              border-t
-              border-slate-100
-              pt-6
-              sm:grid-cols-3
-            "
-          >
-
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <FaTruck
-                className="text-blue-600"
-              />
-
-              <div>
-                <p
-                  className="
-                    text-xs
-                    font-bold
-                    text-slate-800
-                  "
-                >
-                  Fast Delivery
-                </p>
-
-                <p
-                  className="
-                    text-[10px]
-                    text-slate-500
-                  "
-                >
-                  Delivered to your door
-                </p>
-              </div>
-            </div>
-
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <FaShieldAlt
-                className="text-blue-600"
-              />
-
-              <div>
-                <p
-                  className="
-                    text-xs
-                    font-bold
-                    text-slate-800
-                  "
-                >
-                  Secure Payment
-                </p>
-
-                <p
-                  className="
-                    text-[10px]
-                    text-slate-500
-                  "
-                >
-                  Safe and secure checkout
-                </p>
-              </div>
-            </div>
-
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-              "
-            >
-              <FaUndo
-                className="text-blue-600"
-              />
-
-              <div>
-                <p
-                  className="
-                    text-xs
-                    font-bold
-                    text-slate-800
-                  "
-                >
-                  Easy Returns
-                </p>
-
-                <p
-                  className="
-                    text-[10px]
-                    text-slate-500
-                  "
-                >
-                  Shop with confidence
-                </p>
-              </div>
-            </div>
-
-          </div>
+          {/*  */}
 
         </div>
 

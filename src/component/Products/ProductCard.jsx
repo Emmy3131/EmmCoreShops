@@ -1,25 +1,22 @@
-import {
-  FaStar,
-  FaShoppingCart,
-  FaEye,
-  FaBolt,
-} from "react-icons/fa";
 
 import { useState } from "react";
+import {
+  FaShoppingCart,
+  FaEye,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import api from "../../library/api";
-
-import CountdownTimer from "./CountDownTimer";
 import ProductPrice from "./ProductPrice";
-import WishlistButton from "./WishListButton";
 import { addGuestItem } from "../../library/guestCart";
 import { useAuth } from "../../Context/AuthContext";
 
+import WishListButton from "./WishListButton";
+
 const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   /* =========================================
      FLASH SALE STATUS
@@ -27,7 +24,7 @@ const ProductCard = ({ product }) => {
 
   const isFlashSale =
     product?.isFlashSale &&
-    product?.flashSalePrice &&
+    Number(product?.flashSalePrice) > 0 &&
     product?.flashSaleEndAt &&
     new Date(product.flashSaleEndAt) > new Date();
 
@@ -39,20 +36,18 @@ const ProductCard = ({ product }) => {
     product?.oldPrice || product?.price || 0
   );
 
-  const salePrice = Number(
-    product?.flashSalePrice || 0
-  );
+  const activePrice = isFlashSale
+    ? Number(product.flashSalePrice)
+    : Number(product?.price || 0);
 
   /* =========================================
      DISCOUNT
   ========================================= */
 
   const discountPercentage =
-    isFlashSale && originalPrice > salePrice
+    isFlashSale && originalPrice > activePrice
       ? Math.round(
-        ((originalPrice - salePrice) /
-          originalPrice) *
-        100
+        ((originalPrice - activePrice) / originalPrice) * 100
       )
       : 0;
 
@@ -61,128 +56,93 @@ const ProductCard = ({ product }) => {
   ========================================= */
 
   const stock = Number(product?.stock) || 0;
-
   const isOutOfStock = stock <= 0;
-
-  const isLowStock =
-    stock > 0 && stock <= 5;
-
-  /* =========================================
-     RATING
-  ========================================= */
-
-  const rating = Math.round(
-    Number(product?.ratingsAverage) || 0
-  );
-
-  const reviewCount =
-    product?.ratingsQuantity || 0;
+  const isLowStock = stock > 0 && stock <= 5;
 
   /* =========================================
      ADD TO CART
   ========================================= */
 
   const handleAddToCart = async () => {
-  if (!product?._id) {
-    toast.error("Product not found");
-    return;
-  }
-
-  if (isOutOfStock) {
-    toast.error("Product is out of stock");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // ============================
-    // GUEST USER
-    // ============================
-    if (!user) {
-      addGuestItem(product, 1);
-
-      toast.success("Added to cart 🛒");
-
+    if (!product?._id) {
+      toast.error("Product not found");
       return;
     }
 
-    // ============================
-    // LOGGED IN USER
-    // ============================
-    const res = await api.post("/cart", {
-      productId: product._id,
-      quantity: 1,
-    });
-
-    if (res.data.status === "success") {
-      toast.success("Added to cart 🛒");
+    if (isOutOfStock) {
+      toast.error("Product is out of stock");
+      return;
     }
-  } catch (error) {
-    console.error("Add to cart error:", error);
 
-    toast.error(
-      error.response?.data?.message ||
-      "Unable to add product to cart"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+
+      // GUEST USER
+      if (!user) {
+        const guestProduct = {
+          ...product,
+          price: activePrice,
+        };
+
+        const saved = addGuestItem(guestProduct, 1);
+
+        if (saved) {
+          toast.success("Added to cart 🛒");
+        } else {
+          toast.error("Unable to save product to cart");
+        }
+
+        return;
+      }
+
+      // LOGGED-IN USER
+      const res = await api.post("/cart", {
+        productId: product._id,
+        quantity: 1,
+      });
+
+      if (res.data?.status === "success") {
+        toast.success("Added to cart 🛒");
+      } else {
+        toast.error(
+          res.data?.message || "Unable to add product to cart"
+        );
+      }
+    } catch (error) {
+      console.error("Add to cart error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+        "Unable to add product to cart"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <article
       className="
-        group
-        flex
-        flex-col
-        h-full
-        overflow-hidden
-        bg-white
-        border
-        border-slate-200
-        rounded-2xl
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border-blue-200
-        hover:shadow-xl
+        group flex h-full flex-col overflow-hidden
+        rounded-2xl border border-slate-200 bg-white
+        transition-all duration-300
+        hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl
       "
     >
-      {/* =====================================
-          IMAGE
-      ===================================== */}
+      {/* IMAGE */}
 
-      <div
-        className="
-          relative
-          h-40
-          md:h-64
-          overflow-hidden
-          bg-slate-50
-        "
-      >
+      <div className="relative h-40 overflow-hidden bg-slate-50 md:h-64">
         <Link
           to={`/product/${product?._id}`}
-          className="block w-full h-full"
+          className="block h-full w-full"
         >
           <img
-            src={
-              product?.image ||
-              "/placeholder-product.png"
-            }
-            alt={
-              product?.name || "Product"
-            }
+            src={product?.image || "/placeholder-product.png"}
+            alt={product?.name || "Product"}
             loading="lazy"
             className="
-              w-full
-              h-full
-              object-contain
-              p-2
-              md:p-3
-              transition-transform
-              duration-500
+              h-full w-full object-contain p-2 md:p-3
+              transition-transform duration-500
               group-hover:scale-110
             "
           />
@@ -190,113 +150,69 @@ const ProductCard = ({ product }) => {
 
         {/* DISCOUNT BADGE */}
 
-        {isFlashSale &&
-          discountPercentage > 0 && (
-            <span
-              className="
-                absolute
-                bottom-3
-                left-3
-                px-2
-                py-1
-                rounded-md
-                bg-amber-400
-                text-slate-900
-                text-[10px]
-                font-extrabold
-              "
-            >
-              -{discountPercentage}%
-            </span>
-          )}
+        {isFlashSale && discountPercentage > 0 && (
+          <span
+            className="
+              absolute bottom-3 left-3 rounded-md
+              bg-amber-400 px-2 py-1
+              text-[10px] font-extrabold text-slate-900
+            "
+          >
+            -{discountPercentage}%
+          </span>
+        )}
+
+        {/* WISHLIST */}
+
+        <div className="absolute right-3 top-3 z-10">
+          <WishListButton productId={product?._id} />
+        </div>
 
         {/* QUICK VIEW */}
 
         <Link
           to={`/product/${product?._id}`}
           className="
-            hidden
+            absolute bottom-3 left-1/2 hidden
+            -translate-x-1/2 translate-y-12
+            items-center gap-2 rounded-full bg-white
+            px-4 py-2 text-xs font-semibold text-blue-600
+            opacity-0 shadow-lg transition-all duration-300
+            group-hover:translate-y-0 group-hover:opacity-100
             md:flex
-            absolute
-            bottom-3
-            left-1/2
-            -translate-x-1/2
-            translate-y-12
-            group-hover:translate-y-0
-            opacity-0
-            group-hover:opacity-100
-            items-center
-            gap-2
-            px-4
-            py-2
-            rounded-full
-            bg-white
-            text-blue-600
-            text-xs
-            font-semibold
-            shadow-lg
-            transition-all
-            duration-300
           "
         >
           <FaEye />
-
           Quick View
         </Link>
       </div>
 
-      {/* =====================================
-          CONTENT
-      ===================================== */}
+      {/* CONTENT */}
 
-      <div
-        className="
-          flex
-          flex-col
-          flex-1
-          p-3
-          sm:p-4
-        "
-      >
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
         {/* CATEGORY + STOCK */}
 
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            gap-2
-            mb-2
-          "
-        >
+        <div className="mb-2 flex items-center justify-between gap-2">
           <span
             className="
-              max-w-[65%]
-              truncate
-              px-2
-              py-1
-              rounded-full
-              bg-blue-50
-              text-blue-600
-              text-[9px]
-              sm:text-xs
-              font-semibold
+              max-w-[65%] truncate rounded-full
+              bg-blue-50 px-2 py-1
+              text-[9px] font-semibold text-blue-600 sm:text-xs
             "
           >
-            {product?.category?.name ||
-              "General"}
+            {product?.category?.name || "General"}
           </span>
 
           {isOutOfStock ? (
-            <span className="text-[9px] sm:text-xs font-semibold text-red-500">
-              Out
+            <span className="text-[9px] font-semibold text-red-500 sm:text-xs">
+              Out of stock
             </span>
           ) : isLowStock ? (
-            <span className="text-[9px] sm:text-xs font-semibold text-amber-500">
+            <span className="text-[9px] font-semibold text-amber-500 sm:text-xs">
               {stock} left
             </span>
           ) : (
-            <span className="text-[9px] sm:text-xs font-semibold text-emerald-500">
+            <span className="text-[9px] font-semibold text-emerald-500 sm:text-xs">
               In stock
             </span>
           )}
@@ -304,104 +220,43 @@ const ProductCard = ({ product }) => {
 
         {/* PRODUCT NAME */}
 
-        <Link
-          to={`/product/${product?._id}`}
-        >
+        <Link to={`/product/${product?._id}`}>
           <h3
             className="
-              
-              line-clamp-2
-              text-sm
-              sm:text-base
-              font-semibold
-              leading-5
-              text-slate-800
-              hover:text-blue-600
+              line-clamp-2 text-sm font-semibold
+              leading-5 text-slate-800
+              hover:text-blue-600 sm:text-base
             "
           >
             {product?.name}
           </h3>
         </Link>
 
-        {/* RATING */}
-
         {/* PRICE */}
 
-        <div className="">
-          <ProductPrice
-            product={product}
-          />
+        <div className="mt-2">
+          <ProductPrice product={product} />
         </div>
-
-        {/* COUNTDOWN */}
-
-        {/* {isFlashSale && (
-          <div
-            className="
-              flex
-              items-center
-              justify-between
-              mt-3
-              px-2
-              py-1.5
-              rounded-lg
-              bg-blue-50
-              text-blue-700
-            "
-          >
-            <span className="text-[9px] sm:text-xs font-medium">
-              Ends in
-            </span>
-
-            <CountdownTimer
-              endDate={
-                product.flashSaleEndAt
-              }
-            />
-          </div>
-        )} */}
 
         {/* ADD TO CART */}
 
         <button
+          type="button"
           onClick={handleAddToCart}
-          disabled={
-            loading ||
-            isOutOfStock
-          }
-          className="
-            w-full
-            mt-auto
-            pt-3
-            sm:pt-4
-          "
+          disabled={loading || isOutOfStock}
+          className="mt-auto w-full pt-3 sm:pt-4"
         >
           <span
             className="
-              w-full
-              flex
-              items-center
-              justify-center
-              gap-1.5
-              py-2.5
-              sm:py-3
-              rounded-xl
-              bg-gradient-to-r
-              from-blue-600
-              to-cyan-500
-              text-white
-              text-xs
-              sm:text-sm
-              font-bold
-              hover:from-blue-700
-              hover:to-cyan-600
-              transition-all
-              duration-300
+              flex w-full items-center justify-center gap-1.5
+              rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500
+              py-2.5 text-xs font-bold text-white
+              transition-all duration-300
+              hover:from-blue-700 hover:to-cyan-600
+              disabled:opacity-50 sm:py-3 sm:text-sm
             "
           >
-            <FaShoppingCart
-              size={12}
-            />
+            <FaShoppingCart size={12} />
 
             {loading
               ? "Adding..."

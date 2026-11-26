@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import {
   FaArrowLeft,
-  FaArrowRight,
   FaCheck,
   FaLock,
   FaMapMarkerAlt,
@@ -37,47 +36,101 @@ const CheckOut = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Redirect guests to login when they try to access checkout.
   useEffect(() => {
     if (authLoading) return;
 
     if (!user) {
-      navigate("/login");
+      navigate("/login?redirect=/checkout", {
+        replace: true,
+      });
     }
   }, [user, authLoading, navigate]);
 
+  // Load cart and addresses only for authenticated users.
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+
+    if (!user) {
+      setPageLoading(false);
+      return;
+    }
+
+    let cancelled = false;
 
     const initCheckout = async () => {
       try {
         setPageLoading(true);
         setError("");
 
-        await Promise.all([loadCart(), loadAddresses()]);
+        const [cartRes, addressRes] = await Promise.all([
+          api.get("/cart"),
+          api.get("/users/addresses"),
+        ]);
+
+        if (cancelled) return;
+
+        const cart = cartRes.data?.data;
+        const addresses = addressRes.data?.data?.addresses || [];
+
+        setCartItems(cart?.items || []);
+        setTotal(Number(cart?.totalPrice || 0));
+
+        setSavedAddresses(addresses);
+
+        setSelectedAddress(
+          (current) => {
+            if (current) {
+              const stillExists = addresses.find(
+                (item) => item._id === current._id
+              );
+
+              if (stillExists) return stillExists;
+            }
+
+            return (
+              addresses.find((item) => item.isDefault) ||
+              addresses[0] ||
+              null
+            );
+          }
+        );
       } catch (err) {
         console.error(err);
-        setError(
-          err.response?.data?.message || "Unable to load checkout."
-        );
+
+        if (!cancelled) {
+          setError(
+            err.response?.data?.message ||
+            "Unable to load checkout."
+          );
+        }
       } finally {
-        setPageLoading(false);
+        if (!cancelled) {
+          setPageLoading(false);
+        }
       }
     };
 
     initCheckout();
-  }, [user]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading]);
 
   const loadCart = async () => {
     const res = await api.get("/cart");
-    const cart = res.data.data;
+    const cart = res.data?.data;
 
     setCartItems(cart?.items || []);
     setTotal(Number(cart?.totalPrice || 0));
+
+    return cart;
   };
 
   const loadAddresses = async () => {
     const res = await api.get("/users/addresses");
-    const addresses = res.data.data.addresses || [];
+    const addresses = res.data?.data?.addresses || [];
 
     setSavedAddresses(addresses);
 
@@ -108,7 +161,9 @@ const CheckOut = () => {
       const res = await api.post("/users/addresses", address);
 
       const newAddress =
-        res.data?.data?.address || res.data?.address || address;
+        res.data?.data?.address ||
+        res.data?.address ||
+        address;
 
       await loadAddresses();
 
@@ -140,13 +195,22 @@ const CheckOut = () => {
       console.error(err);
 
       setError(
-        err.response?.data?.message || "Unable to delete address."
+        err.response?.data?.message ||
+        "Unable to delete address."
       );
     }
   };
 
   const handleCheckout = async () => {
     setError("");
+
+    // Extra protection in case a guest reaches this handler.
+    if (!user) {
+      navigate("/login?redirect=/checkout", {
+        replace: true,
+      });
+      return;
+    }
 
     if (!cartItems.length) {
       setError("Your cart is empty.");
@@ -191,6 +255,7 @@ const CheckOut = () => {
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+
           <p className="text-sm font-medium text-slate-500">
             Preparing your checkout...
           </p>
@@ -199,9 +264,13 @@ const CheckOut = () => {
     );
   }
 
+  // Do not display checkout content while redirecting a guest.
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f8fc] pb-16">
-      {/* Header */}
       <header className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
         <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-cyan-500/15 blur-3xl" />
@@ -239,15 +308,18 @@ const CheckOut = () => {
               </div>
 
               <div>
-                <p className="text-xs text-slate-400">Items in your cart</p>
+                <p className="text-xs text-slate-400">
+                  Items in your cart
+                </p>
+
                 <p className="mt-1 text-lg font-bold text-white">
-                  {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+                  {cartItems.length}{" "}
+                  {cartItems.length === 1 ? "item" : "items"}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Checkout progress */}
           <div className="mt-10 grid grid-cols-3 gap-2 sm:gap-4">
             {[
               { label: "Delivery", number: "01", active: true },
@@ -296,7 +368,6 @@ const CheckOut = () => {
         )}
 
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_390px]">
-          {/* Delivery section */}
           <section className="space-y-6">
             <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -309,9 +380,11 @@ const CheckOut = () => {
                     <p className="text-xs font-bold uppercase tracking-[0.15em] text-blue-600">
                       Step 01
                     </p>
+
                     <h2 className="mt-1 text-xl font-bold text-slate-900">
                       Delivery address
                     </h2>
+
                     <p className="mt-1 text-sm text-slate-500">
                       Choose where your order should go.
                     </p>
@@ -373,7 +446,6 @@ const CheckOut = () => {
               )}
             </div>
 
-            {/* Payment reassurance */}
             <div className="overflow-hidden rounded-3xl border border-cyan-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-5 sm:p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
@@ -396,6 +468,7 @@ const CheckOut = () => {
                       <FaLock className="mr-1 inline text-blue-600" />
                       Secure checkout
                     </span>
+
                     <span className="rounded-full bg-white px-3 py-1.5">
                       Encrypted payment
                     </span>
@@ -405,10 +478,10 @@ const CheckOut = () => {
             </div>
           </section>
 
-          {/* Order summary */}
           <aside className="lg:sticky lg:top-6">
             <div className="mb-4 flex items-center gap-2 px-1">
               <span className="h-2 w-2 rounded-full bg-cyan-500" />
+
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
                 Step 02 · Review your order
               </p>
@@ -429,7 +502,6 @@ const CheckOut = () => {
         </div>
       </main>
 
-      {/* Separate address modal */}
       {showAddressModal && (
         <AddressModal
           onClose={() => {

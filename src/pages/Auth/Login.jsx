@@ -34,6 +34,7 @@ const Login = () => {
   /* ================= SUBMIT ================= */
 
  
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -44,8 +45,6 @@ const handleSubmit = async (e) => {
 
     const token = res.data?.token;
     const responseData = res.data?.data;
-
-    // Support both { data: user } and { data: { user } }
     const user = responseData?.user || responseData;
 
     if (!token || !user) {
@@ -53,14 +52,22 @@ const handleSubmit = async (e) => {
       return;
     }
 
-    await login(user, token);
+    const mergeResult = await login(user, token);
 
     toast.success("Welcome back!");
 
-    // Normalize the role in case the API returns different casing.
+    if (mergeResult?.failedCount > 0) {
+      toast.warning(
+        `${mergeResult.successCount} cart item(s) transferred. ${mergeResult.failedCount} item(s) could not be transferred.`
+      );
+    } else if (mergeResult?.successCount > 0) {
+      toast.success(
+        `${mergeResult.successCount} guest cart item(s) transferred successfully.`
+      );
+    }
+
     const role = String(user.role || "").toLowerCase();
 
-    // Send each role to its appropriate destination.
     if (role === "admin") {
       navigate("/admin/dashboard", { replace: true });
       return;
@@ -81,12 +88,13 @@ const handleSubmit = async (e) => {
     toast.error(`Unrecognized account role: ${role || "missing"}`);
   } catch (err) {
     toast.error(
-      err.response?.data?.message || "Invalid email or password"
+      err.response?.data?.message || err.message || "Invalid email or password"
     );
   } finally {
     setLoading(false);
   }
 };
+
 
 
   return (

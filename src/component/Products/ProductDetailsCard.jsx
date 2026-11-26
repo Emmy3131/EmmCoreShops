@@ -11,9 +11,14 @@ import {
   FaCheck,
   FaArrowRight,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 import ProductPrice from "./ProductPrice";
 import WishListButton from "./WishListButton";
+
+import { addGuestItem } from "../../library/guestCart";
+import api from "../../library/api";
+import { useAuth } from "../../Context/AuthContext";
 
 const getProductId = (product) =>
   product?._id || product?.id;
@@ -26,14 +31,13 @@ const ProductDetailsCard = ({
   onReviewClick,
 }) => {
   const [quantity, setQuantity] = useState(1);
+  const { user } = useAuth();
 
   const productId = getProductId(product);
 
-  /*
-  =====================================
-  FLASH SALE
-  =====================================
-  */
+  /* =========================================
+     FLASH SALE
+  ========================================= */
 
   const isFlashSale =
     product?.isFlashSale &&
@@ -41,20 +45,20 @@ const ProductDetailsCard = ({
     product?.flashSaleEndAt &&
     new Date(product.flashSaleEndAt) > new Date();
 
-  /*
-  =====================================
-  STOCK
-  =====================================
-  */
+  const activePrice = isFlashSale
+    ? Number(product.flashSalePrice)
+    : Number(product?.price || 0);
+
+  /* =========================================
+     STOCK
+  ========================================= */
 
   const stock = Number(product?.stock) || 0;
   const isOutOfStock = stock <= 0;
 
-  /*
-  =====================================
-  RATING
-  =====================================
-  */
+  /* =========================================
+     RATING
+  ========================================= */
 
   const rating = Math.min(
     5,
@@ -63,11 +67,9 @@ const ProductDetailsCard = ({
 
   const reviews = Number(product?.ratingsQuantity) || 0;
 
-  /*
-  =====================================
-  QUANTITY
-  =====================================
-  */
+  /* =========================================
+     QUANTITY
+  ========================================= */
 
   const increaseQuantity = () => {
     setQuantity((previous) =>
@@ -81,20 +83,82 @@ const ProductDetailsCard = ({
     );
   };
 
-  /*
-  =====================================
-  CART ACTIONS
-  =====================================
-  */
+  /* =========================================
+     ADD TO CART
+  ========================================= */
 
-  const handleAddToCart = () => {
-    if (!isOutOfStock && onAddToCart) {
-      onAddToCart(quantity);
+ 
+const handleAddToCart = async () => {
+  if (!product?._id && !product?.id) {
+    toast.error("Product not found");
+    return;
+  }
+
+  if (isOutOfStock) {
+    toast.error("Product is out of stock");
+    return;
+  }
+
+  try {
+    // GUEST USER: Save directly to localStorage
+    if (!user) {
+      const guestProduct = {
+        ...product,
+        price: activePrice,
+      };
+
+      const saved = addGuestItem(guestProduct, quantity);
+
+      if (saved) {
+        toast.success("Product added to your cart!");
+      } else {
+        toast.error("Could not save product to cart");
+      }
+
+      return;
     }
-  };
+
+    // LOGGED-IN USER: Use existing backend callback
+    if (onAddToCart) {
+      await onAddToCart(quantity);
+      return;
+    }
+
+    // FALLBACK: Call cart API directly
+    const response = await api.post("/cart", {
+      productId,
+      quantity,
+    });
+
+    if (response.data?.status === "success") {
+      toast.success("Product added to your cart!");
+    } else {
+      toast.error(
+        response.data?.message || "Unable to add product"
+      );
+    }
+  } catch (error) {
+    console.error("Add to cart error:", error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Unable to add product to cart"
+    );
+  }
+};
+
+
+  /* =========================================
+     BUY NOW
+  ========================================= */
 
   const handleBuyNow = () => {
-    if (!isOutOfStock && onBuyNow) {
+    if (isOutOfStock) {
+      toast.error("Product is out of stock");
+      return;
+    }
+
+    if (onBuyNow) {
       onBuyNow(quantity);
     }
   };
@@ -102,17 +166,19 @@ const ProductDetailsCard = ({
   return (
     <section className="mx-auto mt-5 max-w-7xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 md:mt-0">
       <div className="grid grid-cols-1 lg:grid-cols-2">
+
         {/* PRODUCT VISUAL */}
 
         <div className="relative flex min-h-[380px] items-center justify-center overflow-hidden bg-slate-950 px-6 py-12 sm:min-h-[520px] lg:min-h-[650px]">
-          {/* Decorative background */}
+
           <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-blue-600/30 blur-3xl" />
 
           <div className="absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
 
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
 
-          {/* Top labels */}
+          {/* TOP LABELS */}
+
           <div className="absolute left-5 top-5 z-10 flex flex-wrap gap-2 sm:left-7 sm:top-7">
             <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-200 backdrop-blur-md">
               EmmCore Select
@@ -126,25 +192,28 @@ const ProductDetailsCard = ({
             )}
           </div>
 
-          {/* Backend Wishlist Button */}
+          {/* WISHLIST */}
+
           <div className="absolute right-5 top-5 z-20 sm:right-7 sm:top-7">
             <WishListButton productId={productId} />
           </div>
 
-          {/* Product image */}
+          {/* PRODUCT IMAGE */}
+
           <div className="relative z-10 flex w-full items-center justify-center">
             <div className="absolute h-64 w-64 rounded-full border border-white/10 sm:h-80 sm:w-80" />
 
             <div className="absolute h-48 w-48 rounded-full border border-white/10 sm:h-64 sm:w-64" />
 
             <img
-              src={product?.image}
+              src={product?.image || "/placeholder-product.png"}
               alt={product?.name || "Product image"}
               className="relative z-10 max-h-[380px] w-full max-w-[90%] object-contain drop-shadow-2xl transition duration-700 hover:scale-105 sm:max-h-[460px]"
             />
           </div>
 
-          {/* Bottom visual label */}
+          {/* BOTTOM LABEL */}
+
           <div className="absolute bottom-5 left-5 right-5 z-10 flex items-center justify-between sm:bottom-7 sm:left-7 sm:right-7">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -165,19 +234,23 @@ const ProductDetailsCard = ({
         {/* PRODUCT INFORMATION */}
 
         <div className="flex flex-col p-5 sm:p-8 lg:p-10">
-          {/* Category */}
+
+          {/* CATEGORY */}
+
           <div className="mb-4 flex items-center justify-between gap-3">
             <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
               {product?.category?.name || "General"}
             </span>
           </div>
 
-          {/* Product name */}
+          {/* PRODUCT NAME */}
+
           <h1 className="text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
             {product?.name}
           </h1>
 
-          {/* Rating */}
+          {/* RATING */}
+
           <button
             type="button"
             onClick={onReviewClick}
@@ -202,7 +275,8 @@ const ProductDetailsCard = ({
             </span>
           </button>
 
-          {/* Price */}
+          {/* PRICE */}
+
           <div className="mt-7 rounded-2xl border border-slate-100 bg-slate-50/80 p-4 sm:p-5">
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
               Price
@@ -211,7 +285,8 @@ const ProductDetailsCard = ({
             <ProductPrice product={product} large />
           </div>
 
-          {/* Stock status */}
+          {/* STOCK STATUS */}
+
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             {isOutOfStock ? (
               <span className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600">
@@ -231,7 +306,8 @@ const ProductDetailsCard = ({
             )}
           </div>
 
-          {/* Quantity */}
+          {/* QUANTITY */}
+
           {!isOutOfStock && (
             <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 p-4">
               <div>
@@ -272,7 +348,8 @@ const ProductDetailsCard = ({
             </div>
           )}
 
-          {/* Action buttons */}
+          {/* ACTION BUTTONS */}
+
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               type="button"
@@ -300,7 +377,8 @@ const ProductDetailsCard = ({
             </button>
           </div>
 
-          {/* Shopping assurances */}
+          {/* SHOPPING ASSURANCES */}
+
           <div className="mt-6 grid grid-cols-3 gap-2 border-y border-slate-100 py-5">
             <div className="text-center">
               <FaTruck className="mx-auto text-lg text-blue-600" />
@@ -324,7 +402,8 @@ const ProductDetailsCard = ({
             </div>
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
+
           <div className="mt-6">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.12em] text-slate-900">
               Product details

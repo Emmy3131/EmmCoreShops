@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -10,46 +11,87 @@ import api from "../library/api";
 
 import {
   getGuestCartItems,
-  clearGuestCart,
+  removeGuestItem,
 } from "../library/guestCart";
 
 const AuthContext = createContext(null);
+
+/* =====================================================
+   GET PRODUCT ID FROM GUEST CART ITEM
+===================================================== */
+
+const getGuestProductId = (item) => {
+  const product = item?.product;
+
+  if (!product) return null;
+
+  if (typeof product === "string") {
+    return product;
+  }
+
+  return product._id || product.id || null;
+};
 
 /* =====================================================
    MERGE GUEST CART AFTER LOGIN
 ===================================================== */
 
 const mergeGuestCart = async () => {
-  try {
-    const guestItems = getGuestCartItems();
+  const guestItems = getGuestCartItems();
 
-    if (!Array.isArray(guestItems) || guestItems.length === 0) {
-      return;
-    }
-
-    for (const item of guestItems) {
-      const productId = item.product?._id;
-
-      if (!productId || !item.quantity) {
-        console.warn("Skipping invalid guest cart item:", item);
-        continue;
-      }
-
-      await api.post("/cart", {
-        productId,
-        quantity: item.quantity,
-      });
-    }
-
-    clearGuestCart();
-
-    window.dispatchEvent(new Event("cart-updated"));
-  } catch (error) {
-    console.error(
-      "Guest cart merge failed:",
-      error.response?.data?.message || error.message
-    );
+  if (!Array.isArray(guestItems) || guestItems.length === 0) {
+    return {
+      successCount: 0,
+      failedCount: 0,
+    };
   }
+
+  let successCount = 0;
+  let failedCount = 0;
+
+  for (const item of guestItems) {
+    const productId = getGuestProductId(item);
+    const quantity = Number(item?.quantity);
+
+    if (
+      !productId ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      console.warn("Invalid guest cart item:", item);
+      failedCount++;
+      continue;
+    }
+
+    try {
+      // Send the guest item to the authenticated user's database cart.
+      await api.post("/cart", {
+        productId: String(productId),
+        quantity,
+      });
+
+      // Remove this guest item only after the backend confirms success.
+      removeGuestItem(String(productId));
+
+      successCount++;
+    } catch (error) {
+      failedCount++;
+
+      console.error(
+        `Could not merge product ${productId}:`,
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+
+  // Notify components that display cart information.
+  window.dispatchEvent(new Event("cart-updated"));
+  window.dispatchEvent(new Event("guest-cart-updated"));
+
+  return {
+    successCount,
+    failedCount,
+  };
 };
 
 /* =====================================================
@@ -74,7 +116,6 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // Display cached user while the backend verifies the token.
     if (storedUser) {
       try {
         setUser({
@@ -91,12 +132,10 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data?.status === "success") {
         const responseData = response.data.data;
-
-        // Support either { data: { user } } or { data: user }.
         const freshUser = responseData?.user || responseData;
 
         if (!freshUser || typeof freshUser !== "object") {
-          throw new Error("The authentication response contains no user.");
+          throw new Error("Invalid authentication response.");
         }
 
         const authenticatedUser = {
@@ -110,6 +149,9 @@ export const AuthProvider = ({ children }) => {
           "user",
           JSON.stringify(authenticatedUser)
         );
+
+        // Retry any guest cart items left from a previous failed merge.
+        await mergeGuestCart();
       } else {
         setUser(null);
       }
@@ -117,13 +159,10 @@ export const AuthProvider = ({ children }) => {
       const statusCode = error.response?.status;
 
       if (statusCode === 401 || statusCode === 403) {
-        // The backend rejected the token.
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
       } else {
-        // Network errors and server failures should not automatically
-        // erase an otherwise valid cached login.
         console.error(
           "Could not verify authentication:",
           error.response?.data?.message || error.message
@@ -144,7 +183,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userData, token) => {
     if (!userData || !token) {
-      throw new Error("Login requires both user data and a token.");
+      throw new Error("Login requires user data and a token.");
     }
 
     const authenticatedUser = {
@@ -152,13 +191,19 @@ export const AuthProvider = ({ children }) => {
       token,
     };
 
+    // Save token before making cart requests.
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(authenticatedUser));
+    localStorage.setItem(
+      "user",
+      JSON.stringify(authenticatedUser)
+    );
 
     setUser(authenticatedUser);
 
-    // A cart merge failure should not undo a successful login.
-    await mergeGuestCart();
+    // Login remains successful even if cart merging fails.
+    const mergeResult = await mergeGuestCart();
+
+    return mergeResult;
   };
 
   /* =====================================================
@@ -166,8 +211,6 @@ export const AuthProvider = ({ children }) => {
   ===================================================== */
 
   const logout = () => {
-    // Send the logout request before removing the saved token.
-    // The client still logs out if the backend is unavailable.
     api.post("/users/logout").catch((error) => {
       console.warn(
         "Backend logout request failed:",
@@ -179,6 +222,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
 
     setUser(null);
+
+    window.dispatchEvent(new Event("cart-updated"));
   };
 
   return (

@@ -177,6 +177,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, [initAuth]);
 
+
   /* =====================================================
      LOGIN
   ===================================================== */
@@ -210,21 +211,47 @@ export const AuthProvider = ({ children }) => {
      LOGOUT
   ===================================================== */
 
+
   const logout = () => {
+    // Remove authentication immediately.
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Update application authentication state.
+    setUser(null);
+
+    // Notify other components.
+    window.dispatchEvent(new Event("cart-updated"));
+    window.dispatchEvent(new Event("auth:session-expired"));
+
+    // Inform the backend without blocking logout.
     api.post("/users/logout").catch((error) => {
       console.warn(
         "Backend logout request failed:",
         error.response?.data?.message || error.message
       );
     });
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    setUser(null);
-
-    window.dispatchEvent(new Event("cart-updated"));
   };
+
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setUser(null);
+      setLoading(false);
+    };
+
+    window.addEventListener(
+      "auth:session-expired",
+      handleSessionExpired
+    );
+
+    return () => {
+      window.removeEventListener(
+        "auth:session-expired",
+        handleSessionExpired
+      );
+    };
+  }, []);
 
   return (
     <AuthContext.Provider

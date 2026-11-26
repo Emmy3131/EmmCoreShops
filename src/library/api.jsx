@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 const api = axios.create({
@@ -12,7 +13,45 @@ const api = axios.create({
   },
 });
 
-/* Attach the saved authentication token when available */
+/* =====================================================
+   HANDLE EXPIRED AUTHENTICATION
+===================================================== */
+
+let isRedirectingToLogin = false;
+
+const handleExpiredSession = () => {
+  if (isRedirectingToLogin) return;
+
+  const currentPath =
+    window.location.pathname + window.location.search;
+
+  // Do not redirect repeatedly when already on login.
+  if (window.location.pathname === "/login") return;
+
+  isRedirectingToLogin = true;
+
+  // Remove expired authentication information.
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  // Notify AuthContext and other components.
+  window.dispatchEvent(new Event("auth:session-expired"));
+
+  // Preserve the page the user was trying to access.
+  const redirect =
+    window.location.pathname !== "/"
+      ? `&redirect=${encodeURIComponent(currentPath)}`
+      : "";
+
+  window.location.replace(
+    `/login?reason=session-expired${redirect}`
+  );
+};
+
+/* =====================================================
+   REQUEST INTERCEPTOR
+===================================================== */
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -25,6 +64,41 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+/* =====================================================
+   RESPONSE INTERCEPTOR
+===================================================== */
+
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+    const status = error.response?.status;
+    const config = error.config;
+
+    const requestUrl = config?.url || "";
+
+    // Do not treat incorrect login credentials as expired sessions.
+    const isLoginRequest =
+      requestUrl.includes("/users/login");
+
+    // Only expire a session when an authenticated request fails.
+    const hasAuthToken = Boolean(
+      config?.headers?.Authorization ||
+      config?.headers?.authorization
+    );
+
+    if (
+      status === 401 &&
+      hasAuthToken &&
+      !isLoginRequest
+    ) {
+      handleExpiredSession();
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default api;

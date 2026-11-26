@@ -245,7 +245,6 @@ const ProductCard = ({ product }) => {
                 font-bold
               "
             >
-              Featurd
             </span>
           )}
 

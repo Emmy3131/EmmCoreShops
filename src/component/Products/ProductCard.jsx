@@ -156,9 +156,6 @@ const ProductCard = ({ product }) => {
       <div
         className="
           relative
-          h-40
-          sm:h-56
-          md:h-64
           overflow-hidden
           bg-slate-50
         "
@@ -180,8 +177,8 @@ const ProductCard = ({ product }) => {
               w-full
               h-full
               object-contain
-              p-3
-              sm:p-5
+              p-1
+              sm:p-2
               transition-transform
               duration-500
               group-hover:scale-110

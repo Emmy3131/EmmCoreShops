@@ -132,7 +132,6 @@ const ProductDetailsCard = ({
           className="
             relative
             min-h-[360px]
-            sm:min-h-[500px]
             md:min-h-[600px]
             flex
             items-center

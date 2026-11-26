@@ -326,35 +326,6 @@ const ProductCard = ({ product }) => {
 
         {/* RATING */}
 
-        <div
-          className="
-            flex
-            items-center
-            gap-1
-            mt-2
-          "
-        >
-          <div className="flex gap-0.5">
-            {[...Array(5)].map(
-              (_, index) => (
-                <FaStar
-                  key={index}
-                  size={10}
-                  className={
-                    index < rating
-                      ? "text-amber-400"
-                      : "text-slate-200"
-                  }
-                />
-              )
-            )}
-          </div>
-
-          <span className="text-[10px] text-slate-400">
-            ({reviewCount})
-          </span>
-        </div>
-
         {/* PRICE */}
 
         <div className="mt-3">

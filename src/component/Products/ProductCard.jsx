@@ -156,6 +156,8 @@ const ProductCard = ({ product }) => {
       <div
         className="
           relative
+          h-40
+          md:h-64
           overflow-hidden
           bg-slate-50
         "

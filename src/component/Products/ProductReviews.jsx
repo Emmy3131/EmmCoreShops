@@ -91,10 +91,12 @@ const ProductReviews = ({ productId }) => {
     <section
       id="reviews"
       className="
-      max-w-6xl
+      max-w-7xl
+      mt-6
+      px-4
+      sm:px-6
       mx-auto
       bg-white
-      rounded-3xl
       shadow-lg
       p-6
       md:p-10

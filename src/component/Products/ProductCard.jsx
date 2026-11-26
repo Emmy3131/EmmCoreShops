@@ -179,8 +179,8 @@ const ProductCard = ({ product }) => {
               w-full
               h-full
               object-contain
-              p-1
-              sm:p-2
+              p-2
+              md:p-3
               transition-transform
               duration-500
               group-hover:scale-110
@@ -328,7 +328,7 @@ const ProductCard = ({ product }) => {
 
         {/* PRICE */}
 
-        <div className="mt-3">
+        <div className="">
           <ProductPrice
             product={product}
           />
@@ -336,7 +336,7 @@ const ProductCard = ({ product }) => {
 
         {/* COUNTDOWN */}
 
-        {isFlashSale && (
+        {/* {isFlashSale && (
           <div
             className="
               flex
@@ -360,7 +360,7 @@ const ProductCard = ({ product }) => {
               }
             />
           </div>
-        )}
+        )} */}
 
         {/* ADD TO CART */}
 

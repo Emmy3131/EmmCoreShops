@@ -318,38 +318,7 @@ const ProductDetailsCard = ({
 
           </div>
 
-          {/* DESCRIPTION */}
 
-          <div
-            className="
-              mt-6
-              border-t
-              border-slate-100
-              pt-6
-            "
-          >
-            <h2
-              className="
-                mb-2
-                text-sm
-                font-bold
-                text-slate-900
-              "
-            >
-              Product Description
-            </h2>
-
-            <p
-              className="
-                text-sm
-                leading-7
-                text-slate-600
-              "
-            >
-              {product?.description ||
-                "No description available for this product."}
-            </p>
-          </div>
 
           {/* STOCK */}
 
@@ -522,7 +491,38 @@ const ProductDetailsCard = ({
           </div>
 
           {/* BENEFITS */}
+          {/* DESCRIPTION */}
 
+          <div
+            className="
+              mt-6
+              border-t
+              border-slate-100
+              pt-6
+            "
+          >
+            <h2
+              className="
+                mb-2
+                text-sm
+                font-bold
+                text-slate-900
+              "
+            >
+              Product Description
+            </h2>
+
+            <p
+              className="
+                text-sm
+                leading-7
+                text-slate-600
+              "
+            >
+              {product?.description ||
+                "No description available for this product."}
+            </p>
+          </div>
           {/*  */}
 
         </div>

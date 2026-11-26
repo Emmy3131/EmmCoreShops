@@ -309,8 +309,7 @@ const ProductCard = ({ product }) => {
         >
           <h3
             className="
-              min-h-[40px]
-              sm:min-h-[42px]
+              
               line-clamp-2
               text-sm
               sm:text-base

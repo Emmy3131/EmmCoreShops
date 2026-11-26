@@ -107,7 +107,7 @@ const ProductDetailsCard = ({
         max-w-7xl
         mx-auto
         overflow-hidden
-        mt-2
+        mt-5
         md:mt-0
         bg-white
         border

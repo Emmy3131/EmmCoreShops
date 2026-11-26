@@ -1,5 +1,6 @@
+
 import api from "../../library/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -11,10 +12,12 @@ import {
   FaBoxOpen,
   FaShieldAlt,
   FaTruck,
+  FaLock,
+  FaShoppingBag,
+  FaCheckCircle,
 } from "react-icons/fa";
 
 import Button from "../../component/UI/Button";
-
 import { useAuth } from "../../Context/AuthContext";
 
 import {
@@ -25,47 +28,43 @@ import {
   clearGuestCart,
 } from "../../library/guestCart";
 
+const formatPrice = (amount) =>
+  `₦${Number(amount || 0).toLocaleString("en-NG")}`;
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
-  const { user } = useAuth();
-
 
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
   const [clearing, setClearing] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
 
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  /* =====================================================
-     FETCH CART
-  ===================================================== */
+  /*
+  =====================================================
+  FETCH CART
+  =====================================================
+  */
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
 
-      // ===========================
-      // GUEST CART
-      // ===========================
       if (!user) {
         const guestItems = getGuestCart();
 
         setCartItems(guestItems);
-
         setTotal(getGuestCartTotal());
 
         return;
       }
 
-      // ===========================
-      // USER CART
-      // ===========================
       const res = await api.get("/cart");
 
       const data = res.data.data;
-
       const items = data?.items || [];
 
       setCartItems(items);
@@ -73,7 +72,7 @@ const Cart = () => {
       const sum = items.reduce((acc, item) => {
         return (
           acc +
-          Number(item.price || 0) *
+          Number(item.price || item.product?.price || 0) *
           Number(item.quantity || 1)
         );
       }, 0);
@@ -90,16 +89,17 @@ const Cart = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  /* =====================================================
-     LOAD CART
-  ===================================================== */
+  }, [user]);
 
   useEffect(() => {
     fetchCart();
-  }, [user]);
+  }, [fetchCart]);
 
+  /*
+  =====================================================
+  GUEST CART LISTENER
+  =====================================================
+  */
 
   useEffect(() => {
     if (user) return;
@@ -109,89 +109,71 @@ const Cart = () => {
       setTotal(getGuestCartTotal());
     };
 
-    window.addEventListener(
-      "guest-cart-updated",
-      updateCart
-    );
+    window.addEventListener("guest-cart-updated", updateCart);
 
-    return () =>
-      window.removeEventListener(
-        "guest-cart-updated",
-        updateCart
-      );
+    return () => {
+      window.removeEventListener("guest-cart-updated", updateCart);
+    };
   }, [user]);
 
-  /* =====================================================
-     CHECKOUT
-  ===================================================== */
+  /*
+  =====================================================
+  CHECKOUT
+  =====================================================
+  */
 
- const handleCheckout = () => {
-  if (!user) {
-    navigate("/login?redirect=/checkout");
-    return;
-  }
+  const handleCheckout = () => {
+    if (!user) {
+      navigate("/login?redirect=/checkout");
+      return;
+    }
 
-  navigate("/checkout");
-};
+    navigate("/checkout");
+  };
 
-  /* =====================================================
-     UPDATE QUANTITY
-  ===================================================== */
+  /*
+  =====================================================
+  UPDATE QUANTITY
+  =====================================================
+  */
 
-  const handleQuantityChange = async (
-    productId,
-    type
-  ) => {
+  const handleQuantityChange = async (productId, type) => {
     try {
       setUpdatingId(productId);
 
-      /* ===============================
-         GUEST CART
-      =============================== */
-
       if (!user) {
-        const item = cartItems.find(
-          (i) => i.product._id === productId
-        );
+        const item = cartItems.find((i) => {
+          const id =
+            typeof i.product === "object"
+              ? i.product?._id
+              : i.product;
+
+          return String(id) === String(productId);
+        });
 
         if (!item) return;
 
-        let newQuantity = item.quantity;
+        const newQuantity =
+          type === "increase"
+            ? item.quantity + 1
+            : item.quantity - 1;
 
-        if (type === "increase") {
-          newQuantity += 1;
-        } else {
-          newQuantity -= 1;
-        }
+        if (newQuantity < 1) return;
 
-        updateGuestQuantity(
-          productId,
-          newQuantity
-        );
+        updateGuestQuantity(productId, newQuantity);
 
         setCartItems(getGuestCart());
-
         setTotal(getGuestCartTotal());
 
         return;
       }
 
-      /* ===============================
-         USER CART
-      =============================== */
+      const quantity = type === "increase" ? 1 : -1;
 
-      const quantity =
-        type === "increase"
-          ? 1
-          : -1;
-
-      const res = await api.patch(
-        "/cart/update",
-        {
-          productId,
-          quantity,
-        }
-      );
+      const res = await api.patch("/cart/update", {
+        productId,
+        quantity,
+      });
 
       if (res.data.status === "success") {
         await fetchCart();
@@ -206,35 +188,26 @@ const Cart = () => {
     }
   };
 
-  /* =====================================================
-     REMOVE ITEM
-  ===================================================== */
+  /*
+  =====================================================
+  REMOVE ITEM
+  =====================================================
+  */
 
   const handleRemove = async (productId) => {
     try {
       setRemovingId(productId);
 
-      /* ===============================
-         GUEST CART
-      =============================== */
-
       if (!user) {
         removeGuestItem(productId);
 
         setCartItems(getGuestCart());
-
         setTotal(getGuestCartTotal());
 
         return;
       }
 
-      /* ===============================
-         USER CART
-      =============================== */
-
-      const res = await api.delete(
-        `/cart/${productId}`
-      );
+      const res = await api.delete(`/cart/${productId}`);
 
       if (res.data.status === "success") {
         await fetchCart();
@@ -249,9 +222,11 @@ const Cart = () => {
     }
   };
 
-  /* =====================================================
-     CLEAR CART
-  ===================================================== */
+  /*
+  =====================================================
+  CLEAR CART
+  =====================================================
+  */
 
   const handleClearCart = async () => {
     const confirmClear = window.confirm(
@@ -263,23 +238,14 @@ const Cart = () => {
     try {
       setClearing(true);
 
-      /* ===============================
-         GUEST CART
-      =============================== */
-
       if (!user) {
         clearGuestCart();
 
         setCartItems([]);
-
         setTotal(0);
 
         return;
       }
-
-      /* ===============================
-         USER CART
-      =============================== */
 
       const res = await api.delete("/cart");
 
@@ -293,268 +259,156 @@ const Cart = () => {
       );
     } finally {
       setClearing(false);
-    };
+    }
   };
 
-  /* =====================================================
-     LOADING STATE
-  ===================================================== */
+  /*
+  =====================================================
+  LOADING STATE
+  =====================================================
+  */
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--color-background)] pt-24 px-4 md:px-10">
+      <div className="min-h-screen bg-slate-50 px-4 pb-16 pt-28 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 h-10 w-56 animate-pulse rounded-xl bg-slate-200" />
 
-        <div className="max-w-7xl mx-auto">
-
-          <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse mb-8" />
-
-          <div className="grid lg:grid-cols-3 gap-8">
-
-            <div className="lg:col-span-2 space-y-4">
-
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="space-y-5 lg:col-span-2">
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
-                  className="
-                    bg-white
-                    rounded-[var(--radius-lg)]
-                    p-5
-                    border
-                    border-[var(--color-border)]
-                    animate-pulse
-                  "
+                  className="flex animate-pulse gap-5 rounded-3xl border border-slate-200 bg-white p-5"
                 >
-                  <div className="flex gap-4">
+                  <div className="h-36 w-36 rounded-2xl bg-slate-200" />
 
-                    <div className="w-24 h-24 bg-slate-200 rounded-xl" />
-
-                    <div className="flex-1 space-y-3">
-
-                      <div className="h-5 bg-slate-200 rounded w-1/2" />
-
-                      <div className="h-4 bg-slate-200 rounded w-1/3" />
-
-                      <div className="h-8 bg-slate-200 rounded w-32" />
-
-                    </div>
-
+                  <div className="flex-1 space-y-4 py-2">
+                    <div className="h-5 w-1/2 rounded bg-slate-200" />
+                    <div className="h-4 w-1/3 rounded bg-slate-200" />
+                    <div className="h-9 w-32 rounded bg-slate-200" />
                   </div>
                 </div>
               ))}
-
             </div>
 
-            <div className="h-80 bg-white rounded-2xl animate-pulse" />
-
+            <div className="h-96 animate-pulse rounded-3xl bg-slate-200" />
           </div>
-
         </div>
-
       </div>
     );
   }
 
-  /* =====================================================
-     EMPTY CART
-  ===================================================== */
+  /*
+  =====================================================
+  EMPTY CART
+  =====================================================
+  */
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--color-background)] pt-24 px-4">
-
-        <div className="max-w-4xl mx-auto">
-
-          <div
-            className="
-              bg-white
-              border
-              border-[var(--color-border)]
-              rounded-[var(--radius-xl)]
-              shadow-[var(--shadow-md)]
-              min-h-[520px]
-              flex
-              flex-col
-              items-center
-              justify-center
-              text-center
-              px-6
-            "
-          >
-
-            <div
-              className="
-                w-24
-                h-24
-                rounded-full
-                bg-[var(--color-primary-light)]
-                text-[var(--color-primary)]
-                flex
-                items-center
-                justify-center
-                text-4xl
-                mb-6
-              "
-            >
-              <FaShoppingCart />
-            </div>
-
-            <h1
-              className="
-                text-2xl
-                md:text-3xl
-                font-bold
-                text-[var(--color-text-primary)]
-              "
-            >
-              Your Cart is Empty
-            </h1>
-
-            <p
-              className="
-                text-[var(--color-text-muted)]
-                mt-3
-                max-w-md
-              "
-            >
-              Looks like you haven't added anything
-              to your cart yet. Explore our products
-              and find something you love.
-            </p>
-
-            <Button
-              variant="gradient"
-              size="lg"
-              className="mt-8"
-              icon={<FaArrowRight />}
-              iconPosition="right"
-              onClick={() =>
-                navigate("/products")
-              }
-            >
-              Browse Products
-            </Button>
-
+      <div className="min-h-screen bg-slate-50 px-4 pb-20 pt-28">
+        <div className="mx-auto flex min-h-[580px] max-w-4xl flex-col items-center justify-center rounded-[32px] border border-slate-200 bg-white px-6 text-center shadow-sm">
+          <div className="mb-7 flex h-28 w-28 items-center justify-center rounded-[30px] bg-blue-50 text-5xl text-blue-600">
+            <FaShoppingBag />
           </div>
 
-        </div>
+          <span className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+            EmmCore Shopping
+          </span>
 
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            Your cart is waiting.
+          </h1>
+
+          <p className="mt-4 max-w-md text-sm leading-7 text-slate-500 sm:text-base">
+            You haven't added anything yet. Discover smartphones,
+            gadgets and accessories selected to make everyday
+            technology better.
+          </p>
+
+          <Button
+            variant="gradient"
+            size="lg"
+            className="mt-8"
+            icon={<FaArrowRight />}
+            iconPosition="right"
+            onClick={() => navigate("/products")}
+          >
+            Explore products
+          </Button>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-6 text-xs font-medium text-slate-400">
+            <span className="flex items-center gap-2">
+              <FaShieldAlt className="text-blue-500" />
+              Secure shopping
+            </span>
+
+            <span className="flex items-center gap-2">
+              <FaTruck className="text-blue-500" />
+              Reliable delivery
+            </span>
+          </div>
+        </div>
       </div>
     );
   }
 
-  /* =====================================================
-     MAIN CART
-  ===================================================== */
+  /*
+  =====================================================
+  MAIN CART
+  =====================================================
+  */
 
   return (
-    <div
-      className="
-        min-h-screen
-        bg-[var(--color-background)]
-        pt-24
-        pb-16
-        px-4
-        md:px-8
-      "
-    >
+    <div className="min-h-screen bg-[#f5f7fb] px-4 pb-20 pt-28 md:px-8">
+      <div className="mx-auto max-w-7xl">
 
-      <div className="max-w-7xl mx-auto">
+        {/* PAGE HEADER */}
 
-        {/* ================= HEADER ================= */}
-
-        <div
-          className="
-            flex
-            flex-col
-            md:flex-row
-            md:items-center
-            justify-between
-            gap-4
-            mb-8
-          "
-        >
-
+        <div className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-
-            <div className="flex items-center gap-3">
-
-              <div
-                className="
-                  w-12
-                  h-12
-                  rounded-xl
-                  bg-[var(--color-primary-light)]
-                  text-[var(--color-primary)]
-                  flex
-                  items-center
-                  justify-center
-                  text-xl
-                "
-              >
-                <FaShoppingCart />
-              </div>
-
-              <div>
-
-                <h1
-                  className="
-                    text-2xl
-                    md:text-3xl
-                    font-bold
-                    text-[var(--color-text-primary)]
-                  "
-                >
-                  Shopping Cart
-                </h1>
-
-                <p
-                  className="
-                    text-sm
-                    text-[var(--color-text-muted)]
-                    mt-1
-                  "
-                >
-                  {cartItems.length}{" "}
-                  {cartItems.length === 1
-                    ? "item"
-                    : "items"}{" "}
-                  in your cart
-                </p>
-
-              </div>
-
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+              <span className="h-2 w-2 rounded-full bg-blue-600" />
+              Your EmmCore selection
             </div>
 
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+              Shopping cart
+            </h1>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Review your items and get ready for checkout.
+            </p>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            icon={<FaTrash />}
-            onClick={handleClearCart}
-            loading={clearing}
-          >
-            Clear Cart
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <p className="text-xs text-slate-400">Cart items</p>
+              <p className="text-xl font-black text-slate-900">
+                {cartItems.length}
+              </p>
+            </div>
 
+            <Button
+              variant="outline"
+              size="sm"
+              icon={<FaTrash />}
+              onClick={handleClearCart}
+              loading={clearing}
+              disabled={clearing}
+              className="border-red-100 text-red-500 hover:bg-red-50"
+            >
+              Clear cart
+            </Button>
+          </div>
         </div>
 
-        {/* ================= CONTENT ================= */}
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
 
-        <div
-          className="
-            grid
-            grid-cols-1
-            lg:grid-cols-3
-            gap-8
-            items-start
-          "
-        >
+          {/* CART ITEMS */}
 
-          {/* ================= CART ITEMS ================= */}
-
-          <div className="lg:col-span-2 space-y-4">
-
+          <div className="space-y-5 lg:col-span-2">
             {cartItems.map((item) => {
               const product =
                 typeof item.product === "object"
@@ -568,11 +422,12 @@ const Cart = () => {
                 item._id;
 
               const name =
-                item.name ??
-                product?.name ??
+                item.name ||
+                product?.name ||
                 "Product";
 
               const image =
+                item.image?.url ||
                 item.image ||
                 product?.image?.url ||
                 product?.image ||
@@ -581,399 +436,222 @@ const Cart = () => {
                 "/placeholder.png";
 
               const price = Number(
-                item.price ||
-                product?.price ||
-                0
+                item.price || product?.price || 0
               );
 
-              const itemTotal = price * item.quantity;
-              return (
-                <div
-                  key={productId}
-                  className="
-                    bg-white
-                    border
-                    border-[var(--color-border)]
-                    rounded-[var(--radius-lg)]
-                    p-4
-                    md:p-5
-                    shadow-[var(--shadow-sm)]
-                    hover:shadow-[var(--shadow-md)]
-                    transition-all
-                    duration-300
-                  "
-                >
+              const quantity = Number(item.quantity || 1);
+              const itemTotal = price * quantity;
 
-                  <div
-                    className="
-                      flex
-                      flex-col
-                      sm:flex-row
-                      gap-5
-                    "
-                  >
+              const isUpdating = updatingId === productId;
+              const isRemoving = removingId === productId;
+
+              return (
+                <article
+                  key={productId}
+                  className="group overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-sm transition duration-300 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/5 sm:p-5"
+                >
+                  <div className="flex flex-col gap-5 sm:flex-row">
 
                     {/* PRODUCT IMAGE */}
 
-                    <div
-                      className="
-                        w-full
-                        sm:w-28
-                        h-28
-                        flex-shrink-0
-                        bg-slate-50
-                        rounded-xl
-                        overflow-hidden
-                        border
-                        border-[var(--color-border)]
-                      "
-                    >
+                    <div className="relative flex h-64 w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100 sm:h-48 sm:w-48 md:h-52 md:w-52">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.06),transparent_70%)]" />
 
                       <img
                         src={image}
                         alt={name}
-                        className="
-                          w-full
-                          h-full
-                          object-cover
-                          hover:scale-105
-                          transition-transform
-                          duration-300
-                        "
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.png";
+                        }}
+                        className="relative z-10 h-full w-full object-contain p-4 transition duration-500 group-hover:scale-105 sm:p-5"
                       />
 
+                      <span className="absolute bottom-3 left-3 z-20 rounded-full border border-white/80 bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-sm">
+                        EmmCore
+                      </span>
                     </div>
 
                     {/* PRODUCT DETAILS */}
 
-                    <div className="flex-1">
+                    <div className="flex min-w-0 flex-1 flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <span className="mb-2 inline-block rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600">
+                              Selected item
+                            </span>
 
-                      <div
-                        className="
-                          flex
-                          justify-between
-                          gap-4
-                        "
-                      >
+                            <h2 className="text-lg font-bold leading-snug text-slate-900 sm:text-xl">
+                              {name}
+                            </h2>
 
-                        <div>
+                            <p className="mt-2 text-xs text-slate-400">
+                              Unit price
+                            </p>
 
-                          <h2
-                            className="
-                              font-semibold
-                              text-[var(--color-text-primary)]
-                              text-base
-                              md:text-lg
-                              line-clamp-2
-                            "
+                            <p className="mt-1 text-lg font-extrabold text-blue-600">
+                              {formatPrice(price)}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemove(productId)}
+                            disabled={isRemoving}
+                            title="Remove product"
+                            aria-label={`Remove ${name}`}
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition hover:border-red-100 hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
                           >
-                            {name}
-                          </h2>
-
-                          <p
-                            className="
-                              text-sm
-                              text-[var(--color-text-muted)]
-                              mt-1
-                            "
-                          >
-                            Unit price
-                          </p>
-
-                          <p
-                            className="
-                              font-bold
-                              text-[var(--color-primary)]
-                              mt-1
-                            "
-                          >
-                            ₦
-                            {price.toLocaleString()}
-                          </p>
-
+                            {isRemoving ? (
+                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                            ) : (
+                              <FaTrash size={13} />
+                            )}
+                          </button>
                         </div>
-
-                        {/* REMOVE */}
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          icon={<FaTrash />}
-                          loading={
-                            removingId === productId
-                          }
-                          disabled={
-                            removingId === productId
-                          }
-                          onClick={() =>
-                            handleRemove(productId)
-                          }
-                          className="
-                            text-[var(--color-danger)]
-                            hover:bg-[var(--color-danger-light)]
-                            hover:text-[var(--color-danger)]
-                          "
-                        >
-                          <span className="hidden md:inline">
-                            Remove
-                          </span>
-                        </Button>
-
                       </div>
 
-                      {/* BOTTOM ROW */}
-
-                      <div
-                        className="
-                          flex
-                          flex-col
-                          sm:flex-row
-                          sm:items-center
-                          justify-between
-                          gap-4
-                          mt-5
-                        "
-                      >
-
+                      <div className="mt-6 flex flex-wrap items-end justify-between gap-5">
                         {/* QUANTITY */}
 
                         <div>
-
-                          <p
-                            className="
-                              text-xs
-                              text-[var(--color-text-muted)]
-                              mb-2
-                            "
-                          >
+                          <p className="mb-2 text-xs font-semibold text-slate-400">
                             Quantity
                           </p>
 
-                          <div
-                            className="
-                              inline-flex
-                              items-center
-                              border
-                              border-[var(--color-border)]
-                              rounded-xl
-                              overflow-hidden
-                            "
-                          >
-
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              icon={<FaMinus />}
-                              disabled={
-                                updatingId === productId ||
-                                item.quantity <= 1
-                              }
+                          <div className="inline-flex h-11 items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+                            <button
+                              type="button"
                               onClick={() =>
-                                handleQuantityChange(
-                                  productId,
-                                  "decrease"
-                                )
+                                handleQuantityChange(productId, "decrease")
                               }
-                              className="
-                                rounded-none
-                                px-3
-                                text-[var(--color-primary)]
-                              "
-                            />
-
-                            <span
-                              className="
-                                min-w-10
-                                text-center
-                                font-semibold
-                                text-[var(--color-text-primary)]
-                              "
+                              disabled={isUpdating || quantity <= 1}
+                              aria-label="Decrease quantity"
+                              className="flex h-full w-11 items-center justify-center text-slate-500 transition hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30"
                             >
-                              {item.quantity}
+                              <FaMinus size={11} />
+                            </button>
+
+                            <span className="flex h-full min-w-11 items-center justify-center border-x border-slate-200 px-3 text-sm font-bold text-slate-900">
+                              {quantity}
                             </span>
 
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              icon={<FaPlus />}
-                              disabled={
-                                updatingId === productId
-                              }
+                            <button
+                              type="button"
                               onClick={() =>
-                                handleQuantityChange(
-                                  productId,
-                                  "increase"
-                                )
+                                handleQuantityChange(productId, "increase")
                               }
-                              className="
-                                rounded-none
-                                px-3
-                                text-[var(--color-primary)]
-                              "
-                            />
-
+                              disabled={isUpdating}
+                              aria-label="Increase quantity"
+                              className="flex h-full w-11 items-center justify-center text-slate-500 transition hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30"
+                            >
+                              <FaPlus size={11} />
+                            </button>
                           </div>
 
+                          {isUpdating && (
+                            <p className="mt-1 text-[10px] text-blue-500">
+                              Updating...
+                            </p>
+                          )}
                         </div>
 
                         {/* ITEM TOTAL */}
 
-                        <div className="sm:text-right">
-
-                          <p
-                            className="
-                              text-xs
-                              text-[var(--color-text-muted)]
-                            "
-                          >
-                            Item Total
+                        <div className="text-left sm:text-right">
+                          <p className="text-xs font-medium text-slate-400">
+                            Item total
                           </p>
 
-                          <p
-                            className="
-                              text-lg
-                              font-bold
-                              text-[var(--color-text-primary)]
-                              mt-1
-                            "
-                          >
-                            ₦
-                            {itemTotal.toLocaleString()}
+                          <p className="mt-1 text-xl font-black text-slate-900">
+                            {formatPrice(itemTotal)}
                           </p>
-
                         </div>
-
                       </div>
-
                     </div>
-
                   </div>
-
-                </div>
+                </article>
               );
             })}
 
+            {/* CONTINUE SHOPPING */}
+
+            <button
+              type="button"
+              onClick={() => navigate("/products")}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/60 px-5 py-4 text-sm font-bold text-slate-500 transition hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600"
+            >
+              <FaArrowRight className="rotate-180" size={12} />
+              Continue shopping
+            </button>
           </div>
 
-          {/* ================= SUMMARY ================= */}
+          {/* ORDER SUMMARY */}
 
-          <div className="lg:sticky lg:top-24">
-
-            <div
-              className="
-                bg-white
-                border
-                border-[var(--color-border)]
-                rounded-[var(--radius-xl)]
-                shadow-[var(--shadow-md)]
-                overflow-hidden
-              "
-            >
+          <aside className="lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
 
               {/* SUMMARY HEADER */}
 
-              <div
-                className="
-                  bg-gradient-to-r
-                  from-[var(--color-primary)]
-                  to-[var(--color-accent)]
-                  text-white
-                  p-6
-                "
-              >
+              <div className="relative overflow-hidden bg-slate-950 p-6 text-white">
+                <div className="absolute -right-12 -top-16 h-44 w-44 rounded-full bg-blue-600/30 blur-3xl" />
 
-                <h2 className="text-xl font-bold">
-                  Order Summary
-                </h2>
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-blue-300">
+                    <FaShoppingCart />
+                  </div>
 
-                <p className="text-sm text-white/80 mt-1">
-                  Review your order before checkout
-                </p>
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      Order summary
+                    </h2>
 
+                    <p className="mt-1 text-xs text-slate-400">
+                      Your order at a glance
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* SUMMARY BODY */}
+              {/* SUMMARY CONTENT */}
 
               <div className="p-6">
-
-                <div
-                  className="
-                    flex
-                    justify-between
-                    text-[var(--color-text-secondary)]
-                    mb-4
-                  "
-                >
-                  <span>
-                    Subtotal
+                <div className="mb-5 flex items-center justify-between text-sm">
+                  <span className="text-slate-500">
+                    Subtotal ({cartItems.length} items)
                   </span>
 
-                  <span className="font-medium">
-                    ₦{total.toLocaleString()}
+                  <span className="font-bold text-slate-900">
+                    {formatPrice(total)}
                   </span>
                 </div>
 
-                <div
-                  className="
-                    flex
-                    justify-between
-                    text-[var(--color-text-secondary)]
-                    mb-4
-                  "
-                >
-                  <span>
+                <div className="mb-5 flex items-center justify-between text-sm">
+                  <span className="text-slate-500">
                     Delivery
                   </span>
 
-                  <span
-                    className="
-                      text-[var(--color-success)]
-                      font-semibold
-                    "
-                  >
+                  <span className="font-bold text-emerald-600">
                     FREE
                   </span>
                 </div>
 
-                <div
-                  className="
-                    border-t
-                    border-[var(--color-border)]
-                    pt-5
-                    mt-5
-                  "
-                >
-
-                  <div
-                    className="
-                      flex
-                      justify-between
-                      items-center
-                    "
-                  >
-
-                    <span
-                      className="
-                        text-lg
-                        font-semibold
-                        text-[var(--color-text-primary)]
-                      "
-                    >
+                <div className="border-t border-dashed border-slate-200 pt-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-bold text-slate-900">
                       Total
                     </span>
 
-                    <span
-                      className="
-                        text-2xl
-                        font-bold
-                        text-[var(--color-primary)]
-                      "
-                    >
-                      ₦{total.toLocaleString()}
+                    <span className="text-2xl font-black tracking-tight text-blue-600">
+                      {formatPrice(total)}
                     </span>
-
                   </div>
 
+                  <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                    Delivery fees and any applicable charges will be
+                    confirmed during checkout.
+                  </p>
                 </div>
 
                 <Button
@@ -983,120 +661,76 @@ const Cart = () => {
                   icon={<FaArrowRight />}
                   iconPosition="right"
                   onClick={handleCheckout}
-                  className="mt-6"
+                  className="mt-7"
                 >
-                  Proceed to Checkout
+                  Proceed to checkout
                 </Button>
+
+                <div className="mt-4 flex items-center justify-center gap-2 text-[11px] font-medium text-slate-400">
+                  <FaLock className="text-emerald-500" />
+                  Secure checkout experience
+                </div>
 
                 {/* BENEFITS */}
 
-                <div className="mt-6 space-y-4">
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      text-sm
-                      text-[var(--color-text-secondary)]
-                    "
-                  >
-
-                    <div
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        bg-[var(--color-accent-light)]
-                        text-[var(--color-accent-dark)]
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
+                <div className="mt-7 space-y-4 border-t border-slate-100 pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                       <FaTruck />
                     </div>
 
-                    <span>
-                      Fast and reliable delivery
-                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Reliable delivery
+                      </p>
 
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        Convenient order delivery
+                      </p>
+                    </div>
                   </div>
 
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      text-sm
-                      text-[var(--color-text-secondary)]
-                    "
-                  >
-
-                    <div
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        bg-[var(--color-primary-light)]
-                        text-[var(--color-primary)]
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                       <FaShieldAlt />
                     </div>
 
-                    <span>
-                      Secure and protected checkout
-                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Secure payment
+                      </p>
 
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        Protected checkout process
+                      </p>
+                    </div>
                   </div>
 
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      text-sm
-                      text-[var(--color-text-secondary)]
-                    "
-                  >
-
-                    <div
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        bg-[var(--color-success-light)]
-                        text-[var(--color-success)]
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
-                      <FaBoxOpen />
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                      <FaCheckCircle />
                     </div>
 
-                    <span>
-                      Quality products guaranteed
-                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        Quality products
+                      </p>
 
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        Shop with confidence
+                      </p>
+                    </div>
                   </div>
-
                 </div>
-
               </div>
-
             </div>
 
-          </div>
-
+            <p className="mt-4 text-center text-xs leading-5 text-slate-400">
+              Thank you for shopping with EmmCoreShops.
+            </p>
+          </aside>
         </div>
-
       </div>
-
     </div>
   );
 };

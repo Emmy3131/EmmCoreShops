@@ -87,15 +87,18 @@ const OrderSummary = ({
                                 className="flex gap-4 rounded-2xl border border-gray-100 p-4 hover:shadow-md transition"
                             >
 
-                                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
 
+                                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 p-2 sm:h-28 sm:w-28">
                                     <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover"
+                                        src={item.image?.url || item.image || item.product?.image?.url || item.product?.image || "/placeholder.png"}
+                                        alt={item.name || item.product?.name || "Product"}
+                                        className="h-full w-full object-contain transition-transform duration-300 hover:scale-110"
+                                        onError={(e) => {
+                                            e.currentTarget.src = "/placeholder.png";
+                                        }}
                                     />
-
                                 </div>
+
 
                                 <div className="flex-1">
 
